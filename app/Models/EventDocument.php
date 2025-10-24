@@ -6,5 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class EventDocument extends Model
 {
-    //
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'event_id',
+        'name',
+        'full_elearning',
+        'distance_learning',
+        'blended_learning',
+        'classical',
+        'notes',
+    ];
 }

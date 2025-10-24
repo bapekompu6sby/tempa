@@ -11,7 +11,7 @@
 <body class="bg-white text-gray-900 min-h-screen flex flex-col leading-relaxed">
     <header class="w-full p-6 bg-white border-b">
         <div class="container mx-auto flex items-center justify-between">
-            <h1 class="text-3xl font-semibold text-blue-800">TEMPA</h1>
+            <h1 class="text-3xl font-semibold text-blue-800"><a href="{{ url('/') }}" class="hover:underline">TEMPA</a></h1>
             <nav>
                 <a href="{{ route('instructions.index') }}" class="text-sm text-gray-700 hover:text-blue-700 mr-4">Instruksi</a>
                 <a href="{{ route('events.index') }}" class="text-sm text-gray-700 hover:text-blue-700">Pelatihan</a>

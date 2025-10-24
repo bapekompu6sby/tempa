@@ -31,9 +31,10 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'learning_model' => 'nullable|string|max:255',
+            'learning_model' => 'nullable|in:full_elearning,distance_learning,blended_learning,classical',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
+            'note' => 'nullable|string',
         ]);
         $event = Event::create($validated);
         return redirect()->route('events.index')->with('success', 'Pelatihan berhasil ditambahkan');
@@ -62,9 +63,10 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'learning_model' => 'nullable|string|max:255',
+            'learning_model' => 'nullable|in:full_elearning,distance_learning,blended_learning,classical',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
+            'note' => 'nullable|string',
         ]);
         $event->update($validated);
         return redirect()->route('events.index')->with('success', 'Pelatihan berhasil diupdate');

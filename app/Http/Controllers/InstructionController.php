@@ -12,8 +12,30 @@ class InstructionController extends Controller
      */
     public function index()
     {
-    $instructions = Instruction::all();
-    return view('instructions.index', compact('instructions'));
+    // prepare collections for tabs with optional search
+    $tab = request('tab', 'semua');
+    $q = request('q');
+
+    $build = function ($role = null) use ($q) {
+        $query = Instruction::query();
+        if ($role) {
+            $query->where('role', $role);
+        }
+        if ($q) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('detail', 'like', "%{$q}%");
+            });
+        }
+        return $query->get();
+    };
+
+    $all = $build();
+    $pic = $build('pic');
+    $host = $build('host');
+    $pengamat = $build('pengamat_kelas');
+
+    return view('instructions.index', compact('all', 'pic', 'host', 'pengamat', 'tab', 'q'));
     }
 
     /**
@@ -31,8 +53,15 @@ class InstructionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:255',
             'detail' => 'nullable|string',
         ]);
+        // checkbox fields: present when checked; default false
+        $validated['linkable'] = $request->has('linkable');
+        $validated['full_elearning'] = $request->has('full_elearning');
+        $validated['distance_learning'] = $request->has('distance_learning');
+        $validated['blended_learning'] = $request->has('blended_learning');
+        $validated['classical'] = $request->has('classical');
         $instruction = Instruction::create($validated);
         return redirect()->route('instructions.index')->with('success', 'Instruksi berhasil ditambahkan');
     }
@@ -60,8 +89,14 @@ class InstructionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:255',
             'detail' => 'nullable|string',
         ]);
+        $validated['linkable'] = $request->has('linkable');
+        $validated['full_elearning'] = $request->has('full_elearning');
+        $validated['distance_learning'] = $request->has('distance_learning');
+        $validated['blended_learning'] = $request->has('blended_learning');
+        $validated['classical'] = $request->has('classical');
         $instruction->update($validated);
         return redirect()->route('instructions.index')->with('success', 'Instruksi berhasil diupdate');
     }
