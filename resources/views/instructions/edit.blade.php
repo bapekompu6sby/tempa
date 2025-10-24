@@ -1,0 +1,21 @@
+@extends('layout.app')
+
+@section('content')
+<div class="container mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-6">Edit Instruksi</h2>
+    <form action="{{ route('instructions.update', $instruction) }}" method="POST" class="max-w-lg mx-auto bg-white p-6 rounded shadow">
+        @csrf
+        @method('PUT')
+        <div class="mb-4">
+            <label for="name" class="block mb-2 font-semibold">Nama</label>
+            <input type="text" name="name" id="name" class="w-full border px-3 py-2 rounded" value="{{ old('name', $instruction->name) }}">
+        </div>
+        <div class="mb-4">
+            <label for="detail" class="block mb-2 font-semibold">Detail</label>
+            <textarea name="detail" id="detail" class="w-full border px-3 py-2 rounded">{{ old('detail', $instruction->detail) }}</textarea>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Update</button>
+        <a href="{{ route('instructions.index') }}" class="ml-2 px-4 py-2 bg-gray-300 rounded">Batal</a>
+    </form>
+</div>
+@endsection
