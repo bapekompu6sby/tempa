@@ -45,7 +45,35 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-    return view('events.show', compact('event'));
+    // Prepare tabbed instruction lists scoped to this event, with optional search
+    $tab = request('tab', 'semua');
+    $q = request('q');
+
+    // load related instructions
+    $event->load('eventInstructions.instruction');
+
+    $build = function ($role = null) use ($event, $q) {
+        $list = $event->eventInstructions->filter(function ($ei) use ($role, $q) {
+            $instr = $ei->instruction;
+            if (!$instr) return false;
+            if ($role && $instr->role !== $role) return false;
+            if ($q) {
+                $qLower = mb_strtolower($q);
+                $name = mb_strtolower($instr->name ?? '');
+                $detail = mb_strtolower($instr->detail ?? '');
+                return str_contains($name, $qLower) || str_contains($detail, $qLower);
+            }
+            return true;
+        });
+        return $list->values();
+    };
+
+    $all = $build();
+    $pic = $build('pic');
+    $host = $build('host');
+    $pengamat = $build('pengamat_kelas');
+
+    return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q'));
     }
 
     /**

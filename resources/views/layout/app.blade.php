@@ -27,5 +27,7 @@
     <footer class="w-full border-t bg-white py-4">
         <div class="container mx-auto text-center text-sm text-gray-500">&copy; {{ date('Y') }} TEMPA</div>
     </footer>
+    {{-- Stack for page-specific scripts --}}
+    @stack('scripts')
 </body>
 </html>

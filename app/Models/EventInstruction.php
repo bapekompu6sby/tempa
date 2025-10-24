@@ -22,4 +22,12 @@ class EventInstruction extends Model
         'blended_learning',
         'classical',
     ];
+
+    /**
+     * Instruction relation
+     */
+    public function instruction()
+    {
+        return $this->belongsTo(Instruction::class);
+    }
 }

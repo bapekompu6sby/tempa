@@ -9,3 +9,7 @@ Route::get('/', function () {
 Route::resource('instructions', App\Http\Controllers\InstructionController::class);
 Route::resource('events', App\Http\Controllers\EventController::class);
 Route::resource('documents', App\Http\Controllers\EventDocumentController::class);
+// EventInstruction toggle route
+Route::patch('event-instructions/{eventInstruction}/toggle', [App\Http\Controllers\EventInstructionController::class, 'toggle'])->name('event-instructions.toggle');
+// EventInstruction update route (used for saving link and other inline updates)
+Route::patch('event-instructions/{eventInstruction}', [App\Http\Controllers\EventInstructionController::class, 'update'])->name('event-instructions.update');
