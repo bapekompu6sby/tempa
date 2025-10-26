@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Event;
 
 class EventDocument extends Model
 {
@@ -22,4 +23,12 @@ class EventDocument extends Model
         'link',
         'file_path',
     ];
+
+    /**
+     * The event this document belongs to.
+     */
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
 }

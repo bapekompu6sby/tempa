@@ -67,8 +67,9 @@ class EventDocumentController extends Controller
         $eventDocument->save();
 
         $url = $eventDocument->file_path ? Storage::url($eventDocument->file_path) : null;
+        $downloadUrl = $eventDocument->file_path ? route('documents.download', $eventDocument) : null;
 
-        return response()->json(['success' => true, 'eventDocument' => $eventDocument, 'url' => $url]);
+        return response()->json(['success' => true, 'eventDocument' => $eventDocument, 'url' => $url, 'download_url' => $downloadUrl]);
     }
 
     /**
@@ -99,7 +100,33 @@ class EventDocumentController extends Controller
         $eventDocument->save();
 
         $url = Storage::url($path);
+        $downloadUrl = route('documents.download', $eventDocument);
 
-        return response()->json(['success' => true, 'file_path' => $path, 'url' => $url, 'eventDocument' => $eventDocument]);
+        return response()->json(['success' => true, 'file_path' => $path, 'url' => $url, 'download_url' => $downloadUrl, 'eventDocument' => $eventDocument]);
+    }
+
+    /**
+     * Stream a file download with a suggested filename: "{EventDocument name} - {Event name}.{ext}"
+     */
+    public function download(EventDocument $eventDocument)
+    {
+        if (empty($eventDocument->file_path) || !\Illuminate\Support\Facades\Storage::disk('public')->exists($eventDocument->file_path)) {
+            abort(404);
+        }
+
+    // build a friendly filename and preserve extension
+    // replace both forward and back slashes with hyphens to avoid regex escaping issues
+    $safeName = str_replace(['/', '\\'], '-', $eventDocument->name ?? 'document');
+    $eventName = str_replace(['/', '\\'], '-', optional($eventDocument->event)->name ?? 'event');
+        $ext = pathinfo($eventDocument->file_path, PATHINFO_EXTENSION);
+        $downloadName = trim($safeName);
+        if ($eventName) {
+            $downloadName .= ' - ' . trim($eventName);
+        }
+        if ($ext) {
+            $downloadName .= '.' . $ext;
+        }
+
+        return Storage::disk('public')->download($eventDocument->file_path, $downloadName);
     }
 }

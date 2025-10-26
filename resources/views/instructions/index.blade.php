@@ -8,15 +8,41 @@
     </div>
 
     {{-- Search + Tabs --}}
-    <div class="mb-4 flex items-center justify-between">
-        <form method="GET" action="{{ route('instructions.index') }}" class="flex items-center space-x-2">
+    <div class="mb-4">
+        <form method="GET" action="{{ route('instructions.index') }}" class="flex items-center flex-wrap gap-3">
             <input type="hidden" name="tab" value="{{ $tab }}">
             <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama atau detail..." class="border rounded px-3 py-2 w-64">
-            <button type="submit" class="px-3 py-2 bg-gray-200 rounded">Cari</button>
-            @if(!empty($q))
-                <a href="{{ route('instructions.index', ['tab' => $tab]) }}" class="ml-2 text-sm text-gray-600">Reset</a>
-            @endif
-    </form>
+
+            {{-- Learning model checkboxes --}}
+            <div class="flex items-center space-x-3 ml-4">
+                @php
+                    $f = $filters ?? [];
+                @endphp
+                <label class="inline-flex items-center text-sm">
+                    <input type="checkbox" name="full_elearning" value="1" class="form-checkbox h-4 w-4" {{ !empty($f['full_elearning']) ? 'checked' : '' }}>
+                    <span class="ml-2">Full E-Learning</span>
+                </label>
+                <label class="inline-flex items-center text-sm">
+                    <input type="checkbox" name="distance_learning" value="1" class="form-checkbox h-4 w-4" {{ !empty($f['distance_learning']) ? 'checked' : '' }}>
+                    <span class="ml-2">Distance</span>
+                </label>
+                <label class="inline-flex items-center text-sm">
+                    <input type="checkbox" name="blended_learning" value="1" class="form-checkbox h-4 w-4" {{ !empty($f['blended_learning']) ? 'checked' : '' }}>
+                    <span class="ml-2">Blended</span>
+                </label>
+                <label class="inline-flex items-center text-sm">
+                    <input type="checkbox" name="classical" value="1" class="form-checkbox h-4 w-4" {{ !empty($f['classical']) ? 'checked' : '' }}>
+                    <span class="ml-2">Classical</span>
+                </label>
+            </div>
+            
+            <div class="ml-4 flex items-center gap-2">
+                <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">Cari</button>
+                @if(!empty($q))
+                    <a href="{{ route('instructions.index', ['tab' => $tab]) }}" class="ml-2 text-sm text-gray-600">Reset</a>
+                @endif
+            </div>
+        </form>
     </div>
 
     {{-- Tabs --}}

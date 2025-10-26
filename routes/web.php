@@ -16,6 +16,8 @@ Route::resource('documents', App\Http\Controllers\EventDocumentController::class
 ]);
 // upload file for event document
 Route::post('documents/{eventDocument}/upload', [App\Http\Controllers\EventDocumentController::class, 'upload'])->name('documents.upload');
+// download (force-download) for event document
+Route::get('documents/{eventDocument}/download', [App\Http\Controllers\EventDocumentController::class, 'download'])->name('documents.download');
 // EventInstruction toggle route
 Route::patch('event-instructions/{eventInstruction}/toggle', [App\Http\Controllers\EventInstructionController::class, 'toggle'])->name('event-instructions.toggle');
 // EventInstruction update route (used for saving link and other inline updates)

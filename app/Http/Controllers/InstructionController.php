@@ -12,11 +12,16 @@ class InstructionController extends Controller
      */
     public function index()
     {
-    // prepare collections for tabs with optional search
+    // prepare collections for tabs with optional search and learning-model filters
     $tab = request('tab', 'semua');
     $q = request('q');
 
-    $build = function ($role = null) use ($q) {
+    // collect learning model checkbox filters
+    $filters = request()->only(['full_elearning', 'distance_learning', 'blended_learning', 'classical']);
+    // normalize to boolean presence
+    $selected = array_filter($filters);
+
+    $build = function ($role = null) use ($q, $selected) {
         $query = Instruction::query();
         if ($role) {
             $query->where('role', $role);
@@ -27,6 +32,16 @@ class InstructionController extends Controller
                     ->orWhere('detail', 'like', "%{$q}%");
             });
         }
+
+        // if any learning-model filter is selected, include instructions that match ANY of them
+        if (!empty($selected)) {
+            $query->where(function ($q2) use ($selected) {
+                foreach ($selected as $col => $val) {
+                    $q2->orWhere($col, true);
+                }
+            });
+        }
+
         return $query->get();
     };
 
@@ -35,7 +50,7 @@ class InstructionController extends Controller
     $host = $build('host');
     $pengamat = $build('pengamat_kelas');
 
-    return view('instructions.index', compact('all', 'pic', 'host', 'pengamat', 'tab', 'q'));
+    return view('instructions.index', compact('all', 'pic', 'host', 'pengamat', 'tab', 'q', 'filters'));
     }
 
     /**
