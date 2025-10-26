@@ -8,13 +8,13 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-white text-gray-900 min-h-screen flex flex-col leading-relaxed">
-    <header class="w-full p-6 bg-white border-b">
+<body class="m-0 bg-white text-gray-900 min-h-screen flex flex-col leading-relaxed" style="margin: 0;">
+    <header class="w-full py-6 bg-pu-blue border-b border-pu-blue-dark" style="background:#203368; border-bottom-color:#1b2d56;">
         <div class="container mx-auto flex items-center justify-between">
-            <h1 class="text-3xl font-semibold text-blue-800"><a href="{{ url('/') }}" class="hover:underline">TEMPA</a></h1>
+            <h1 class="text-3xl font-semibold" style="color:#FDB714"><a href="{{ url('/') }}" class="hover:underline" style="color:inherit">TEMPA</a></h1>
             <nav>
-                <a href="{{ route('instructions.index') }}" class="text-sm text-gray-700 hover:text-blue-700 mr-4">Instruksi</a>
-                <a href="{{ route('events.index') }}" class="text-sm text-gray-700 hover:text-blue-700">Pelatihan</a>
+                <a href="{{ route('instructions.index') }}" class="text-sm mr-4" style="color:#FDB714">Instruksi</a>
+                <a href="{{ route('events.index') }}" class="text-sm" style="color:#FDB714">Pelatihan</a>
             </nav>
         </div>
     </header>
@@ -24,8 +24,8 @@
         @endif
         @yield('content')
     </main>
-    <footer class="w-full border-t bg-white py-4">
-        <div class="container mx-auto text-center text-sm text-gray-500">&copy; {{ date('Y') }} TEMPA</div>
+    <footer class="w-full border-t border-pu-blue bg-white py-4">
+        <div class="container mx-auto text-center text-sm text-gray-600">&copy; {{ date('Y') }} TEMPA</div>
     </footer>
     {{-- Stack for page-specific scripts --}}
     @stack('scripts')
