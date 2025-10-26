@@ -17,6 +17,7 @@ class Instruction extends Model
         'detail',
         'linkable',
         'link_label',
+        'phase',
         'full_elearning',
         'distance_learning',
         'blended_learning',

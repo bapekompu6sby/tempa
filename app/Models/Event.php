@@ -77,6 +77,7 @@ class Event extends Model
                     'linkable' => $instruction->linkable,
                         'link' => $instruction->link ?? null,
                         'link_label' => $instruction->link_label ?? null,
+                        'phase' => $instruction->phase ?? 'pelaksanaan',
                     'full_elearning' => $instruction->full_elearning,
                     'distance_learning' => $instruction->distance_learning,
                     'blended_learning' => $instruction->blended_learning,

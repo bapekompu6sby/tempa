@@ -18,6 +18,7 @@ class EventInstruction extends Model
         'linkable',
         'link',
         'link_label',
+        'phase',
         'full_elearning',
         'distance_learning',
         'blended_learning',
