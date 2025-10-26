@@ -15,7 +15,7 @@
                 <option value="" {{ old('role') == '' ? 'selected' : '' }}>-- Pilih role --</option>
                 <option value="pic" {{ old('role') == 'pic' ? 'selected' : '' }}>PIC</option>
                 <option value="host" {{ old('role') == 'host' ? 'selected' : '' }}>Host</option>
-                <option value="pengamat_kelas" {{ old('role') == 'pengamat_kelas' ? 'selected' : '' }}>Pengamat Kelas</option>
+                <option value="petugas_kelas" {{ old('role') == 'petugas_kelas' ? 'selected' : '' }}>Petugas Kelas</option>
             </select>
         </div>
         <div class="mb-4">

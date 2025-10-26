@@ -1,0 +1,69 @@
+name,role,detail,linkable,link_label,phase,full_elearning,distance_learning,blended_learning,classical
+Rapat persiapan dengan PUSBANGKOM ,pic,Mengikuti rapat persiapan yang diadakan oleh Pusbangkom,1,link rapat,persiapan,1,1,1,1
+Membuat KAK dan RAB H-10 ,pic,Membuat KAK dan RAB H-10. Setelah selesai minta tanda tangan ke PPK,1,link KAK RAB,persiapan,1,1,1,1
+penjaringan calon peserta pelatihan,host,Melakukan penjaringan calon peserta pelatihan dengan broadcast ke seluruh alumni pelatihan yang bidangnya berkaitan  Template broadcast  Poster Surat sapu jagad Surat ijin atasan langsung,1,link form penjaringan,persiapan,1,1,1,1
+Kompilasi data capes penjaringan ,host,-,1,hasil kompilasi,persiapan,1,1,1,1
+Verifikasi dini hasil penjaringan ,pic,-,0,,persiapan,1,1,1,1
+Konfirmasi ulang hasil penjaringan ke peserta ,pic,-,0,,persiapan,1,1,1,1
+Membuat dan Mengirimkan surat usulan capes hasil penjaringan ke pusbangkom,pic,-,,,persiapan,1,1,1,1
+Menerima surat penetapan peserta ,pic,-,,,persiapan,1,1,1,1
+Membuat surat pemanggilan ,pic,-,,,persiapan,1,1,1,1
+Melakukan broadcast dan komfirmasi ke capes surat pemanggilan ,host,-,,,persiapan,1,1,1,1
+Menyiapkan WAG,host,-,,,persiapan,1,1,1,1
+Memastikan semua Capes Pemanggilan sudah masuk WAG ,host,-,,,persiapan,1,1,1,1
+Membuat dan menyampaikan hasil konfirmasi pemanggilan ,host,-,,,persiapan,1,1,1,1
+Penyusunan TF4,pic,-,,,persiapan,1,1,1,1
+Menyusun SK Peserta dan Panitia Pelaksana Pelatihan ,pic,-,,,persiapan,1,1,1,1
+Meminta keterangan tambahan/arahan ke pusbangkom untuk capes hasil penjaringan yang tidak lolos seleks,pic,-,,,persiapan,1,1,1,1
+"Menyampaikan ke capes penjaringan, hasil seleksi pusbangkom ",host,-,,,persiapan,1,1,1,1
+Surat undangan membuka pelatihan ke pusbangkom,pic,-,,,persiapan,0,1,1,1
+Surat undangan menghadiri pembukaan pelatihan,pic,-,,,persiapan,0,1,1,1
+Background zoom peserta pelatihan,host,-,,,persiapan,0,1,1,1
+Desain dan pemesanan spanduk pelatihan,pic,-,,,persiapan,0,1,1,1
+Pemasangan spanduk pelatihan di aula muktarudin,pic,-,,,persiapan,0,1,1,1
+"Menghubungi widyaiswara terkait: jadwal, link zoom, Rencana Pembelajaran, SAP, bahan tayang, tiket dan penginapan (klasikal)",pic,-,,,persiapan,0,1,1,1
+Pemesanan tiket dan atau penginapan ke travel (klasikal),pic,-,,,persiapan,0,1,1,1
+Koordinasi dengan driver terkait jemput antar pengajar (klasikal),pic,-,,,persiapan,0,1,1,1
+Pembuatan panduan pelatihan ,pic,-,,,persiapan,0,1,1,1
+Bahan serahan peserta (Blended/Klasikal),pic,-,,,persiapan,0,1,1,1
+Pengecekan Sarana dan Prasarana Pelatihan,petugas_kelas,-,,,persiapan,0,1,1,1
+Check In Peserta Pelatihan (Klasikal),petugas_kelas,-,,,persiapan,0,1,1,1
+"Penyiapan name table kabalai, kasi penyelenggaraan, widyaiswara dan undangan",petugas_kelas,-,,,persiapan,0,1,1,1
+Penyiapan link zoom pembukaan sampai penutupan pelatihan,host,-,,,persiapan,0,1,1,1
+Pembuatan bahan tayang pengarahan program,pic,-,,,persiapan,0,1,1,1
+Pembuatan laporan pembukaan pelatihan,pic,-,,,persiapan,0,1,1,1
+Menginformasikan ke WAG kelas dimulai & memandu jalannya pelatihan,host,,,,pelaksanaan,1,1,1,1
+Membuka Pembelajaran,host,,,,pelaksanaan,0,1,1,1
+Menginfokan dan menampung tugas peserta,host,,,,pelaksanaan,0,1,1,1
+Menyampaikan permasalahan pelaksanaan,host,,,,pelaksanaan,1,1,1,1
+"Melaporkan setiap hari, progress peserta FEL ",petugas_kelas,,,,pelaksanaan,1,0,0,0
+Mengingatkan peserta untuk join FEL ,host,,,,pelaksanaan,1,0,0,0
+Mengingatkan peserta untuk mengisi evaluasi,host,,,,pelaksanaan,1,1,1,1
+Penyiapan zoom meeting pembukaan pelatihan,host,,,,pembukaan_pelatihan,0,1,1,1
+MC pembukaan pelatihan,pic,,,,pembukaan_pelatihan,0,1,1,1
+Pembaca doa pembukaan pelatihan,pic,,,,pembukaan_pelatihan,0,1,1,1
+Pengarahan program,pic,,,,pembukaan_pelatihan,0,1,1,1
+Pengarahan pretest,host,,,,pembukaan_pelatihan,0,1,1,1
+Mengirim formulir isian biodata  dan absen mengajar ke wi,pic,Diawal sesi pembelajaran,,,pelaksanaan,0,1,1,1
+"Mengirim berkas adm honor ke widyaiswara, meminta no.rekening dan no.npwp",pic,Setelah sesi pembelajaran,,,pelaksanaan,0,1,1,1
+Meminta rekap nilai hasil penilaian wi ke peserta,pic,Setelah sesi pembelajaran,,,pelaksanaan,0,1,1,1
+Pengarahan post test,host,,,,pelaksanaan,0,1,1,1
+Link zoom rapat evaluasi kelulusan peserta pelatihan,host,,,,pelaksanaan,1,1,1,1
+Surat undangan rapat evaluasi kelulusan peserta,pic,,,,pelaksanaan,1,1,1,1
+Surat undangan menutup pelatihan,pic,,,,penutupan_pelatihan,0,1,1,1
+Surat undangan menghadiri penutupan pelatihan,pic,,,,penutupan_pelatihan,0,1,1,1
+Rekap izin peserta selama zoom,pic,,,,evaluasi_pelatihan,0,1,1,1
+Rekap penilaian sikap peserta,pic,,,,evaluasi_pelatihan,0,1,1,1
+Rekap penilaian akhir peserta,pic,,,,evaluasi_pelatihan,1,1,1,1
+Rapat Evaluasi Kelulusan,pic,,,,evaluasi_pelatihan,1,1,1,1
+Mc penutupan pelatihan,pic,,,,penutupan_pelatihan,0,1,1,1
+Pembaca doa penutupan pelatihan,pic,,,,penutupan_pelatihan,0,1,1,1
+Evaluasi Pengajar oleh Panitia,pic,,,,penutupan_pelatihan,0,1,1,1
+Membuat surat pengembalian peserta,pic,-,0,,pra_pelatihan,1,1,1,1
+Menyampaikan surat pengembalian peserta,host,-,0,,pra_pelatihan,1,1,1,1
+Menyusun Berita Acara Pelatihan,pic,-,0,,pra_pelatihan,1,1,1,1
+Melakukan sinkronisasi data & pengajuan sertifikat ,pic,-,0,,pra_pelatihan,1,1,1,1
+Membuat Laporan ,pic,-,0,,pra_pelatihan,1,1,1,1
+Memfinalkan dan mengupload Berkas Laporan,pic,-,0,,pra_pelatihan,1,1,1,1
+Mengarsipkan Laporan Final,pic,-,0,,pra_pelatihan,1,1,1,1
+Pembuatan SPMK / Surat Keterangan Mengajar,pic,-,0,,pra_pelatihan,1,1,1,1

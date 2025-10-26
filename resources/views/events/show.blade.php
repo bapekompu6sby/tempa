@@ -46,12 +46,12 @@
 
             {{-- Tabs --}}
             <div class="mb-4 border-b">
-                @php
+                    @php
                     $tabs = [
                         'semua' => 'Semua',
                         'pic' => 'PIC',
                         'host' => 'Host',
-                        'pengamat_kelas' => 'Pengamat Kelas',
+                        'petugas_kelas' => 'Petugas Kelas',
                     ];
                 @endphp
                 <nav class="flex space-x-2">
@@ -66,7 +66,17 @@
                 $list = $all ?? collect();
                 if($tab === 'pic') { $list = $pic ?? collect(); }
                 elseif($tab === 'host') { $list = $host ?? collect(); }
-                elseif($tab === 'pengamat_kelas') { $list = $pengamat ?? collect(); }
+                elseif($tab === 'petugas_kelas') { $list = $pengamat ?? collect(); }
+
+                // phase -> color mapping
+                $phaseClasses = [
+                    'persiapan' => ['border' => 'border-yellow-400', 'bg' => 'bg-yellow-50', 'text' => 'text-yellow-800'],
+                    'pelaksanaan' => ['border' => 'border-green-400', 'bg' => 'bg-green-50', 'text' => 'text-green-800'],
+                    'pembukaan_pelatihan' => ['border' => 'border-blue-400', 'bg' => 'bg-blue-50', 'text' => 'text-blue-800'],
+                    'penutupan_pelatihan' => ['border' => 'border-purple-400', 'bg' => 'bg-purple-50', 'text' => 'text-purple-800'],
+                    'evaluasi_pelatihan' => ['border' => 'border-red-400', 'bg' => 'bg-red-50', 'text' => 'text-red-800'],
+                    'pra_pelatihan' => ['border' => 'border-gray-400', 'bg' => 'bg-gray-50', 'text' => 'text-gray-800'],
+                ];
             @endphp
 
             <div class="bg-white shadow rounded overflow-hidden">
@@ -75,35 +85,28 @@
                         <tr>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700"> </th>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Learning Model</th>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700"> </th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($list as $ei)
                             @php $instr = $ei->instruction; @endphp
-                            <tr id="ei-row-{{ $ei->id }}" class="border-t align-top {{ $ei->checked ? 'bg-green-50' : '' }}">
+                            @php
+                                $phase = $ei->phase ?? optional($instr)->phase ?? 'pelaksanaan';
+                                $c = $phaseClasses[$phase] ?? $phaseClasses['pelaksanaan'];
+                            @endphp
+                            <tr id="ei-row-{{ $ei->id }}" class="border-t align-top border-l-4 {{ $c['border'] }} {{ $ei->checked ? 'bg-green-50' : '' }}">
                                     <td class="py-2 px-4 w-20">
                                         <input type="checkbox" data-ei-id="{{ $ei->id }}" {{ $ei->checked ? 'checked' : '' }} class="ei-checkbox w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" />
                                     </td>
-                                    <td class="py-2 px-4">{{ $instr->name ?? 'Instruksi #' . $ei->instruction_id }}</td>
                                     <td class="py-2 px-4">
-                                    <div class="flex flex-wrap gap-2">
-                                        @if(optional($instr)->full_elearning)
-                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Full E-Learning</span>
-                                        @endif
-                                        @if(optional($instr)->distance_learning)
-                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Distance</span>
-                                        @endif
-                                        @if(optional($instr)->blended_learning)
-                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Blended</span>
-                                        @endif
-                                        @if(optional($instr)->classical)
-                                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Classical</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="py-2 px-4 text-right w-20">
+                                        <div class="flex items-center">
+                                            <span>{{ $instr->name ?? 'Instruksi #' . $ei->instruction_id }}</span>
+                                            <span class="ml-3 px-2 py-0.5 text-xs font-medium rounded {{ $c['bg'] }} {{ $c['text'] }}">{{ ucwords(str_replace('_', ' ', $phase)) }}</span>
+                                        </div>
+                                    </td>
+                                    
+                                <td class="py-2 px-4 text-right w-20 whitespace-nowrap">
                                     <button type="button" class="view-detail-ei" data-id="{{ $ei->id }}" aria-expanded="false" title="Lihat detail">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 inline view-icon" viewBox="0 0 20 20" fill="currentColor">
                                             <path d="M10 3C5 3 1.73 6.11 0 10c1.73 3.89 5 7 10 7s8.27-3.11 10-7c-1.73-3.89-5-7-10-7zM10 15a5 5 0 110-10 5 5 0 010 10z"/>

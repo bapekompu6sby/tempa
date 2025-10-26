@@ -25,7 +25,7 @@
         @yield('content')
     </main>
     <footer class="w-full border-t border-pu-blue bg-white py-4">
-        <div class="container mx-auto text-center text-sm text-gray-600">&copy; {{ date('Y') }} TEMPA</div>
+        <div class="container mx-auto text-center text-sm text-gray-600">&copy; {{ date('Y') }} TEMPA - Balai Pengembangan Kompetensi PU Wilayah VI Surabaya </div>
     </footer>
     {{-- Stack for page-specific scripts --}}
     @stack('scripts')

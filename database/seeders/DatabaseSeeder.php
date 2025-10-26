@@ -25,5 +25,7 @@ class DatabaseSeeder extends Seeder
 
         // seed document templates from CSV
         $this->call(DocumentTemplateSeeder::class);
+        // seed instructions from CSV
+        $this->call(InstructionSeeder::class);
     }
 }

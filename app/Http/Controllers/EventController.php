@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventInstruction;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -53,25 +55,38 @@ class EventController extends Controller
     $event->load('eventInstructions.instruction');
 
     $build = function ($role = null) use ($event, $q) {
-        $list = $event->eventInstructions->filter(function ($ei) use ($role, $q) {
-            $instr = $ei->instruction;
-            if (!$instr) return false;
-            if ($role && $instr->role !== $role) return false;
-            if ($q) {
-                $qLower = mb_strtolower($q);
-                $name = mb_strtolower($instr->name ?? '');
-                $detail = mb_strtolower($instr->detail ?? '');
-                return str_contains($name, $qLower) || str_contains($detail, $qLower);
-            }
-            return true;
-        });
-        return $list->values();
+        $query = EventInstruction::with('instruction')->where('event_id', $event->id);
+        if ($role) {
+            $query->whereHas('instruction', function ($qi) use ($role) {
+                $qi->where('role', $role);
+            });
+        }
+        if ($q) {
+            $query->whereHas('instruction', function ($qi) use ($q) {
+                $qi->where('name', 'like', "%{$q}%")
+                    ->orWhere('detail', 'like', "%{$q}%");
+            });
+        }
+
+        // enforce specific phase ordering: persiapan -> pembukaan_pelatihan -> pelaksanaan -> penutupan_pelatihan -> evaluasi_pelatihan -> pra_pelatihan
+        $orderSql = "CASE phase
+            WHEN 'persiapan' THEN 1
+            WHEN 'pembukaan_pelatihan' THEN 2
+            WHEN 'pelaksanaan' THEN 3
+            WHEN 'penutupan_pelatihan' THEN 4
+            WHEN 'evaluasi_pelatihan' THEN 5
+            WHEN 'pra_pelatihan' THEN 6
+            ELSE 7 END";
+
+        $query->orderByRaw($orderSql)->orderBy('id');
+
+        return $query->get();
     };
 
     $all = $build();
     $pic = $build('pic');
     $host = $build('host');
-    $pengamat = $build('pengamat_kelas');
+    $pengamat = $build('petugas_kelas');
 
     return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q'));
     }

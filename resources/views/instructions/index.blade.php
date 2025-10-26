@@ -47,12 +47,12 @@
 
     {{-- Tabs --}}
     <div class="mb-4 border-b">
-        @php
+            @php
             $tabs = [
                 'semua' => 'Semua',
                 'pic' => 'PIC',
                 'host' => 'Host',
-                'pengamat_kelas' => 'Pengamat Kelas',
+                'petugas_kelas' => 'Petugas Kelas',
             ];
         @endphp
         <nav class="flex space-x-2">
@@ -68,7 +68,17 @@
         $list = $all;
         if($tab === 'pic') { $list = $pic; }
         elseif($tab === 'host') { $list = $host; }
-        elseif($tab === 'pengamat_kelas') { $list = $pengamat; }
+    elseif($tab === 'petugas_kelas') { $list = $pengamat; }
+
+    // phase -> color mapping for outline and badge
+    $phaseClasses = [
+        'persiapan' => ['border' => 'border-yellow-400', 'bg' => 'bg-yellow-50', 'text' => 'text-yellow-800'],
+        'pelaksanaan' => ['border' => 'border-green-400', 'bg' => 'bg-green-50', 'text' => 'text-green-800'],
+        'pembukaan_pelatihan' => ['border' => 'border-blue-400', 'bg' => 'bg-blue-50', 'text' => 'text-blue-800'],
+        'penutupan_pelatihan' => ['border' => 'border-purple-400', 'bg' => 'bg-purple-50', 'text' => 'text-purple-800'],
+        'evaluasi_pelatihan' => ['border' => 'border-red-400', 'bg' => 'bg-red-50', 'text' => 'text-red-800'],
+        'pra_pelatihan' => ['border' => 'border-gray-400', 'bg' => 'bg-gray-50', 'text' => 'text-gray-800'],
+    ];
     @endphp
 
     <div class="bg-white shadow rounded overflow-hidden">
@@ -76,59 +86,52 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Learning Model</th>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($list as $instruction)
-                        <tr class="border-t align-top">
-                            <td class="py-2 px-4">{{ $instruction->name }}</td>
-                            <td class="py-2 px-4">
-                                {{-- badges for learning model (show only when true) --}}
-                                <div class="flex flex-wrap gap-2">
-                                    @if($instruction->full_elearning)
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Full E-Learning</span>
-                                    @endif
-                                    @if($instruction->distance_learning)
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Distance</span>
-                                    @endif
-                                    @if($instruction->blended_learning)
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Blended</span>
-                                    @endif
-                                    @if($instruction->classical)
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Classical</span>
-                                    @endif
+                        @php
+                            $phase = $instruction->phase ?? 'pelaksanaan';
+                            $c = $phaseClasses[$phase] ?? $phaseClasses['pelaksanaan'];
+                        @endphp
+                        <tr class="border-t align-top border-l-4 {{ $c['border'] }}">
+                            <td class="py-2 px-4 flex items-center">
+                                <div class="flex items-center">
+                                    <span>{{ $instruction->name }}</span>
+                                    <span class="ml-3 px-2 py-0.5 text-xs font-medium rounded {{ $c['bg'] }} {{ $c['text'] }}">{{ ucwords(str_replace('_', ' ', $phase)) }}</span>
                                 </div>
                             </td>
+                            
                             <td class="py-2 px-4">
-                                {{-- action icons: view (eye), edit (pencil), delete (trash) --}}
-                                <button type="button" class="view-detail" data-id="{{ $instruction->id }}" aria-expanded="false" title="Lihat detail">
-                                    <!-- single svg icon, we'll swap paths on toggle -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="view-icon h-5 w-5 text-blue-600 inline" viewBox="0 0 20 20" fill="currentColor">
-                                        <!-- open eye paths (initial) -->
-                                        <path d="M10 3C5 3 1.73 6.11 0 10c1.73 3.89 5 7 10 7s8.27-3.11 10-7c-1.73-3.89-5-7-10-7zM10 15a5 5 0 110-10 5 5 0 010 10z"/>
-                                        <path d="M10 7a3 3 0 100 6 3 3 0 000-6z"/>
-                                    </svg>
-                                </button>
-                                <a href="{{ route('instructions.edit', $instruction) }}" class="ml-3" title="Edit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 inline" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.192 9.192a1 1 0 01-.464.263l-4 1a1 1 0 01-1.213-1.213l1-4a1 1 0 01.263-.464l9.192-9.192a2 2 0 012.828 0z"/></svg>
-                                </a>
-                                <form action="{{ route('instructions.destroy', $instruction) }}" method="POST" class="inline ml-3" onsubmit="return confirm('Hapus instruksi ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" title="Hapus">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H3a1 1 0 000 2h14a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm2 5a1 1 0 00-1 1v7a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v7a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                <div class="flex items-center space-x-3 whitespace-nowrap">
+                                    <button type="button" class="view-detail" data-id="{{ $instruction->id }}" aria-expanded="false" title="Lihat detail">
+                                        <!-- single svg icon, we'll swap paths on toggle -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="view-icon h-5 w-5 text-blue-600 inline" viewBox="0 0 20 20" fill="currentColor">
+                                            <!-- open eye paths (initial) -->
+                                            <path d="M10 3C5 3 1.73 6.11 0 10c1.73 3.89 5 7 10 7s8.27-3.11 10-7c-1.73-3.89-5-7-10-7zM10 15a5 5 0 110-10 5 5 0 010 10z"/>
+                                            <path d="M10 7a3 3 0 100 6 3 3 0 000-6z"/>
+                                        </svg>
                                     </button>
-                                </form>
+                                    <a href="{{ route('instructions.edit', $instruction) }}" title="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 inline" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.192 9.192a1 1 0 01-.464.263l-4 1a1 1 0 01-1.213-1.213l1-4a1 1 0 01.263-.464l9.192-9.192a2 2 0 012.828 0z"/></svg>
+                                    </a>
+                                    <form action="{{ route('instructions.destroy', $instruction) }}" method="POST" class="inline" onsubmit="return confirm('Hapus instruksi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Hapus">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H3a1 1 0 000 2h14a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm2 5a1 1 0 00-1 1v7a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v7a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <tr id="detail-{{ $instruction->id }}" class="detail-row hidden bg-gray-50">
-                            <td class="py-3 px-4" colspan="3">{!! nl2br(e($instruction->detail)) !!}</td>
+                            <td class="py-3 px-4" colspan="2">{!! nl2br(e($instruction->detail)) !!}</td>
                         </tr>
                 @empty
                 <tr>
-                            <td class="py-4 px-4 text-center text-gray-500" colspan="3">Tidak ada instruksi.</td>
+                            <td class="py-4 px-4 text-center text-gray-500" colspan="2">Tidak ada instruksi.</td>
                 </tr>
                 @endforelse
             </tbody>

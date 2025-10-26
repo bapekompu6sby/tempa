@@ -16,7 +16,7 @@
                 <option value="" {{ old('role', $instruction->role) == '' ? 'selected' : '' }}>-- Pilih role --</option>
                 <option value="pic" {{ old('role', $instruction->role) == 'pic' ? 'selected' : '' }}>PIC</option>
                 <option value="host" {{ old('role', $instruction->role) == 'host' ? 'selected' : '' }}>Host</option>
-                <option value="pengamat_kelas" {{ old('role', $instruction->role) == 'pengamat_kelas' ? 'selected' : '' }}>Pengamat Kelas</option>
+                <option value="petugas_kelas" {{ old('role', $instruction->role) == 'petugas_kelas' ? 'selected' : '' }}>Petugas Kelas</option>
             </select>
         </div>
         <div class="mb-4">
