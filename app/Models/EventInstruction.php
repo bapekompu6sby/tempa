@@ -17,6 +17,7 @@ class EventInstruction extends Model
         'checked',
         'linkable',
         'link',
+        'link_label',
         'full_elearning',
         'distance_learning',
         'blended_learning',

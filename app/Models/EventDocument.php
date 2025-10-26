@@ -19,5 +19,7 @@ class EventDocument extends Model
         'blended_learning',
         'classical',
         'notes',
+        'link',
+        'file_path',
     ];
 }

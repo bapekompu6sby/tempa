@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Instruction;
 use App\Models\EventInstruction;
+use App\Models\DocumentTemplate;
+use App\Models\EventDocument;
 use Illuminate\Support\Facades\DB;
 
 class Event extends Model
@@ -28,8 +30,9 @@ class Event extends Model
     protected static function booted()
     {
         static::created(function (self $event) {
-            // Delegate to the model method to create EventInstruction records
+            // Delegate to the model methods to create EventInstruction and EventDocument records
             $event->createEventInstructions();
+            $event->createEventDocuments();
         });
     }
 
@@ -72,11 +75,53 @@ class Event extends Model
                     'instruction_id' => $instruction->id,
                     'checked' => false,
                     'linkable' => $instruction->linkable,
-                    'link' => $instruction->link ?? null,
+                        'link' => $instruction->link ?? null,
+                        'link_label' => $instruction->link_label ?? null,
                     'full_elearning' => $instruction->full_elearning,
                     'distance_learning' => $instruction->distance_learning,
                     'blended_learning' => $instruction->blended_learning,
                     'classical' => $instruction->classical,
+                ]);
+            }
+        });
+    }
+
+    /**
+     * Create EventDocument records for this event based on its learning_model.
+     *
+     * Logic mirrors createEventInstructions: find DocumentTemplate rows where
+     * the learning_model column is true and duplicate their attributes into
+     * EventDocument entries for this event.
+     *
+     * @return void
+     */
+    public function createEventDocuments(): void
+    {
+        if (empty($this->learning_model)) {
+            return;
+        }
+
+        $allowed = ['full_elearning', 'distance_learning', 'blended_learning', 'classical'];
+        if (!in_array($this->learning_model, $allowed, true)) {
+            return;
+        }
+
+        $column = $this->learning_model;
+        $templates = DocumentTemplate::where($column, true)->get();
+        if ($templates->isEmpty()) {
+            return;
+        }
+
+        DB::transaction(function () use ($templates) {
+            foreach ($templates as $tpl) {
+                EventDocument::create([
+                    'event_id' => $this->id,
+                    'name' => $tpl->name,
+                    'notes' => null,
+                    'full_elearning' => $tpl->full_elearning,
+                    'distance_learning' => $tpl->distance_learning,
+                    'blended_learning' => $tpl->blended_learning,
+                    'classical' => $tpl->classical,
                 ]);
             }
         });
@@ -88,5 +133,13 @@ class Event extends Model
     public function eventInstructions()
     {
         return $this->hasMany(EventInstruction::class);
+    }
+
+    /**
+     * Get the EventDocument records for this Event.
+     */
+    public function eventDocuments()
+    {
+        return $this->hasMany(EventDocument::class);
     }
 }

@@ -7,6 +7,7 @@
         {{-- Top-right action buttons --}}
         <div class="absolute top-4 right-4 flex space-x-2">
             <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 text-white rounded text-sm">Edit</a>
+            <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Lihat Kelengkapan Dokumen</a>
             <a href="{{ route('events.index') }}" class="px-3 py-1.5 bg-gray-300 rounded text-sm">Kembali</a>
         </div>
         <div class="mb-4">

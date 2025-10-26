@@ -16,6 +16,7 @@ class Instruction extends Model
         'role',
         'detail',
         'linkable',
+        'link_label',
         'full_elearning',
         'distance_learning',
         'blended_learning',

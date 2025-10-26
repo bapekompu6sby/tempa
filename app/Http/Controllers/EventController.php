@@ -77,6 +77,18 @@ class EventController extends Controller
     }
 
     /**
+     * Display documents (kelengkapan dokumen) for the specified event.
+     */
+    public function documents(Event $event)
+    {
+        $event->load('eventDocuments');
+
+        $documents = $event->eventDocuments()->get();
+
+        return view('events.documents', compact('event', 'documents'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Event $event)
