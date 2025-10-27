@@ -13,8 +13,10 @@
         <div class="container mx-auto flex items-center justify-between">
             <h1 class="text-3xl font-semibold" style="color:#FDB714"><a href="{{ url('/') }}" class="hover:underline" style="color:inherit">TEMPA</a></h1>
             <nav>
-                <a href="{{ route('instructions.index') }}" class="text-sm mr-4" style="color:#FDB714">Instruksi</a>
-                <a href="{{ route('events.index') }}" class="text-sm" style="color:#FDB714">Pelatihan</a>
+                @if(session('access_granted'))
+                    <a href="{{ route('instructions.index') }}" class="text-sm mr-4" style="color:#FDB714">Instruksi</a>
+                    <a href="{{ route('events.index') }}" class="text-sm" style="color:#FDB714">Pelatihan</a>
+                @endif
             </nav>
         </div>
     </header>
