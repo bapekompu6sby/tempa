@@ -120,22 +120,33 @@
                                     <div class="mb-2">{!! nl2br(e(optional($instr)->detail)) !!}</div>
 
                                     @if(optional($instr)->linkable)
-                                        <div id="ei-link-display-{{ $ei->id }}" class="ei-link-display">
+                                        @php
+                                            $displayLabel = $ei->link_label ?? optional($instr)->link_label ?? null;
+                                        @endphp
+                                        <div id="ei-link-display-{{ $ei->id }}" class="ei-link-display" data-link-label="{{ $displayLabel }}">
                                             @if(!empty($ei->link))
                                                 @php
                                                     // ensure rendered href has a scheme so browser treats it as absolute
                                                     $raw = $ei->link;
                                                     $href = (strpos($raw, '://') !== false) ? $raw : 'https://' . ltrim($raw, '/');
+                                                    $label = $displayLabel;
                                                 @endphp
+                                                @if($label)
+                                                    <span id="ei-link-label-{{ $ei->id }}" class="font-semibold text-black">{{ $label }}</span>
+                                                    <span class="mx-1">:</span>
+                                                @endif
                                                 <a id="ei-link-anchor-{{ $ei->id }}" href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($raw, 20) }}</a>
                                                 <button type="button" data-ei-id="{{ $ei->id }}" class="ei-link-edit ml-3 px-2 py-1 bg-yellow-500 text-white rounded text-sm">Edit</button>
                                             @else
-                                                <span class="text-gray-600">Belum ada link.</span>
-                                                <button type="button" data-ei-id="{{ $ei->id }}" class="ei-link-edit ml-3 px-2 py-1 bg-blue-500 text-white rounded text-sm">Tambah</button>
+                                                @if($displayLabel)
+                                                    <span class="font-semibold text-black">{{ $displayLabel }}</span>
+                                                @else
+                                                    <span class="text-gray-600">Belum ada link.</span>
+                                                @endif
                                             @endif
                                         </div>
 
-                                        <div id="ei-link-form-{{ $ei->id }}" class="ei-link-form mt-2 {{ empty($ei->link) ? '' : 'hidden' }}">
+                                            <div id="ei-link-form-{{ $ei->id }}" class="ei-link-form mt-2 {{ empty($ei->link) ? '' : 'hidden' }}">
                                             <div class="flex items-center space-x-2">
                                                 <input name="link" type="text" value="{{ $ei->link }}" placeholder="Masukkan link..." class="border rounded px-3 py-2 w-full ei-link-input" />
                                                 <button type="button" data-ei-id="{{ $ei->id }}" class="ei-link-save px-3 py-2 bg-green-600 text-white rounded text-sm">Simpan</button>
@@ -295,18 +306,53 @@
                             var anchor = document.getElementById('ei-link-anchor-' + id);
                             var display = document.getElementById('ei-link-display-' + id);
                             if (anchor) {
-                                anchor.href = normalizeLink(data.eventInstruction.link || val);
-                                anchor.textContent = truncate(data.eventInstruction.link || val, 20);
+                                const savedLink = data.eventInstruction.link || val;
+                                const savedLabel = data.eventInstruction.link_label || display?.dataset?.linkLabel || '';
+                                anchor.href = normalizeLink(savedLink);
+                                anchor.textContent = truncate(savedLink, 20);
+
+                                // update or create label span (bold black)
+                                let labelEl = document.getElementById('ei-link-label-' + id);
+                                if (savedLabel) {
+                                    if (!labelEl && display) {
+                                        labelEl = document.createElement('span');
+                                        labelEl.id = 'ei-link-label-' + id;
+                                        labelEl.className = 'font-semibold text-black';
+                                        display.insertBefore(labelEl, anchor);
+                                        // insert colon separator
+                                        const sep = document.createElement('span');
+                                        sep.className = 'mx-1';
+                                        sep.textContent = ':';
+                                        display.insertBefore(sep, anchor);
+                                    }
+                                    if (labelEl) labelEl.textContent = savedLabel;
+                                }
                             } else if (display) {
-                                // create anchor if not present
+                                // create label (if present) and anchor if not present
+                                const newLink = data.eventInstruction.link || val;
+                                const newLabel = data.eventInstruction.link_label || display.dataset.linkLabel || '';
+
+                                if (newLabel) {
+                                    var labelSpan = document.createElement('span');
+                                    labelSpan.id = 'ei-link-label-' + id;
+                                    labelSpan.className = 'font-semibold text-black';
+                                    labelSpan.textContent = newLabel;
+                                    display.insertBefore(labelSpan, display.firstChild);
+
+                                    var sep = document.createElement('span');
+                                    sep.className = 'mx-1';
+                                    sep.textContent = ':';
+                                    display.insertBefore(sep, display.firstChild.nextSibling);
+                                }
+
                                 var a = document.createElement('a');
                                 a.id = 'ei-link-anchor-' + id;
-                                a.href = normalizeLink(data.eventInstruction.link || val);
+                                a.href = normalizeLink(newLink);
                                 a.target = '_blank';
                                 a.rel = 'noopener noreferrer';
                                 a.className = 'text-blue-600 underline';
-                                a.textContent = truncate(data.eventInstruction.link || val, 20);
-                                display.insertBefore(a, display.firstChild);
+                                a.textContent = truncate(newLink, 20);
+                                display.insertBefore(a, display.firstChild.nextSibling || display.firstChild);
                             }
 
                             // hide form and show display

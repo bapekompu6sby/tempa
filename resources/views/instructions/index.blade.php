@@ -86,7 +86,8 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Model</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -102,7 +103,25 @@
                                     <span class="ml-3 px-2 py-0.5 text-xs font-medium rounded {{ $c['bg'] }} {{ $c['text'] }}">{{ ucwords(str_replace('_', ' ', $phase)) }}</span>
                                 </div>
                             </td>
-                            
+
+                            <td class="py-2 px-4">
+                                <div class="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+                                    {{-- Learning model badges column: keep badges single-line to avoid vertical bulk --}}
+                                    @if($instruction->full_elearning)
+                                        <span class="inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">E-Learn</span>
+                                    @endif
+                                    @if($instruction->distance_learning)
+                                        <span class="inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full bg-teal-100 text-teal-800 border border-teal-200">Distance</span>
+                                    @endif
+                                    @if($instruction->blended_learning)
+                                        <span class="inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-200">Blended</span>
+                                    @endif
+                                    @if($instruction->classical)
+                                        <span class="inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full bg-pink-100 text-pink-800 border border-pink-200">Classical</span>
+                                    @endif
+                                </div>
+                            </td>
+
                             <td class="py-2 px-4">
                                 <div class="flex items-center space-x-3 whitespace-nowrap">
                                     <button type="button" class="view-detail" data-id="{{ $instruction->id }}" aria-expanded="false" title="Lihat detail">
@@ -127,11 +146,11 @@
                             </td>
                         </tr>
                         <tr id="detail-{{ $instruction->id }}" class="detail-row hidden bg-gray-50">
-                            <td class="py-3 px-4" colspan="2">{!! nl2br(e($instruction->detail)) !!}</td>
+                            <td class="py-3 px-4" colspan="3">{!! nl2br(e($instruction->detail)) !!}</td>
                         </tr>
                 @empty
                 <tr>
-                            <td class="py-4 px-4 text-center text-gray-500" colspan="2">Tidak ada instruksi.</td>
+                            <td class="py-4 px-4 text-center text-gray-500" colspan="3">Tidak ada instruksi.</td>
                 </tr>
                 @endforelse
             </tbody>
