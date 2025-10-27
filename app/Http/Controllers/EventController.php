@@ -68,14 +68,14 @@ class EventController extends Controller
             });
         }
 
-        // enforce specific phase ordering: persiapan -> pembukaan_pelatihan -> pelaksanaan -> penutupan_pelatihan -> evaluasi_pelatihan -> pra_pelatihan
+        // enforce specific phase ordering: persiapan -> pembukaan_pelatihan -> pelaksanaan -> penutupan_pelatihan -> evaluasi_pelatihan -> pasca_pelatihan
         $orderSql = "CASE phase
             WHEN 'persiapan' THEN 1
             WHEN 'pembukaan_pelatihan' THEN 2
             WHEN 'pelaksanaan' THEN 3
             WHEN 'penutupan_pelatihan' THEN 4
             WHEN 'evaluasi_pelatihan' THEN 5
-            WHEN 'pra_pelatihan' THEN 6
+            WHEN 'pasca_pelatihan' THEN 6
             ELSE 7 END";
 
         $query->orderByRaw($orderSql)->orderBy('id');
