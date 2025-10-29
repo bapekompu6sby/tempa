@@ -18,11 +18,8 @@
                 <select name="phase" class="border rounded px-2 py-2 text-sm">
                     <option value="all" {{ (isset($phase) && $phase === 'all') ? 'selected' : '' }}>Semua Fase</option>
                     <option value="persiapan" {{ (isset($phase) && $phase === 'persiapan') ? 'selected' : '' }}>Persiapan</option>
-                    <option value="pembukaan_pelatihan" {{ (isset($phase) && $phase === 'pembukaan_pelatihan') ? 'selected' : '' }}>Pembukaan Pelatihan</option>
                     <option value="pelaksanaan" {{ (isset($phase) && $phase === 'pelaksanaan') ? 'selected' : '' }}>Pelaksanaan</option>
-                    <option value="penutupan_pelatihan" {{ (isset($phase) && $phase === 'penutupan_pelatihan') ? 'selected' : '' }}>Penutupan Pelatihan</option>
-                    <option value="evaluasi_pelatihan" {{ (isset($phase) && $phase === 'evaluasi_pelatihan') ? 'selected' : '' }}>Evaluasi Pelatihan</option>
-                    <option value="pasca_pelatihan" {{ (isset($phase) && $phase === 'pasca_pelatihan') ? 'selected' : '' }}>Pasca Pelatihan</option>
+                    <option value="pelaporan" {{ (isset($phase) && $phase === 'pelaporan') ? 'selected' : '' }}>Pelaporan</option>
                 </select>
             </div>
 
@@ -101,6 +98,8 @@
         'penutupan_pelatihan' => ['border' => 'border-purple-400', 'bg' => 'bg-purple-50', 'text' => 'text-purple-800'],
         'evaluasi_pelatihan' => ['border' => 'border-red-400', 'bg' => 'bg-red-50', 'text' => 'text-red-800'],
         'pasca_pelatihan' => ['border' => 'border-gray-400', 'bg' => 'bg-gray-50', 'text' => 'text-gray-800'],
+        // consolidated phase after normalization
+        'pelaporan' => ['border' => 'border-red-400', 'bg' => 'bg-red-50', 'text' => 'text-red-800'],
     ];
     @endphp
 

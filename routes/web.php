@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $events = \App\Models\Event::orderBy('start_date', 'desc')->get();
+    return view('welcome', compact('events'));
 });
 Route::post('/unlock', function (\Illuminate\Http\Request $request) {
     $request->validate(['password' => 'required']);
