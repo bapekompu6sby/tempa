@@ -87,6 +87,7 @@ class InstructionController extends Controller
             'name' => 'nullable|string|max:255',
             'role' => 'nullable|string|max:255',
             'detail' => 'nullable|string',
+            'phase' => 'nullable|in:persiapan,pelaksanaan,pembukaan_pelatihan,penutupan_pelatihan,evaluasi_pelatihan,pasca_pelatihan',
         ]);
         // checkbox fields: present when checked; default false
         $validated['linkable'] = $request->has('linkable');
@@ -123,6 +124,7 @@ class InstructionController extends Controller
             'name' => 'nullable|string|max:255',
             'role' => 'nullable|string|max:255',
             'detail' => 'nullable|string',
+            'phase' => 'nullable|in:persiapan,pelaksanaan,pembukaan_pelatihan,penutupan_pelatihan,evaluasi_pelatihan,pasca_pelatihan',
         ]);
         $validated['linkable'] = $request->has('linkable');
         $validated['full_elearning'] = $request->has('full_elearning');
