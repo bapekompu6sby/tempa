@@ -71,7 +71,17 @@
         <nav class="flex space-x-2">
             @foreach($tabs as $key => $label)
                 @php $active = ($tab === $key); @endphp
-                <a href="{{ route('instructions.index', ['tab' => $key, 'q' => $q ?? null]) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $active ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">{{ $label }}</a>
+                @php
+                    // build params preserving current filters when switching tabs
+                    $params = ['tab' => $key];
+                    if(!empty($q)) $params['q'] = $q;
+                    if(isset($phase) && $phase !== 'all') $params['phase'] = $phase;
+                    if(!empty($f['full_elearning'])) $params['full_elearning'] = 1;
+                    if(!empty($f['distance_learning'])) $params['distance_learning'] = 1;
+                    if(!empty($f['blended_learning'])) $params['blended_learning'] = 1;
+                    if(!empty($f['classical'])) $params['classical'] = 1;
+                @endphp
+                <a href="{{ route('instructions.index', $params) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $active ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">{{ $label }}</a>
             @endforeach
         </nav>
     </div>
