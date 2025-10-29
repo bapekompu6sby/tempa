@@ -143,4 +143,26 @@ class Event extends Model
     {
         return $this->hasMany(EventDocument::class);
     }
+
+    /**
+     * Count number of EventInstruction rows for this event by phase.
+     *
+     * @param string $phase
+     * @return int
+     */
+    public function instructionCountByPhase(string $phase): int
+    {
+        return $this->eventInstructions()->where('phase', $phase)->count();
+    }
+
+    /**
+     * Count number of checked EventInstruction rows for this event by phase.
+     *
+     * @param string $phase
+     * @return int
+     */
+    public function checkedInstructionCountByPhase(string $phase): int
+    {
+        return $this->eventInstructions()->where('phase', $phase)->where('checked', true)->count();
+    }
 }

@@ -22,6 +22,24 @@
         <div class="mb-4">
             <strong>Tanggal Selesai:</strong> {{ $event->end_date }}
         </div>
+        <div class="mb-4">
+            <div class="grid grid-cols-3 gap-4">
+                @php
+                    $phases = ['persiapan' => 'Persiapan', 'pelaksanaan' => 'Pelaksanaan', 'pelaporan' => 'Pelaporan'];
+                @endphp
+                @foreach($phases as $key => $label)
+                    @php
+                        $total = $event->instructionCountByPhase($key);
+                        $checked = $event->checkedInstructionCountByPhase($key);
+                    @endphp
+                    <div class="bg-gray-50 p-3 rounded shadow-sm">
+                        <div class="text-sm text-gray-600">{{ $label }}</div>
+                        <div class="text-lg font-semibold">{{ $total }} <span class="text-sm text-gray-500">instruksi</span></div>
+                        <div class="text-sm text-green-600">{{ $checked }} checked</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
         @if(!empty($event->note))
         <div class="mb-4">
             <strong>Catatan:</strong>

@@ -3,7 +3,21 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $events = \App\Models\Event::orderBy('start_date', 'desc')->get();
+    // Load events and pre-compute instruction counts per phase to avoid N+1 queries in the view
+    $events = \App\Models\Event::orderBy('start_date', 'desc')
+        ->withCount([
+            // persiapan
+            'eventInstructions as persiapan_total' => function ($q) { $q->where('phase', 'persiapan'); },
+            'eventInstructions as persiapan_checked' => function ($q) { $q->where('phase', 'persiapan')->where('checked', true); },
+            // pelaksanaan
+            'eventInstructions as pelaksanaan_total' => function ($q) { $q->where('phase', 'pelaksanaan'); },
+            'eventInstructions as pelaksanaan_checked' => function ($q) { $q->where('phase', 'pelaksanaan')->where('checked', true); },
+            // pelaporan
+            'eventInstructions as pelaporan_total' => function ($q) { $q->where('phase', 'pelaporan'); },
+            'eventInstructions as pelaporan_checked' => function ($q) { $q->where('phase', 'pelaporan')->where('checked', true); },
+        ])
+        ->get();
+
     return view('welcome', compact('events'));
 });
 Route::post('/unlock', function (\Illuminate\Http\Request $request) {
