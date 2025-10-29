@@ -50,15 +50,23 @@ class EventController extends Controller
     // Prepare tabbed instruction lists scoped to this event, with optional search
     $tab = request('tab', 'semua');
     $q = request('q');
+    // phase filter: 'all' means no filtering
+    $phase = request('phase', 'all');
 
     // load related instructions
     $event->load('eventInstructions.instruction');
 
-    $build = function ($role = null) use ($event, $q) {
+    $build = function ($role = null) use ($event, $q, $phase) {
         $query = EventInstruction::with('instruction')->where('event_id', $event->id);
         if ($role) {
             $query->whereHas('instruction', function ($qi) use ($role) {
                 $qi->where('role', $role);
+            });
+        }
+        // apply phase filter when a specific phase is selected
+        if (!empty($phase) && $phase !== 'all') {
+            $query->whereHas('instruction', function ($qi) use ($phase) {
+                $qi->where('phase', $phase);
             });
         }
         if ($q) {
@@ -88,7 +96,7 @@ class EventController extends Controller
     $host = $build('host');
     $pengamat = $build('petugas_kelas');
 
-    return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q'));
+    return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q', 'phase'));
     }
 
     /**

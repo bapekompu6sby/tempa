@@ -27,13 +27,32 @@
             <label for="linkable" class="font-medium">Linkable</label>
         </div>
         <div class="mb-4">
-            <label class="block mb-2 font-semibold">Learning Model</label>
+            <label class="block mb-2 font-semibold">Mode Pembelajaran</label>
             <div class="flex space-x-4 items-center">
                 <label class="inline-flex items-center"><input type="checkbox" name="full_elearning" {{ old('full_elearning') ? 'checked' : '' }} class="mr-2"> Full E-Learning</label>
                 <label class="inline-flex items-center"><input type="checkbox" name="distance_learning" {{ old('distance_learning') ? 'checked' : '' }} class="mr-2"> Distance Learning</label>
                 <label class="inline-flex items-center"><input type="checkbox" name="blended_learning" {{ old('blended_learning') ? 'checked' : '' }} class="mr-2"> Blended Learning</label>
                 <label class="inline-flex items-center"><input type="checkbox" name="classical" {{ old('classical') ? 'checked' : '' }} class="mr-2"> Classical</label>
             </div>
+        </div>
+        <div class="mb-4">
+            <label for="phase" class="block mb-2 font-semibold">Phase</label>
+            <select name="phase" id="phase" class="w-full border px-3 py-2 rounded">
+                @php
+                    $phaseOld = old('phase', 'pelaksanaan');
+                    $phases = [
+                        'persiapan' => 'Persiapan',
+                        'pelaksanaan' => 'Pelaksanaan',
+                        'pembukaan_pelatihan' => 'Pembukaan Pelatihan',
+                        'penutupan_pelatihan' => 'Penutupan Pelatihan',
+                        'evaluasi_pelatihan' => 'Evaluasi Pelatihan',
+                        'pasca_pelatihan' => 'Pasca Pelatihan',
+                    ];
+                @endphp
+                @foreach($phases as $value => $label)
+                    <option value="{{ $value }}" {{ $phaseOld === $value ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
         </div>
         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Simpan</button>
         <a href="{{ route('instructions.index') }}" class="ml-2 px-4 py-2 bg-gray-300 rounded">Batal</a>

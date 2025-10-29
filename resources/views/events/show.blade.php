@@ -37,8 +37,20 @@
                 <form method="GET" action="{{ route('events.show', $event) }}" class="flex items-center space-x-2">
                     <input type="hidden" name="tab" value="{{ $tab }}">
                     <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama atau detail..." class="border rounded px-3 py-2 w-64">
+
+                    {{-- Phase select (single choice; 'all' shows all phases) --}}
+                    <select name="phase" class="border rounded px-2 py-2 text-sm">
+                        <option value="all" {{ (isset($phase) && $phase === 'all') ? 'selected' : '' }}>Semua Fase</option>
+                        <option value="persiapan" {{ (isset($phase) && $phase === 'persiapan') ? 'selected' : '' }}>Persiapan</option>
+                        <option value="pembukaan_pelatihan" {{ (isset($phase) && $phase === 'pembukaan_pelatihan') ? 'selected' : '' }}>Pembukaan Pelatihan</option>
+                        <option value="pelaksanaan" {{ (isset($phase) && $phase === 'pelaksanaan') ? 'selected' : '' }}>Pelaksanaan</option>
+                        <option value="penutupan_pelatihan" {{ (isset($phase) && $phase === 'penutupan_pelatihan') ? 'selected' : '' }}>Penutupan Pelatihan</option>
+                        <option value="evaluasi_pelatihan" {{ (isset($phase) && $phase === 'evaluasi_pelatihan') ? 'selected' : '' }}>Evaluasi Pelatihan</option>
+                        <option value="pasca_pelatihan" {{ (isset($phase) && $phase === 'pasca_pelatihan') ? 'selected' : '' }}>Pasca Pelatihan</option>
+                    </select>
+
                     <button type="submit" class="px-3 py-2 bg-gray-200 rounded">Cari</button>
-                    @if(!empty($q))
+                    @if(!empty($q) || (isset($phase) && $phase !== 'all'))
                         <a href="{{ route('events.show', ['event' => $event, 'tab' => $tab]) }}" class="ml-2 text-sm text-gray-600">Reset</a>
                     @endif
                 </form>

@@ -12,19 +12,25 @@ class InstructionController extends Controller
      */
     public function index()
     {
-    // prepare collections for tabs with optional search and learning-model filters
+    // prepare collections for tabs with optional search, phase and learning-model filters
     $tab = request('tab', 'semua');
     $q = request('q');
+    // phase filter: 'all' means no filtering
+    $phase = request('phase', 'all');
 
     // collect learning model checkbox filters
     $filters = request()->only(['full_elearning', 'distance_learning', 'blended_learning', 'classical']);
     // normalize to boolean presence
     $selected = array_filter($filters);
 
-    $build = function ($role = null) use ($q, $selected) {
+    $build = function ($role = null) use ($q, $selected, $phase) {
         $query = Instruction::query();
         if ($role) {
             $query->where('role', $role);
+        }
+        // apply phase filter when a specific phase is selected
+        if (!empty($phase) && $phase !== 'all') {
+            $query->where('phase', $phase);
         }
         if ($q) {
             $query->where(function ($sub) use ($q) {
@@ -61,7 +67,7 @@ class InstructionController extends Controller
     $host = $build('host');
     $pengamat = $build('petugas_kelas');
 
-    return view('instructions.index', compact('all', 'pic', 'host', 'pengamat', 'tab', 'q', 'filters'));
+    return view('instructions.index', compact('all', 'pic', 'host', 'pengamat', 'tab', 'q', 'filters', 'phase'));
     }
 
     /**
