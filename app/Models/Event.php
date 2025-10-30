@@ -8,6 +8,7 @@ use App\Models\EventInstruction;
 use App\Models\DocumentTemplate;
 use App\Models\EventDocument;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Event extends Model
 {
@@ -22,6 +23,20 @@ class Event extends Model
         'start_date',
         'end_date',
         'note',
+        'preparation_date',
+        'report_date',
+    ];
+
+    /**
+     * Date casts
+     *
+     * @var array
+     */
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'preparation_date' => 'date',
+        'report_date' => 'date',
     ];
 
     /**
@@ -30,6 +45,34 @@ class Event extends Model
     protected static function booted()
     {
         static::created(function (self $event) {
+            // Assign default preparation_date (30 days before start_date) and report_date (14 days after end_date)
+            $updates = [];
+            try {
+                if (!empty($event->start_date)) {
+                    $sd = $event->start_date instanceof Carbon ? $event->start_date : Carbon::parse($event->start_date);
+                    $prep = $sd->copy()->subDays(30)->toDateString();
+                    $updates['preparation_date'] = $prep;
+                }
+            } catch (\Exception $e) {
+                // ignore parse errors
+            }
+            try {
+                if (!empty($event->end_date)) {
+                    $ed = $event->end_date instanceof Carbon ? $event->end_date : Carbon::parse($event->end_date);
+                    $rep = $ed->copy()->addDays(14)->toDateString();
+                    $updates['report_date'] = $rep;
+                }
+            } catch (\Exception $e) {
+                // ignore parse errors
+            }
+
+            if (!empty($updates)) {
+                // update the model record with computed dates
+                $event->update($updates);
+                // refresh attributes so subsequent operations see new values
+                $event->refresh();
+            }
+
             // Delegate to the model methods to create EventInstruction and EventDocument records
             $event->createEventInstructions();
             $event->createEventDocuments();
