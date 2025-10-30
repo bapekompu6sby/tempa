@@ -141,6 +141,7 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-50">
                         <tr>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">No.</th>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700"> </th>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama</th>
                             <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700"> </th>
@@ -154,6 +155,7 @@
                                 $c = $phaseClasses[$phase] ?? $phaseClasses['pelaksanaan'];
                             @endphp
                             <tr id="ei-row-{{ $ei->id }}" class="border-t align-top border-l-4 {{ $c['border'] }} {{ $ei->checked ? 'bg-green-50' : '' }}">
+                                    <td class="py-2 px-4 text-sm text-gray-700 font-semibold w-10">{{ $loop->iteration }}</td>
                                     <td class="py-2 px-4 w-20">
                                         <input type="checkbox" data-ei-id="{{ $ei->id }}" {{ $ei->checked ? 'checked' : '' }} class="ei-checkbox w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" />
                                     </td>
@@ -174,7 +176,7 @@
                                 </td>
                             </tr>
                             <tr id="detail-ei-{{ $ei->id }}" class="detail-row hidden bg-gray-50">
-                                <td class="py-3 px-4" colspan="3">
+                                <td class="py-3 px-4" colspan="4">
                                     <div class="mb-2">{!! nl2br(e(optional($instr)->detail)) !!}</div>
 
                                     @if(optional($instr)->linkable)

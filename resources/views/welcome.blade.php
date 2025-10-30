@@ -19,43 +19,48 @@
 				@if(isset($events) && $events->count())
 					<ul class="space-y-2">
 						@foreach($events as $ev)
-							<li class="border rounded px-3 py-3">
-								{{-- Top: event detail --}}
+							<li class="border rounded px-4 py-4 bg-white">
+								{{-- Top: event detail (match events.index) --}}
 								<div class="mb-3">
-									<div class="font-medium text-lg">{{ $ev->name }}</div>
-									<div class="text-sm text-gray-600">{{ $ev->start_date }} @if($ev->end_date) - {{ $ev->end_date }}@endif</div>
-									<div class="mt-2 flex items-center justify-between">
-										@php
-											$lm = $ev->learning_model ?? null;
-											$lmLabel = null;
-											$lmClass = 'inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full';
-											if ($lm === 'full_elearning') {
-												$lmLabel = 'E-Learning';
-												$lmClass .= ' bg-indigo-100 text-indigo-800 border border-indigo-200';
-											} elseif ($lm === 'distance_learning') {
-												$lmLabel = 'Distance';
-												$lmClass .= ' bg-teal-100 text-teal-800 border border-teal-200';
-											} elseif ($lm === 'blended_learning') {
-												$lmLabel = 'Blended';
-												$lmClass .= ' bg-orange-100 text-orange-800 border border-orange-200';
-											} elseif ($lm === 'classical') {
-												$lmLabel = 'Klasikal';
-												$lmClass .= ' bg-pink-100 text-pink-800 border border-pink-200';
-											}
-										@endphp
+									<div class="flex items-center justify-between">
+										<div>
+											<div class="font-medium text-lg">{{ $ev->name }}</div>
+											<div class="mt-2">
+												@php
+													$lm = $ev->learning_model ?? null;
+													$lmLabel = null;
+													$lmClass = 'inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full';
+													if ($lm === 'full_elearning') {
+														$lmLabel = 'E-Learning';
+														$lmClass .= ' bg-indigo-100 text-indigo-800 border border-indigo-200';
+													} elseif ($lm === 'distance_learning') {
+														$lmLabel = 'Distance';
+														$lmClass .= ' bg-teal-100 text-teal-800 border border-teal-200';
+													} elseif ($lm === 'blended_learning') {
+														$lmLabel = 'Blended';
+														$lmClass .= ' bg-orange-100 text-orange-800 border border-orange-200';
+													} elseif ($lm === 'classical') {
+														$lmLabel = 'Klasikal';
+														$lmClass .= ' bg-pink-100 text-pink-800 border border-pink-200';
+													}
+												@endphp
 
+												<div class="flex items-center gap-3">
+													@if($lmLabel)
+														<span class="{{ $lmClass }}">{{ $lmLabel }}</span>
+													@else
+														<span class="text-sm text-gray-500">-</span>
+													@endif
+												</div>
+											</div>
+										</div>
 										<div class="flex items-center gap-3">
-											@if($lmLabel)
-												<span class="{{ $lmClass }}">{{ $lmLabel }}</span>
-											@else
-												<span class="text-sm text-gray-500">-</span>
-											@endif
 											<a href="{{ route('events.show', $ev) }}" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Lihat</a>
 										</div>
 									</div>
 								</div>
 
-								{{-- Bottom: three phase blocks --}}
+								{{-- Bottom: three phase blocks (match events.index) --}}
 								@php
 									$phases = [
 										'persiapan' => 'Persiapan',
@@ -66,7 +71,7 @@
 								<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 									@foreach($phases as $key => $label)
 										@php
-											// Prefer model helper methods (they query event_instructions) when available
+											// Use Event model helper methods to get accurate counts
 											$total = method_exists($ev, 'instructionCountByPhase') ? $ev->instructionCountByPhase($key) : ($ev->{$key . '_total'} ?? 0);
 											$checked = method_exists($ev, 'checkedInstructionCountByPhase') ? $ev->checkedInstructionCountByPhase($key) : ($ev->{$key . '_checked'} ?? 0);
 											$pct = $total > 0 ? (int) round(($checked / $total) * 100) : 0;
@@ -89,24 +94,24 @@
 											}
 											$phaseStartLabel = $phaseStart ? ($phaseStart instanceof \Carbon\Carbon ? $phaseStart->format('d M Y') : \Carbon\Carbon::parse($phaseStart)->format('d M Y')) : '-';
 											$phaseEndLabel = $phaseEnd ? ($phaseEnd instanceof \Carbon\Carbon ? $phaseEnd->format('d M Y') : \Carbon\Carbon::parse($phaseEnd)->format('d M Y')) : '-';
-										@endphp
-										<a href="{{ route('events.show', ['event' => $ev, 'phase' => $key]) }}" class="block {{ $bgColor }} p-3 rounded hover:shadow">
-											<div class="flex justify-between text-sm text-gray-600 mb-2">
-												<div>
-													<div class="font-medium">{{ $label }}</div>
-													<div class="text-xs text-gray-500">{{ $phaseStartLabel }} &ndash; {{ $phaseEndLabel }}</div>
-												</div>
-												<div class="text-sm text-gray-600">{{ $checked }}/{{ $total }}</div>
+									@endphp
+									<a href="{{ route('events.show', ['event' => $ev, 'phase' => $key]) }}" class="block {{ $bgColor }} p-3 rounded hover:shadow">
+										<div class="flex justify-between text-sm text-gray-600 mb-2">
+											<div>
+												<div class="font-medium">{{ $label }}</div>
+												<div class="text-xs text-gray-500">{{ $phaseStartLabel }} &ndash; {{ $phaseEndLabel }}</div>
 											</div>
-											<div class="w-full bg-gray-200 h-4 rounded overflow-hidden">
-												<div class="h-4 {{ $barColor }}" style="width: {{ $pct }}%"></div>
-											</div>
-										</a>
+											<div class="text-sm text-gray-600">{{ $checked }}/{{ $total }}</div>
+										</div>
+										<div class="w-full bg-gray-200 h-4 rounded overflow-hidden">
+											<div class="h-4 {{ $barColor }}" style="width: {{ $pct }}%"></div>
+										</div>
+									</a>
 									@endforeach
 								</div>
 							</li>
 						@endforeach
-					</ul>
+						</ul>
 				@else
 					<div class="text-gray-600">Belum ada pelatihan.</div>
 				@endif

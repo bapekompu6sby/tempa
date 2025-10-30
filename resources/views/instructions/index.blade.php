@@ -107,6 +107,7 @@
         <table class="min-w-full">
             <thead class="bg-gray-50">
                 <tr>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">No.</th>
                     <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama</th>
                     <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Model</th>
                     <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
@@ -119,6 +120,7 @@
                             $c = $phaseClasses[$phase] ?? $phaseClasses['pelaksanaan'];
                         @endphp
                         <tr class="border-t align-top border-l-4 {{ $c['border'] }}">
+                            <td class="py-2 px-4 text-sm text-gray-700 font-semibold">{{ $loop->iteration }}</td>
                             <td class="py-2 px-4 flex items-center">
                                 <div class="flex items-center">
                                     <span>{{ $instruction->name }}</span>
@@ -168,7 +170,7 @@
                             </td>
                         </tr>
                         <tr id="detail-{{ $instruction->id }}" class="detail-row hidden bg-gray-50">
-                            <td class="py-3 px-4" colspan="3">{!! nl2br(e($instruction->detail)) !!}</td>
+                            <td class="py-3 px-4" colspan="4">{!! nl2br(e($instruction->detail)) !!}</td>
                         </tr>
                 @empty
                 <tr>
