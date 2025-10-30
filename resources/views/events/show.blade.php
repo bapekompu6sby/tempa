@@ -14,7 +14,30 @@
             <strong>Nama:</strong> {{ $event->name }}
         </div>
         <div class="mb-4">
-            <strong>Model Pembelajaran:</strong> {{ $event->learning_model }}
+            <strong>Model Pembelajaran:</strong>
+            @php
+                $lm = $event->learning_model ?? null;
+                $lmLabel = null;
+                $lmClass = 'inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full';
+                if ($lm === 'full_elearning') {
+                    $lmLabel = 'E-Learning';
+                    $lmClass .= ' bg-indigo-100 text-indigo-800 border border-indigo-200';
+                } elseif ($lm === 'distance_learning') {
+                    $lmLabel = 'Distance';
+                    $lmClass .= ' bg-teal-100 text-teal-800 border border-teal-200';
+                } elseif ($lm === 'blended_learning') {
+                    $lmLabel = 'Blended';
+                    $lmClass .= ' bg-orange-100 text-orange-800 border border-orange-200';
+                } elseif ($lm === 'classical') {
+                    $lmLabel = 'Klasikal';
+                    $lmClass .= ' bg-pink-100 text-pink-800 border border-pink-200';
+                }
+            @endphp
+            @if($lmLabel)
+                <span class="{{ $lmClass }}">{{ $lmLabel }}</span>
+            @else
+                <span class="text-sm text-gray-600">-</span>
+            @endif
         </div>
         <div class="mb-4">
             <strong>Tanggal Mulai:</strong> {{ $event->start_date }}

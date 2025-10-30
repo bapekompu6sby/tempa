@@ -25,8 +25,33 @@
 									<div class="font-medium text-lg">{{ $ev->name }}</div>
 									<div class="text-sm text-gray-600">{{ $ev->start_date }} @if($ev->end_date) - {{ $ev->end_date }}@endif</div>
 									<div class="mt-2 flex items-center justify-between">
-										<span class="text-sm text-gray-500">{{ $ev->learning_model }}</span>
-										<a href="{{ route('events.show', $ev) }}" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Lihat</a>
+										@php
+											$lm = $ev->learning_model ?? null;
+											$lmLabel = null;
+											$lmClass = 'inline-flex items-center px-2 py-0 text-[11px] leading-none font-semibold rounded-full';
+											if ($lm === 'full_elearning') {
+												$lmLabel = 'E-Learning';
+												$lmClass .= ' bg-indigo-100 text-indigo-800 border border-indigo-200';
+											} elseif ($lm === 'distance_learning') {
+												$lmLabel = 'Distance';
+												$lmClass .= ' bg-teal-100 text-teal-800 border border-teal-200';
+											} elseif ($lm === 'blended_learning') {
+												$lmLabel = 'Blended';
+												$lmClass .= ' bg-orange-100 text-orange-800 border border-orange-200';
+											} elseif ($lm === 'classical') {
+												$lmLabel = 'Klasikal';
+												$lmClass .= ' bg-pink-100 text-pink-800 border border-pink-200';
+											}
+										@endphp
+
+										<div class="flex items-center gap-3">
+											@if($lmLabel)
+												<span class="{{ $lmClass }}">{{ $lmLabel }}</span>
+											@else
+												<span class="text-sm text-gray-500">-</span>
+											@endif
+											<a href="{{ route('events.show', $ev) }}" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Lihat</a>
+										</div>
 									</div>
 								</div>
 
