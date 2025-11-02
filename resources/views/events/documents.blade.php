@@ -25,7 +25,7 @@
                 </thead>
                 <tbody>
                     @forelse($documents as $doc)
-                        @php $hasAttachment = !empty($doc->link) || !empty($doc->file_path); @endphp
+                        @php $hasAttachment = !empty($doc->link) || (!empty($doc->file_path) || (isset($doc->files) && $doc->files->count() > 0)); @endphp
                         <tr class="border-t align-top {{ $hasAttachment ? 'bg-green-50' : '' }}" id="ed-row-{{ $doc->id }}">
                             <td class="py-2 px-4 align-top">{{ $doc->name }}</td>
                             <td class="py-2 px-4 align-top">
@@ -47,6 +47,7 @@
                             <td class="py-2 px-4 align-top" id="ed-notes-{{ $doc->id }}">{{ $doc->notes ?? '-' }}</td>
                             <td class="py-2 px-4 align-top">
                                 <div class="flex items-center gap-2">
+                                    <button type="button" class="ed-view px-2 py-1 bg-blue-500 text-white rounded text-sm" data-id="{{ $doc->id }}">Lihat File</button>
                                     <button type="button" class="ed-edit px-2 py-1 bg-yellow-500 text-white rounded text-sm" data-id="{{ $doc->id }}">Edit</button>
                                 </div>
                             </td>
@@ -79,7 +80,7 @@
                         </tr>
                     
                         {{-- attachments list for this document (multiple files) --}}
-                        <tr id="ed-files-row-{{ $doc->id }}" class="bg-white">
+                        <tr id="ed-files-row-{{ $doc->id }}" class="bg-white hidden">
                             <td colspan="4" class="py-2 px-4">
                                 <div class="text-sm font-medium mb-2">Lampiran</div>
                                 <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
@@ -88,7 +89,7 @@
                                             <a href="{{ route('documents.files.download', $file) }}" class="text-blue-600 underline">{{ $file->original_name }}</a>
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('documents.files.download', $file) }}" class="text-sm text-gray-600">Download</a>
-                                                <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn text-sm text-red-600">Hapus</button>
+                                                <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn hidden text-sm text-red-600">Hapus</button>
                                             </div>
                                         </li>
                                     @endforeach
@@ -119,12 +120,32 @@
         }
 
         document.addEventListener('DOMContentLoaded', function(){
-            // toggle edit row
+            // open edit row (hide all views and other edits first). If this edit is already open, close it.
             document.querySelectorAll('.ed-edit').forEach(function(btn){
                 btn.addEventListener('click', function(){
                     const id = this.getAttribute('data-id');
+
                     const editRow = document.getElementById('ed-edit-row-' + id);
-                    if (editRow) editRow.classList.toggle('hidden');
+                    const filesRow = document.getElementById('ed-files-row-' + id);
+                    const list = document.getElementById('ed-files-list-' + id);
+
+                    // if this edit row is already visible, close it (toggle off)
+                    if (editRow && !editRow.classList.contains('hidden')) {
+                        editRow.classList.add('hidden');
+                        if (filesRow) filesRow.classList.add('hidden');
+                        if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
+                        return;
+                    }
+
+                    // otherwise hide all edit rows and files rows, and hide delete buttons globally
+                    document.querySelectorAll('[id^="ed-edit-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+                    document.querySelectorAll('[id^="ed-files-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+                    document.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
+
+                    // show the selected edit row and files row, reveal delete buttons inside it
+                    if (editRow) editRow.classList.remove('hidden');
+                    if (filesRow) filesRow.classList.remove('hidden');
+                    if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.remove('hidden'); });
                 });
             });
 
@@ -134,10 +155,43 @@
                     const id = this.getAttribute('data-id');
                     const editRow = document.getElementById('ed-edit-row-' + id);
                     if (editRow) editRow.classList.add('hidden');
+                    // also hide files row and hide delete buttons
+                    const filesRow = document.getElementById('ed-files-row-' + id);
+                    const list = document.getElementById('ed-files-list-' + id);
+                    if (filesRow) filesRow.classList.add('hidden');
+                    if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
                 });
             });
 
             // save link & notes via PATCH
+            // view files button -> toggles view-only files list
+            document.querySelectorAll('.ed-view').forEach(function(btn){
+                btn.addEventListener('click', function(){
+                    const id = this.getAttribute('data-id');
+
+                    // If the target filesRow is already visible, hide it (toggle)
+                    const targetFilesRow = document.getElementById('ed-files-row-' + id);
+                    const alreadyVisible = targetFilesRow && !targetFilesRow.classList.contains('hidden');
+
+                    // hide all edit rows and files rows first
+                    document.querySelectorAll('[id^="ed-edit-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+                    document.querySelectorAll('[id^="ed-files-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+
+                    // hide all delete buttons
+                    document.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
+
+                    // if it was visible, we've just hidden everything; stop here (acts like toggle)
+                    if (alreadyVisible) return;
+
+                    // otherwise, show the selected filesRow in view-only mode
+                    const filesRow = targetFilesRow;
+                    const list = document.getElementById('ed-files-list-' + id);
+                    if (filesRow) filesRow.classList.remove('hidden');
+                    // ensure delete buttons are hidden in view mode
+                    if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
+                });
+            });
+
             document.querySelectorAll('.ed-save').forEach(function(btn){
                     btn.addEventListener('click', async function(){
                         const id = this.getAttribute('data-id');
