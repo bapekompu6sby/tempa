@@ -31,13 +31,13 @@
                             <td class="py-2 px-4 align-top">
                                 <div class="flex flex-col gap-1">
                                     @if(!empty($doc->file_path))
-                                        <a href="{{ route('documents.download', $doc) }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->file_path, 30) }}</a>
+                                        <a id="ed-filepath-display-{{ $doc->id }}" href="{{ route('documents.download', $doc) }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->file_path, 30) }}</a>
                                     @endif
                                     @if(!empty($doc->link))
                                         @php
                                             $href = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/');
                                         @endphp
-                                        <a href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 30) }}</a>
+                                        <a id="ed-link-display-{{ $doc->id }}" href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 30) }}</a>
                                     @endif
                                     {{-- If there are uploaded attachment records but no file_path/link to show in the main cell, indicate presence of attachments --}}
                                     @if((isset($doc->files) && $doc->files->count() > 0) && empty($doc->file_path) && empty($doc->link))
@@ -87,6 +87,12 @@
                         <tr id="ed-files-row-{{ $doc->id }}" class="bg-white hidden">
                             <td colspan="4" class="py-2 px-4">
                                 <div class="text-sm font-medium mb-2">Lampiran</div>
+                                @if(!empty($doc->link))
+                                    @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
+                                    <div class="mb-2"><a id="ed-link-view-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 80) }}</a></div>
+                                @else
+                                    <div id="ed-link-view-{{ $doc->id }}"></div>
+                                @endif
                                 <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
                                     @foreach($doc->files as $file)
                                         <li id="file-{{ $file->id }}" class="flex items-center justify-between">
@@ -243,6 +249,62 @@
                             const hasAttachment = (data.eventDocument && (data.eventDocument.link || data.eventDocument.file_path)) || (uploadResult && uploadResult.files && uploadResult.files.length > 0);
                             if (row) {
                                 if (hasAttachment) row.classList.add('bg-green-50'); else row.classList.remove('bg-green-50');
+                            }
+
+                            // Update displayed link in the main list and in the files view if returned by the server
+                            try {
+                                const docData = data.eventDocument || {};
+                                // main link display
+                                const mainLink = document.getElementById('ed-link-display-' + id);
+                                const mainFilePath = document.getElementById('ed-filepath-display-' + id);
+                                if (docData.link) {
+                                    const href = normalizeLink(docData.link);
+                                    if (mainLink) {
+                                        mainLink.href = href;
+                                        mainLink.textContent = docData.link.length > 30 ? docData.link.slice(0,30) + '...' : docData.link;
+                                    } else {
+                                        // create anchor and insert at top of the cell
+                                        const cell = document.querySelector('#ed-row-' + id + ' td:nth-child(2) .flex');
+                                        if (cell) {
+                                            const a = document.createElement('a');
+                                            a.id = 'ed-link-display-' + id;
+                                            a.href = href;
+                                            a.target = '_blank';
+                                            a.rel = 'noopener noreferrer';
+                                            a.className = 'text-blue-600 underline';
+                                            a.textContent = docData.link.length > 30 ? docData.link.slice(0,30) + '...' : docData.link;
+                                            cell.insertBefore(a, cell.firstChild);
+                                        }
+                                    }
+                                    // update files view link
+                                    const viewLink = document.getElementById('ed-link-view-' + id);
+                                    if (viewLink) {
+                                        viewLink.innerHTML = '';
+                                        const a2 = document.createElement('a');
+                                        a2.id = 'ed-link-view-' + id + '-a';
+                                        a2.href = normalizeLink(docData.link);
+                                        a2.target = '_blank';
+                                        a2.rel = 'noopener noreferrer';
+                                        a2.className = 'text-blue-600 underline';
+                                        a2.textContent = docData.link.length > 80 ? docData.link.slice(0,80) + '...' : docData.link;
+                                        viewLink.appendChild(a2);
+                                    }
+                                } else {
+                                    // no link returned: remove anchors if present
+                                    const ml = document.getElementById('ed-link-display-' + id);
+                                    if (ml) ml.remove();
+                                    const viewLink = document.getElementById('ed-link-view-' + id);
+                                    if (viewLink) viewLink.innerHTML = '';
+                                }
+                                // if server returned a file_path (legacy), update anchor href/text
+                                if (docData.file_path) {
+                                    if (mainFilePath) {
+                                        mainFilePath.href = '/documents/' + id + '/download';
+                                        mainFilePath.textContent = docData.file_path.length > 30 ? docData.file_path.slice(0,30) + '...' : docData.file_path;
+                                    }
+                                }
+                            } catch (errUpdate) {
+                                console.error('Failed to update link display', errUpdate);
                             }
 
                             // update attachments list DOM if uploadResult returned files

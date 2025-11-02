@@ -23,7 +23,8 @@ class InstructionController extends Controller
     // normalize to boolean presence
     $selected = array_filter($filters);
 
-    $build = function ($role = null) use ($q, $selected, $phase) {
+    // Build base query generator (returns a QueryBuilder so we can paginate)
+    $buildQuery = function ($role = null) use ($q, $selected, $phase) {
         $query = Instruction::query();
         if ($role) {
             $query->where('role', $role);
@@ -58,14 +59,14 @@ class InstructionController extends Controller
             WHEN 'pasca_pelatihan' THEN 6
             ELSE 7 END";
 
-        return $query->orderByRaw($orderSql)->orderBy('id')->get();
+        return $query->orderByRaw($orderSql)->orderBy('id');
     };
 
-
-    $all = $build();
-    $pic = $build('pic');
-    $host = $build('host');
-    $pengamat = $build('petugas_kelas');
+    // Paginate each tab's list separately with distinct page parameter names to avoid conflicts
+    $all = $buildQuery()->paginate(20, ['*'], 'page_all');
+    $pic = $buildQuery('pic')->paginate(20, ['*'], 'page_pic');
+    $host = $buildQuery('host')->paginate(20, ['*'], 'page_host');
+    $pengamat = $buildQuery('petugas_kelas')->paginate(20, ['*'], 'page_pengamat');
 
     return view('instructions.index', compact('all', 'pic', 'host', 'pengamat', 'tab', 'q', 'filters', 'phase'));
     }

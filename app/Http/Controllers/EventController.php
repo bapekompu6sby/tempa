@@ -88,7 +88,8 @@ class EventController extends Controller
 
         $query->orderByRaw($orderSql)->orderBy('id');
 
-        return $query->get();
+        // paginate results to 20 per page
+        return $query->paginate(20);
     };
 
     $all = $build();

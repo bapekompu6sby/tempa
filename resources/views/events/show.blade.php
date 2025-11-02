@@ -222,6 +222,14 @@
                         @endforelse
                     </tbody>
                 </table>
+                {{-- pagination links (preserve current query params) --}}
+                <div class="p-3">
+                    @if(method_exists($list, 'links'))
+                        <div class="mt-2">
+                            {{ $list->appends(request()->except('page'))->links('vendor.pagination.light') }}
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <script>

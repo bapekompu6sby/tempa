@@ -174,11 +174,21 @@
                         </tr>
                 @empty
                 <tr>
-                            <td class="py-4 px-4 text-center text-gray-500" colspan="3">Tidak ada instruksi.</td>
+                            <td class="py-4 px-4 text-center text-gray-500" colspan="4">Tidak ada instruksi.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
+    @php
+        // determine page param used for the currently active tab so we can preserve other query params
+        $pageParam = 'page_all';
+        if ($tab === 'pic') $pageParam = 'page_pic';
+        elseif ($tab === 'host') $pageParam = 'page_host';
+        elseif ($tab === 'petugas_kelas') $pageParam = 'page_pengamat';
+    @endphp
+    <div class="mt-4">
+        {{ $list->appends(request()->except($pageParam))->links('vendor.pagination.light') }}
     </div>
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
