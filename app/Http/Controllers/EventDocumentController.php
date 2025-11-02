@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\EventDocument;
+use App\Models\EventDocumentFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use ZipArchive;
 
 class EventDocumentController extends Controller
 {
@@ -103,6 +106,88 @@ class EventDocumentController extends Controller
         $downloadUrl = route('documents.download', $eventDocument);
 
         return response()->json(['success' => true, 'file_path' => $path, 'url' => $url, 'download_url' => $downloadUrl, 'eventDocument' => $eventDocument]);
+    }
+
+    /**
+     * Upload multiple files for an EventDocument (files[] in form data).
+     */
+    public function uploadMultiple(Request $request, EventDocument $eventDocument)
+    {
+        $validated = $request->validate([
+            'files.*' => 'required|file|max:10240',
+        ]);
+
+        $saved = [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('event_documents', 'public');
+                $record = EventDocumentFile::create([
+                    'event_document_id' => $eventDocument->id,
+                    'original_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'mime' => $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                ]);
+                $saved[] = $record;
+            }
+        }
+
+        return response()->json(['success' => true, 'files' => $saved]);
+    }
+
+    /**
+     * Delete a single attachment record and its file.
+     */
+    public function destroyFile(EventDocumentFile $file)
+    {
+        // authorization can be added here
+        Storage::disk('public')->delete($file->file_path);
+        $file->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Download a single attachment file.
+     */
+    public function downloadFile(EventDocumentFile $file)
+    {
+        if (!Storage::disk('public')->exists($file->file_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->download($file->file_path, $file->original_name);
+    }
+
+    /**
+     * Download all attachments for an EventDocument as a zip.
+     */
+    public function downloadZip(EventDocument $eventDocument)
+    {
+        $files = $eventDocument->files()->get();
+        if ($files->isEmpty()) {
+            abort(404);
+        }
+
+        $zipName = Str::slug($eventDocument->name ?: 'documents') . '.zip';
+        $tempFile = tempnam(sys_get_temp_dir(), 'zip');
+
+        $zip = new ZipArchive();
+        if ($zip->open($tempFile, ZipArchive::CREATE) !== true) {
+            abort(500, 'Could not create zip archive.');
+        }
+
+        foreach ($files as $f) {
+            $fullPath = storage_path('app/public/' . $f->file_path);
+            if (file_exists($fullPath)) {
+                $insideName = $f->original_name;
+                $zip->addFile($fullPath, $insideName);
+            }
+        }
+
+        $zip->close();
+
+        return response()->download($tempFile, $zipName)->deleteFileAfterSend(true);
     }
 
     /**

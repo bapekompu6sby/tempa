@@ -44,6 +44,13 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     ]);
     // upload file for event document
     Route::post('documents/{eventDocument}/upload', [App\Http\Controllers\EventDocumentController::class, 'upload'])->name('documents.upload');
+    // upload multiple files for an event document
+    Route::post('documents/{eventDocument}/files', [App\Http\Controllers\EventDocumentController::class, 'uploadMultiple'])->name('documents.files.upload');
+    // download or delete individual attachment files
+    Route::get('documents/files/{file}/download', [App\Http\Controllers\EventDocumentController::class, 'downloadFile'])->name('documents.files.download');
+    Route::delete('documents/files/{file}', [App\Http\Controllers\EventDocumentController::class, 'destroyFile'])->name('documents.files.destroy');
+    // download all attachments as zip
+    Route::get('documents/{eventDocument}/download-zip', [App\Http\Controllers\EventDocumentController::class, 'downloadZip'])->name('documents.files.downloadZip');
     // download (force-download) for event document
     Route::get('documents/{eventDocument}/download', [App\Http\Controllers\EventDocumentController::class, 'download'])->name('documents.download');
     // EventInstruction toggle route

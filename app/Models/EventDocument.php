@@ -31,4 +31,12 @@ class EventDocument extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    /**
+     * Multiple files (attachments) for this document.
+     */
+    public function files()
+    {
+        return $this->hasMany(\App\Models\EventDocumentFile::class);
+    }
 }

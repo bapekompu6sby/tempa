@@ -61,10 +61,10 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Upload file</label>
                                         <div class="mt-1 flex items-center gap-2">
-                                            <input type="file" name="file" class="ed-file-input hidden" id="ed-file-{{ $doc->id }}" />
-                                            <label for="ed-file-{{ $doc->id }}" class="inline-block px-3 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer text-sm">Pilih file</label>
-                                            <span class="text-sm text-gray-500 file-selected" id="ed-file-name-{{ $doc->id }}">{{ $doc->file_path ? \Illuminate\Support\Str::limit($doc->file_path, 30) : '' }}</span>
-                                        </div>
+                                                <input type="file" name="files[]" multiple class="ed-file-input hidden" id="ed-file-{{ $doc->id }}" />
+                                                <label for="ed-file-{{ $doc->id }}" class="inline-block px-3 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer text-sm">Pilih file</label>
+                                                <span class="text-sm text-gray-500 file-selected" id="ed-file-name-{{ $doc->id }}">{{ $doc->file_path ? \Illuminate\Support\Str::limit($doc->file_path, 30) : '' }}</span>
+                                            </div>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Catatan</label>
@@ -75,6 +75,24 @@
                                         <button type="button" class="ed-cancel px-3 py-2 bg-gray-300 rounded text-sm cursor-pointer" data-id="{{ $doc->id }}">Batal</button>
                                     </div>
                                 </div>
+                            </td>
+                        </tr>
+                    
+                        {{-- attachments list for this document (multiple files) --}}
+                        <tr id="ed-files-row-{{ $doc->id }}" class="bg-white">
+                            <td colspan="4" class="py-2 px-4">
+                                <div class="text-sm font-medium mb-2">Lampiran</div>
+                                <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
+                                    @foreach($doc->files as $file)
+                                        <li id="file-{{ $file->id }}" class="flex items-center justify-between">
+                                            <a href="{{ route('documents.files.download', $file) }}" class="text-blue-600 underline">{{ $file->original_name }}</a>
+                                            <div class="flex items-center gap-2">
+                                                <a href="{{ route('documents.files.download', $file) }}" class="text-sm text-gray-600">Download</a>
+                                                <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn text-sm text-red-600">Hapus</button>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </td>
                         </tr>
                     @empty
@@ -127,16 +145,17 @@
                         const notesInput = document.querySelector('#ed-edit-row-' + id + ' .ed-notes-input');
                         const fileInput = document.querySelector('#ed-edit-row-' + id + ' .ed-file-input');
                         const fileNameSpan = document.getElementById('ed-file-name-' + id);
-                        const saveBtn = this;
+                            const saveBtn = this;
                         saveBtn.disabled = true;
                         try {
                             let uploadResult = null;
-                            // if a file is selected, upload it first
+                            // handle multiple files upload if present
                             if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                                const file = fileInput.files[0];
                                 const form = new FormData();
-                                form.append('file', file);
-                                const upRes = await fetch(`/documents/${id}/upload`, {
+                                for (let i = 0; i < fileInput.files.length; i++) {
+                                    form.append('files[]', fileInput.files[i]);
+                                }
+                                const upRes = await fetch(`/documents/${id}/files`, {
                                     method: 'POST',
                                     headers: {
                                         'X-CSRF-TOKEN': token
@@ -161,48 +180,42 @@
                             if (!res.ok) throw new Error('Network error');
                             const data = await res.json();
 
-                            // combine results: prefer uploadResult.eventDocument if present for file info, otherwise use data.eventDocument
-                            const saved = (uploadResult && uploadResult.eventDocument) ? uploadResult.eventDocument : (data.eventDocument || {});
-
-                            // update attachment cell: link and file_path
+                            // update attachment cell: we now render file list separately; update row bg
                             const row = document.getElementById('ed-row-' + id);
-                            const attachCell = row ? row.querySelector('td:nth-child(2) .flex') : null;
-                            const hasAttachment = (saved.link && saved.link.length > 0) || (saved.file_path && saved.file_path.length > 0);
+                            const hasAttachment = (data.eventDocument && (data.eventDocument.link || data.eventDocument.file_path)) || (uploadResult && uploadResult.files && uploadResult.files.length > 0);
                             if (row) {
                                 if (hasAttachment) row.classList.add('bg-green-50'); else row.classList.remove('bg-green-50');
                             }
 
-                            if (attachCell) {
-                                // clear current content and rebuild
-                                attachCell.innerHTML = '';
-                                if (saved.file_path) {
-                                    const fileHref = (uploadResult && uploadResult.download_url) ? uploadResult.download_url : (data && data.download_url) ? data.download_url : (uploadResult && uploadResult.url) ? uploadResult.url : (saved.url || ('/storage/' + saved.file_path));
-                                    const a = document.createElement('a');
-                                    a.href = fileHref;
-                                    a.target = '_blank';
-                                    a.rel = 'noopener noreferrer';
-                                    a.className = 'text-blue-600 underline';
-                                    a.textContent = saved.file_path.length > 30 ? saved.file_path.slice(0,27) + '…' : saved.file_path;
-                                    attachCell.appendChild(a);
-                                }
-                                if (saved.link) {
-                                    const br = document.createElement('div');
-                                    br.className = '';
-                                    attachCell.appendChild(br);
-                                    const href = (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(saved.link)) ? saved.link : ('https://' + saved.link.replace(/^\/+/, ''));
-                                    const a2 = document.createElement('a');
-                                    a2.href = href;
-                                    a2.target = '_blank';
-                                    a2.rel = 'noopener noreferrer';
-                                    a2.className = 'text-blue-600 underline';
-                                    a2.textContent = saved.link.length > 30 ? saved.link.slice(0,27) + '…' : saved.link;
-                                    attachCell.appendChild(a2);
-                                }
-                                if (!hasAttachment) {
-                                    const span = document.createElement('span');
-                                    span.className = 'text-gray-600';
-                                    span.textContent = 'Belum ada dokumen';
-                                    attachCell.appendChild(span);
+                            // update attachments list DOM if uploadResult returned files
+                            if (uploadResult && uploadResult.files) {
+                                const list = document.getElementById('ed-files-list-' + id);
+                                if (list) {
+                                    uploadResult.files.forEach(function(f){
+                                        const li = document.createElement('li');
+                                        li.id = 'file-' + f.id;
+                                        li.className = 'flex items-center justify-between';
+                                        const a = document.createElement('a');
+                                        a.href = '/documents/files/' + f.id + '/download';
+                                        a.className = 'text-blue-600 underline';
+                                        a.textContent = f.original_name;
+                                        const right = document.createElement('div');
+                                        right.className = 'flex items-center gap-2';
+                                        const down = document.createElement('a');
+                                        down.href = '/documents/files/' + f.id + '/download';
+                                        down.className = 'text-sm text-gray-600';
+                                        down.textContent = 'Download';
+                                        const del = document.createElement('button');
+                                        del.type = 'button';
+                                        del.dataset.fileId = f.id;
+                                        del.className = 'delete-file-btn text-sm text-red-600';
+                                        del.textContent = 'Hapus';
+                                        right.appendChild(down);
+                                        right.appendChild(del);
+                                        li.appendChild(a);
+                                        li.appendChild(right);
+                                        list.appendChild(li);
+                                    });
                                 }
                             }
 
@@ -213,10 +226,10 @@
                                 const notesInp = editRow.querySelector('.ed-notes-input');
                                 const fileInp = editRow.querySelector('.ed-file-input');
                                 const fileName = editRow.querySelector('.file-selected');
-                                if (linkInp) linkInp.value = saved.link || '';
-                                if (notesInp) notesInp.value = saved.notes || '';
+                                if (linkInp) linkInp.value = (data.eventDocument && data.eventDocument.link) ? data.eventDocument.link : (linkInput ? linkInput.value.trim() : '');
+                                if (notesInp) notesInp.value = (data.eventDocument && data.eventDocument.notes) ? data.eventDocument.notes : (notesInput ? notesInput.value.trim() : '');
                                 if (fileInp) fileInp.value = null;
-                                if (fileName) fileName.textContent = saved.file_path ? (saved.file_path.length > 30 ? saved.file_path.slice(0,27) + '…' : saved.file_path) : '';
+                                if (fileName) fileName.textContent = uploadResult && uploadResult.files && uploadResult.files.length ? uploadResult.files.map(f=>f.original_name).join(', ') : '';
                                 editRow.classList.add('hidden');
                             }
                         } catch (err) {
@@ -234,11 +247,34 @@
                     const id = this.id.replace('ed-file-', '');
                     const nameSpan = document.getElementById('ed-file-name-' + id);
                     if (this.files && this.files.length > 0) {
-                        nameSpan.textContent = this.files[0].name;
+                        // show multiple file names comma separated
+                        const names = Array.from(this.files).map(f => f.name).join(', ');
+                        nameSpan.textContent = names;
                     } else {
                         nameSpan.textContent = '';
                     }
                 });
+            });
+
+            // delete file handler (delegated)
+            document.addEventListener('click', async function(e){
+                if (e.target && e.target.classList.contains('delete-file-btn')) {
+                    const id = e.target.dataset.fileId;
+                    if (!confirm('Hapus lampiran ini?')) return;
+                    try {
+                        const res = await fetch('/documents/files/' + id, {
+                            method: 'DELETE',
+                            headers: { 'X-CSRF-TOKEN': token }
+                        });
+                        if (!res.ok) throw new Error('Delete failed');
+                        // remove from DOM
+                        const li = document.getElementById('file-' + id);
+                        if (li) li.remove();
+                    } catch (err) {
+                        console.error(err);
+                        alert('Gagal menghapus lampiran.');
+                    }
+                }
             });
 
             // upload file if present, then PATCH link & notes in a single Save action
