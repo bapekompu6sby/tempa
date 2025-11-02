@@ -39,6 +39,10 @@
                                         @endphp
                                         <a href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 30) }}</a>
                                     @endif
+                                    {{-- If there are uploaded attachment records but no file_path/link to show in the main cell, indicate presence of attachments --}}
+                                    @if((isset($doc->files) && $doc->files->count() > 0) && empty($doc->file_path) && empty($doc->link))
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-sm font-medium bg-green-100 text-green-800">Ada lampiran ({{ $doc->files->count() }})</span>
+                                    @endif
                                     @if(!$hasAttachment)
                                         <span class="text-gray-600">Belum ada dokumen</span>
                                     @endif
