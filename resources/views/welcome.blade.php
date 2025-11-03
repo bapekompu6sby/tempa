@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="flex flex-col items-center justify-center min-h-[60vh]">
-	<div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-xl text-center flex flex-col items-center">
+	<div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-xl text-center flex flex-col items-center mb-8">
 		<img src="{{ asset('images/logowil6.png') }}" alt="Logo Wilayah VI Surabaya" class="w-36 h-36 object-contain mb-4" loading="lazy">
 		<h2 class="text-5xl md:text-6xl font-extrabold mb-2" style="color:#203368; text-shadow: 0 2px 8px rgba(32,51,104,0.18);">TEMPA</h2>
 		<p class="text-2xl md:text-3xl font-medium mb-0" style="color:#203368; opacity:0.85; text-shadow: 0 1px 6px rgba(32,51,104,0.12);">Teman Kepanitiaan</p>
@@ -118,18 +118,18 @@
 			</div>
 		</div>
 	@else
-		<div class="w-full max-w-md bg-white rounded shadow">
+		<div class="w-full max-w-md bg-white rounded shadow px-4 py-2">
 			@if($errors->any())
 				<div class="mb-4 text-red-600">{{ $errors->first() }}</div>
 			@endif
 
-			<form method="POST" action="{{ url('/unlock') }}">
+			<form method="POST" action="{{ url('/unlock') }}" class="mt-2">
 				@csrf
 				<div class="mb-0">
 					<label class="block text-sm font-medium text-gray-700">Masukkan Password untuk panitia</label>
 					<div class="flex">
-						<input name="password" type="password" class="flex-1 border rounded-l px-3 py-2" required autofocus aria-label="Password">
-						<button type="submit" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded-r">Masuk Panitia</button>
+						<input name="password" type="password" class="flex-1 border rounded-l px-2 py-2" required autofocus aria-label="Password">
+						<button type="submit" class="ml-2 bg-blue-600 text-white px-3 py-2 rounded-r">Masuk Panitia</button>
 					</div>
 				</div>
 			</form>
