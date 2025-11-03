@@ -8,7 +8,7 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="m-0 bg-white text-gray-900 min-h-screen flex flex-col leading-relaxed" style="margin: 0;">
+<body class="m-0 text-gray-900 min-h-screen flex flex-col leading-relaxed" style="margin: 0; background-image: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url('/images/batik_pu.webp'); background-size: cover; background-repeat: no-repeat; background-position: center; background-attachment: fixed;">
     <header class="w-full py-6 bg-pu-blue border-b border-pu-blue-dark" style="background:#203368; border-bottom-color:#1b2d56;">
         <div class="container mx-auto flex items-center justify-between">
             <h1 class="text-3xl font-semibold" style="color:#FDB714"><a href="{{ url('/') }}" class="hover:underline" style="color:inherit">TEMPA</a></h1>

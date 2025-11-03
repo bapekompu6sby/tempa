@@ -2,9 +2,11 @@
 
 @section('content')
 <div class="flex flex-col items-center justify-center min-h-[60vh]">
-	<img src="{{ asset('images/logowil6.png') }}" alt="Logo Wilayah VI Surabaya" class="w-36 h-36 object-contain mb-4" loading="lazy">
-	<h2 class="text-4xl font-bold mb-4">TEMPA</h2>
-	<p class="text-xl text-gray-700 mb-2">Teman Kepanitiaan</p>
+	<div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-xl text-center flex flex-col items-center">
+		<img src="{{ asset('images/logowil6.png') }}" alt="Logo Wilayah VI Surabaya" class="w-36 h-36 object-contain mb-4" loading="lazy">
+		<h2 class="text-5xl md:text-6xl font-extrabold mb-2" style="color:#203368; text-shadow: 0 2px 8px rgba(32,51,104,0.18);">TEMPA</h2>
+		<p class="text-2xl md:text-3xl font-medium mb-0" style="color:#203368; opacity:0.85; text-shadow: 0 1px 6px rgba(32,51,104,0.12);">Teman Kepanitiaan</p>
+	</div>
 	@if(session('access_granted'))
 		<div class="w-full max-w-3xl">
 			<div class="flex gap-6 mb-6">

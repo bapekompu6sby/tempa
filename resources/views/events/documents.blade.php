@@ -56,6 +56,39 @@
                                 </div>
                             </td>
                         </tr>
+                        <tr id="ed-view-row-{{ $doc->id }}" class="hidden bg-white">
+                            <td class="py-3 px-4" colspan="4">
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
+                                        @if(!empty($doc->link))
+                                            @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
+                                            <div class="mt-1"><a id="view-only-link-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 200) }}</a></div>
+                                        @else
+                                            <div class="mt-1 text-gray-600">-</div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Lampiran</label>
+                                        <ul class="space-y-1 mt-2">
+                                            @forelse($doc->files as $file)
+                                                <li class="flex items-center justify-between">
+                                                    <span class="text-gray-800">{{ $file->original_name }}</span>
+                                                    <a href="{{ route('documents.files.download', $file) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Download</a>
+                                                </li>
+                                            @empty
+                                                <li class="text-gray-600">Tidak ada lampiran</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Catatan</label>
+                                        <div class="mt-1 text-gray-700 whitespace-pre-wrap" id="view-only-notes-{{ $doc->id }}">{{ $doc->notes ?? '-' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
                         <tr id="ed-edit-row-{{ $doc->id }}" class="hidden bg-gray-50">
                             <td class="py-3 px-4" colspan="4">
                                 <div class="grid grid-cols-1 gap-3">
@@ -71,6 +104,28 @@
                                                 <span class="text-sm text-gray-500 file-selected" id="ed-file-name-{{ $doc->id }}">{{ $doc->file_path ? \Illuminate\Support\Str::limit($doc->file_path, 30) : '' }}</span>
                                             </div>
                                     </div>
+
+                                    {{-- Inline attachments list shown while editing (moved above notes) --}}
+                                    <div id="ed-files-inline-{{ $doc->id }}" class="mt-2">
+                                        <div class="text-sm font-medium mb-2">Lampiran</div>
+                                        @if(!empty($doc->link))
+                                            @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
+                                            <div class="mb-2"><a id="ed-link-view-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 80) }}</a></div>
+                                        @else
+                                            <div id="ed-link-view-{{ $doc->id }}"></div>
+                                        @endif
+                                        <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
+                                            @foreach($doc->files as $file)
+                                                <li id="file-{{ $file->id }}" class="flex items-center justify-between">
+                                                    <a href="{{ route('documents.files.download', $file) }}" class="text-blue-600 underline">{{ $file->original_name }}</a>
+                                                    <div class="flex items-center gap-2">
+                                                        <a href="{{ route('documents.files.download', $file) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Download</a>
+                                                        <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn hidden text-sm text-red-600">Hapus</button>
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Catatan</label>
                                         <textarea name="notes" class="ed-notes-input mt-1 block w-full border rounded px-3 py-2" rows="3">{{ $doc->notes }}</textarea>
@@ -83,29 +138,7 @@
                             </td>
                         </tr>
                     
-                        {{-- attachments list for this document (multiple files) --}}
-                        <tr id="ed-files-row-{{ $doc->id }}" class="bg-white hidden">
-                            <td colspan="4" class="py-2 px-4">
-                                <div class="text-sm font-medium mb-2">Lampiran</div>
-                                @if(!empty($doc->link))
-                                    @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
-                                    <div class="mb-2"><a id="ed-link-view-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 80) }}</a></div>
-                                @else
-                                    <div id="ed-link-view-{{ $doc->id }}"></div>
-                                @endif
-                                <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
-                                    @foreach($doc->files as $file)
-                                        <li id="file-{{ $file->id }}" class="flex items-center justify-between">
-                                            <a href="{{ route('documents.files.download', $file) }}" class="text-blue-600 underline">{{ $file->original_name }}</a>
-                                            <div class="flex items-center gap-2">
-                                                <a href="{{ route('documents.files.download', $file) }}" class="text-sm text-gray-600">Download</a>
-                                                <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn hidden text-sm text-red-600">Hapus</button>
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </td>
-                        </tr>
+                        {{-- attachments list previously rendered in a separate row removed (now inline in edit row) --}}
                     @empty
                         <tr>
                             <td class="py-4 px-4 text-center text-gray-500" colspan="4">Tidak ada dokumen untuk pelatihan ini.</td>
@@ -136,25 +169,25 @@
                     const id = this.getAttribute('data-id');
 
                     const editRow = document.getElementById('ed-edit-row-' + id);
-                    const filesRow = document.getElementById('ed-files-row-' + id);
+                    const filesInline = document.getElementById('ed-files-inline-' + id);
                     const list = document.getElementById('ed-files-list-' + id);
 
                     // if this edit row is already visible, close it (toggle off)
                     if (editRow && !editRow.classList.contains('hidden')) {
                         editRow.classList.add('hidden');
-                        if (filesRow) filesRow.classList.add('hidden');
+                        if (filesInline) filesInline.classList.add('hidden');
                         if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
                         return;
                     }
 
-                    // otherwise hide all edit rows and files rows, and hide delete buttons globally
+                    // otherwise hide all edit rows and inline files blocks, and hide delete buttons globally
                     document.querySelectorAll('[id^="ed-edit-row-"]').forEach(function(r){ r.classList.add('hidden'); });
-                    document.querySelectorAll('[id^="ed-files-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+                    document.querySelectorAll('[id^="ed-files-inline-"]').forEach(function(r){ r.classList.add('hidden'); });
                     document.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
 
-                    // show the selected edit row and files row, reveal delete buttons inside it
+                    // show the selected edit row and inline files block, reveal delete buttons inside it
                     if (editRow) editRow.classList.remove('hidden');
-                    if (filesRow) filesRow.classList.remove('hidden');
+                    if (filesInline) filesInline.classList.remove('hidden');
                     if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.remove('hidden'); });
                 });
             });
@@ -166,39 +199,35 @@
                     const editRow = document.getElementById('ed-edit-row-' + id);
                     if (editRow) editRow.classList.add('hidden');
                     // also hide files row and hide delete buttons
-                    const filesRow = document.getElementById('ed-files-row-' + id);
+                    const filesInline = document.getElementById('ed-files-inline-' + id);
                     const list = document.getElementById('ed-files-list-' + id);
-                    if (filesRow) filesRow.classList.add('hidden');
+                    if (filesInline) filesInline.classList.add('hidden');
                     if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
                 });
             });
 
             // save link & notes via PATCH
-            // view files button -> toggles view-only files list
+            // view files button -> toggles read-only view row (link, attachments with download, notes)
             document.querySelectorAll('.ed-view').forEach(function(btn){
                 btn.addEventListener('click', function(){
                     const id = this.getAttribute('data-id');
 
-                    // If the target filesRow is already visible, hide it (toggle)
-                    const targetFilesRow = document.getElementById('ed-files-row-' + id);
-                    const alreadyVisible = targetFilesRow && !targetFilesRow.classList.contains('hidden');
+                    const viewRow = document.getElementById('ed-view-row-' + id);
+                    const alreadyVisible = viewRow && !viewRow.classList.contains('hidden');
 
-                    // hide all edit rows and files rows first
+                    // hide all edit rows, view rows and inline edit blocks first
                     document.querySelectorAll('[id^="ed-edit-row-"]').forEach(function(r){ r.classList.add('hidden'); });
-                    document.querySelectorAll('[id^="ed-files-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+                    document.querySelectorAll('[id^="ed-view-row-"]').forEach(function(r){ r.classList.add('hidden'); });
+                    document.querySelectorAll('[id^="ed-files-inline-"]').forEach(function(r){ r.classList.add('hidden'); });
 
-                    // hide all delete buttons
+                    // hide all delete buttons (view is read-only)
                     document.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
 
                     // if it was visible, we've just hidden everything; stop here (acts like toggle)
                     if (alreadyVisible) return;
 
-                    // otherwise, show the selected filesRow in view-only mode
-                    const filesRow = targetFilesRow;
-                    const list = document.getElementById('ed-files-list-' + id);
-                    if (filesRow) filesRow.classList.remove('hidden');
-                    // ensure delete buttons are hidden in view mode
-                    if (list) list.querySelectorAll('.delete-file-btn').forEach(function(d){ d.classList.add('hidden'); });
+                    // otherwise, show the read-only view row
+                    if (viewRow) viewRow.classList.remove('hidden');
                 });
             });
 
@@ -212,23 +241,15 @@
                             const saveBtn = this;
                         saveBtn.disabled = true;
                         try {
-                            let uploadResult = null;
-                            // handle multiple files upload if present
-                            if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                                const form = new FormData();
-                                for (let i = 0; i < fileInput.files.length; i++) {
-                                    form.append('files[]', fileInput.files[i]);
+                                // gather pending uploads for this doc (staged client-side) and any files still in the input
+                                let uploadResult = null;
+                                const pending = window._ed_pendingUploads && window._ed_pendingUploads[id] ? window._ed_pendingUploads[id].slice() : [];
+                                const inputFiles = (fileInput && fileInput.files && fileInput.files.length) ? Array.from(fileInput.files) : [];
+                                const filesToUpload = pending.concat(inputFiles);
+                                if (filesToUpload.length > 0) {
+                                    // use the helper to upload files (same endpoint)
+                                    uploadResult = await uploadFilesForDoc(id, filesToUpload);
                                 }
-                                const upRes = await fetch(`/documents/${id}/files`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': token
-                                    },
-                                    body: form
-                                });
-                                if (!upRes.ok) throw new Error('Upload failed');
-                                uploadResult = await upRes.json();
-                            }
 
                             // then save link & notes via PATCH
                             const payload = { link: linkInput ? linkInput.value.trim() : '', notes: notesInput ? notesInput.value.trim() : '' };
@@ -307,36 +328,20 @@
                                 console.error('Failed to update link display', errUpdate);
                             }
 
-                            // update attachments list DOM if uploadResult returned files
+                            // clear pending queue and remove pending DOM items if upload succeeded
                             if (uploadResult && uploadResult.files) {
+                                // remove pending markers (elements with class pending-file) for this doc
                                 const list = document.getElementById('ed-files-list-' + id);
                                 if (list) {
-                                    uploadResult.files.forEach(function(f){
-                                        const li = document.createElement('li');
-                                        li.id = 'file-' + f.id;
-                                        li.className = 'flex items-center justify-between';
-                                        const a = document.createElement('a');
-                                        a.href = '/documents/files/' + f.id + '/download';
-                                        a.className = 'text-blue-600 underline';
-                                        a.textContent = f.original_name;
-                                        const right = document.createElement('div');
-                                        right.className = 'flex items-center gap-2';
-                                        const down = document.createElement('a');
-                                        down.href = '/documents/files/' + f.id + '/download';
-                                        down.className = 'text-sm text-gray-600';
-                                        down.textContent = 'Download';
-                                        const del = document.createElement('button');
-                                        del.type = 'button';
-                                        del.dataset.fileId = f.id;
-                                        del.className = 'delete-file-btn text-sm text-red-600';
-                                        del.textContent = 'Hapus';
-                                        right.appendChild(down);
-                                        right.appendChild(del);
-                                        li.appendChild(a);
-                                        li.appendChild(right);
-                                        list.appendChild(li);
-                                    });
+                                    // remove pending-file elements
+                                    list.querySelectorAll('.pending-file').forEach(function(n){ n.remove(); });
                                 }
+                                // append server-returned files (the helper also appends, but ensure delete button visibility)
+                                // the uploadFilesForDoc already appended files; nothing more to do here
+                            }
+                            // clear pendingUploads for this id
+                            if (window._ed_pendingUploads && window._ed_pendingUploads[id]) {
+                                window._ed_pendingUploads[id] = [];
                             }
 
                             // update edit inputs with saved values and hide edit row
@@ -361,20 +366,124 @@
                     });
             });
 
-            // handle file selection UI (show selected filename)
+            // handle file selection UI (show selected filename) and support immediate single-file uploads when user clicked 'Tambah Lampiran'
+            // pending uploads staged on client until user presses Save
+            window._ed_pendingUploads = window._ed_pendingUploads || {};
             document.querySelectorAll('.ed-file-input').forEach(function(input){
                 input.addEventListener('change', function(){
                     const id = this.id.replace('ed-file-', '');
                     const nameSpan = document.getElementById('ed-file-name-' + id);
                     if (this.files && this.files.length > 0) {
-                        // show multiple file names comma separated
+                        // show multiple file names comma separated in the small label
                         const names = Array.from(this.files).map(f => f.name).join(', ');
                         nameSpan.textContent = names;
+
+                        // Add selected files to pending queue for this document
+                        window._ed_pendingUploads[id] = window._ed_pendingUploads[id] || [];
+                        Array.from(this.files).forEach(function(f){
+                            window._ed_pendingUploads[id].push(f);
+                            // render a temporary list item in attachments list
+                            const list = document.getElementById('ed-files-list-' + id);
+                            if (list) {
+                                const tempId = 'pending-' + Math.random().toString(36).slice(2,9);
+                                const li = document.createElement('li');
+                                li.id = tempId;
+                                li.className = 'flex items-center justify-between pending-file';
+                                const span = document.createElement('span');
+                                span.className = 'text-gray-700';
+                                span.textContent = f.name + ' (baru)';
+                                const right = document.createElement('div');
+                                right.className = 'flex items-center gap-2';
+                                const remove = document.createElement('button');
+                                remove.type = 'button';
+                                remove.className = 'pending-remove-btn text-sm text-red-600';
+                                remove.textContent = 'Batal';
+                                remove.addEventListener('click', function(){
+                                    // remove from pendingUploads and DOM
+                                    const arr = window._ed_pendingUploads[id] || [];
+                                    // remove first matching by name (best-effort)
+                                    for (let i = 0; i < arr.length; i++) {
+                                        if (arr[i].name === f.name && arr[i].size === f.size && arr[i].type === f.type) {
+                                            arr.splice(i,1);
+                                            break;
+                                        }
+                                    }
+                                    if (li) li.remove();
+                                    // clear small label if no pending left
+                                    if (!(window._ed_pendingUploads[id] && window._ed_pendingUploads[id].length)) {
+                                        nameSpan.textContent = '';
+                                    }
+                                });
+                                right.appendChild(remove);
+                                li.appendChild(span);
+                                li.appendChild(right);
+                                list.appendChild(li);
+                            }
+                        });
+
+                        // reset input so selecting the same file again works
+                        try { input.value = null; } catch(e){}
                     } else {
                         nameSpan.textContent = '';
                     }
                 });
             });
+
+            // helper: upload files (array of File) immediately for a document and append returned attachments to the list
+            async function uploadFilesForDoc(id, filesArray) {
+                if (!filesArray || filesArray.length === 0) return null;
+                const form = new FormData();
+                for (let i = 0; i < filesArray.length; i++) form.append('files[]', filesArray[i]);
+
+                const upRes = await fetch(`/documents/${id}/files`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': token },
+                    body: form
+                });
+                if (!upRes.ok) {
+                    const txt = await upRes.text().catch(()=>null);
+                    throw new Error('Upload failed: ' + (txt || upRes.status));
+                }
+                const uploadResult = await upRes.json();
+
+                // append returned files to the attachments list in the UI
+                if (uploadResult && uploadResult.files && uploadResult.files.length) {
+                    const list = document.getElementById('ed-files-list-' + id);
+                    if (list) {
+                        uploadResult.files.forEach(function(f){
+                            // avoid duplicate if already present
+                            if (document.getElementById('file-' + f.id)) return;
+                            const li = document.createElement('li');
+                            li.id = 'file-' + f.id;
+                            li.className = 'flex items-center justify-between';
+                            const a = document.createElement('a');
+                            a.href = '/documents/files/' + f.id + '/download';
+                            a.className = 'text-blue-600 underline';
+                            a.textContent = f.original_name;
+                            const right = document.createElement('div');
+                            right.className = 'flex items-center gap-2';
+                            const down = document.createElement('a');
+                            down.href = '/documents/files/' + f.id + '/download';
+                            down.className = 'px-2 py-1 bg-blue-500 text-white rounded text-sm';
+                            down.textContent = 'Download';
+                            const del = document.createElement('button');
+                            del.type = 'button';
+                            del.dataset.fileId = f.id;
+                            del.className = 'delete-file-btn hidden text-sm text-red-600';
+                            del.textContent = 'Hapus';
+                            right.appendChild(down);
+                            right.appendChild(del);
+                            li.appendChild(a);
+                            li.appendChild(right);
+                            list.appendChild(li);
+                        });
+                    }
+                    // mark row as having attachments
+                    const row = document.getElementById('ed-row-' + id);
+                    if (row) row.classList.add('bg-green-50');
+                }
+                return uploadResult;
+            }
 
             // delete file handler (delegated)
             document.addEventListener('click', async function(e){
@@ -396,6 +505,8 @@
                     }
                 }
             });
+
+            // (no immediate upload button in edit row; files are staged and uploaded on Save)
 
             // upload file if present, then PATCH link & notes in a single Save action
             // ed-save handler already handles PATCH; we'll extend it to upload first when file exists
