@@ -15,6 +15,7 @@
             <nav>
                 @if(session('access_granted'))
                     <a href="{{ route('instructions.index') }}" class="text-base font-semibold mr-4" style="color:#FDB714">Referensi Instruksi</a>
+                    <a href="https://drive.google.com/file/d/1SR1ySEDaOayCuMfjzQ7alRML4zHAeJft/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-base font-semibold mr-4" style="color:#FDB714">Panduan Penggunaan</a>
                     <a href="{{ route('events.index') }}" class="text-base font-semibold" style="color:#FDB714">Pelatihan</a>
                 @endif
             </nav>
