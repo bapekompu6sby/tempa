@@ -31,6 +31,48 @@ Route::post('/unlock', function (\Illuminate\Http\Request $request) {
 
     return back()->withErrors(['password' => 'Password is incorrect']);
 });
+// Public-facing event pages (no password required)
+Route::get('public/events', function (\Illuminate\Http\Request $request) {
+    // available years for filter dropdown (distinct years with start_date)
+    $years = \App\Models\Event::selectRaw('YEAR(start_date) as year')
+        ->whereNotNull('start_date')
+        ->distinct()
+        ->orderByDesc('year')
+        ->pluck('year')
+        ->filter()
+        ->values();
+
+    // Default to current year/month when the user did not provide filter parameters.
+    // Respect an explicit empty selection ("Semua") by checking has().
+    $year = $request->has('year') ? $request->query('year') : \Carbon\Carbon::now()->year;
+    $month = $request->has('month') ? $request->query('month') : \Carbon\Carbon::now()->month;
+    $status = $request->query('status');
+
+    $eventsQuery = \App\Models\Event::orderBy('start_date', 'desc')
+        ->withCount([
+            'eventInstructions as persiapan_total' => function ($q) { $q->where('phase', 'persiapan'); },
+            'eventInstructions as persiapan_checked' => function ($q) { $q->where('phase', 'persiapan')->where('checked', true); },
+            'eventInstructions as pelaksanaan_total' => function ($q) { $q->where('phase', 'pelaksanaan'); },
+            'eventInstructions as pelaksanaan_checked' => function ($q) { $q->where('phase', 'pelaksanaan')->where('checked', true); },
+            'eventInstructions as pelaporan_total' => function ($q) { $q->where('phase', 'pelaporan'); },
+            'eventInstructions as pelaporan_checked' => function ($q) { $q->where('phase', 'pelaporan')->where('checked', true); },
+        ]);
+
+    if ($year) {
+        $eventsQuery->whereYear('start_date', $year);
+    }
+    if ($month) {
+        $eventsQuery->whereMonth('start_date', $month);
+    }
+    if ($status) {
+        $eventsQuery->where('status', $status);
+    }
+
+    $events = $eventsQuery->get();
+
+    return view('events.public_index', compact('events', 'years', 'year', 'month', 'status'));
+});
+// (public event detail route removed — only public events index remains)
 
 // Protect application routes behind the simple password middleware (welcome page stays public)
 Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function () {
