@@ -25,6 +25,7 @@ class Event extends Model
         'note',
         'preparation_date',
         'report_date',
+        'status',
     ];
 
     /**
@@ -207,5 +208,73 @@ class Event extends Model
     public function checkedInstructionCountByPhase(string $phase): int
     {
         return $this->eventInstructions()->where('phase', $phase)->where('checked', true)->count();
+    }
+
+    /**
+     * Check and update the event status based on checked EventInstruction rows.
+     *
+     * Rules:
+     * - If current status is one of: 'tentative', 'cancelled', 'completed' => do nothing (exit).
+     * - Otherwise determine status by priority: pelaporan -> pelaksanaan -> persiapan.
+     *   If any checked instruction exists for a phase, set status to that phase and persist.
+     * - If none found, set status back to 'tentative'.
+     *
+     * @return void
+     */
+    public function check_status(): void
+    {
+        $current = $this->status ?? null;
+
+        // do not override final statuses like cancelled or completed
+        if (in_array($current, ['cancelled', 'completed'], true)) {
+            return;
+        }
+
+        $priority = ['pelaporan', 'pelaksanaan', 'persiapan'];
+        $newStatus = null;
+
+        foreach ($priority as $phase) {
+            try {
+                if ($this->checkedInstructionCountByPhase($phase) > 0) {
+                    $newStatus = $phase;
+                    break;
+                }
+            } catch (\Exception $e) {
+                // if relationship not available or query fails, continue
+                continue;
+            }
+        }
+
+        // No checked instructions found
+        if (is_null($newStatus)) {
+            // Total checked across phases
+            $checkedTotal = 0;
+            foreach ($priority as $p) {
+                try {
+                    $checkedTotal += $this->checkedInstructionCountByPhase($p);
+                } catch (\Exception $e) {
+                    // ignore
+                }
+            }
+
+            // If there are absolutely no checked instructions, mark as 'belum_dimulai'
+            if ($checkedTotal === 0) {
+                $newStatus = 'belum_dimulai';
+            } else {
+                // fallback when counts exist but no priority phase matched
+                $newStatus = 'tentative';
+            }
+        }
+
+        // Prevent downgrading from 'belum_dimulai' to 'tentative'
+        if ($current === 'belum_dimulai' && $newStatus === 'tentative') {
+            $newStatus = 'belum_dimulai';
+        }
+
+        if ($newStatus !== $current) {
+            // persist change
+            $this->update(['status' => $newStatus]);
+            $this->refresh();
+        }
     }
 }
