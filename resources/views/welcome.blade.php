@@ -15,7 +15,63 @@
 
 			{{-- Events list --}}
 			<div class="bg-white p-4 rounded shadow">
-				<h3 class="text-lg font-semibold mb-3">Daftar Pelatihan</h3>
+				@php
+					$startMonth = \Carbon\Carbon::now()->startOfMonth();
+					$endMonth = \Carbon\Carbon::now()->endOfMonth();
+					$monthName = \Carbon\Carbon::now()->format('F Y');
+					$monthEvents = collect();
+					if (isset($events) && $events instanceof \Illuminate\Support\Collection) {
+						$monthEvents = $events->filter(function($ev) use ($startMonth, $endMonth) {
+							if (empty($ev->start_date)) return false;
+							$sd = $ev->start_date instanceof \Carbon\Carbon ? $ev->start_date : \Carbon\Carbon::parse($ev->start_date);
+							return $sd->between($startMonth, $endMonth);
+						});
+					}
+					$counts = [
+						'tentative' => $monthEvents->where('status','tentative')->count(),
+						'belum_dimulai' => $monthEvents->where('status','belum_dimulai')->count(),
+						'persiapan' => $monthEvents->where('status','persiapan')->count(),
+						'pelaksanaan' => $monthEvents->where('status','pelaksanaan')->count(),
+						'pelaporan' => $monthEvents->where('status','pelaporan')->count(),
+						'selesai' => $monthEvents->where('status','selesai')->count(),
+					];
+					$monthTotal = array_sum($counts);
+				@endphp
+
+				<div class="md:flex md:items-center md:justify-between md:gap-4 mb-2">
+					<h3 class="text-lg font-semibold mb-0">Daftar Pelatihan</h3>
+					<div class="mt-0 w-full md:flex-1">
+						<div class="p-2 bg-gray-50 rounded">
+							<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
+							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Tentative</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-semibold">{{ $counts['tentative'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Belum</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 font-semibold">{{ $counts['belum_dimulai'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Persiapan</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold">{{ $counts['persiapan'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Pelaksanaan</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-semibold">{{ $counts['pelaksanaan'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Pelaporan</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-semibold">{{ $counts['pelaporan'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Selesai</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">{{ $counts['selesai'] }}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 				@if(isset($events) && $events->count())
 					<ul class="space-y-2">
 						@foreach($events as $ev)
@@ -138,7 +194,63 @@
 		{{-- Always show read-only events list below the password form when not unlocked --}}
 		<div class="w-full max-w-3xl mt-6">
 			<div class="bg-white p-4 rounded shadow">
-				<h3 class="text-lg font-semibold mb-3">Daftar Pelatihan</h3>
+				@php
+					$startMonth = \Carbon\Carbon::now()->startOfMonth();
+					$endMonth = \Carbon\Carbon::now()->endOfMonth();
+					$monthName = \Carbon\Carbon::now()->format('F Y');
+					$monthEvents = collect();
+					if (isset($events) && $events instanceof \Illuminate\Support\Collection) {
+						$monthEvents = $events->filter(function($ev) use ($startMonth, $endMonth) {
+							if (empty($ev->start_date)) return false;
+							$sd = $ev->start_date instanceof \Carbon\Carbon ? $ev->start_date : \Carbon\Carbon::parse($ev->start_date);
+							return $sd->between($startMonth, $endMonth);
+						});
+					}
+					$counts = [
+						'tentative' => $monthEvents->where('status','tentative')->count(),
+						'belum_dimulai' => $monthEvents->where('status','belum_dimulai')->count(),
+						'persiapan' => $monthEvents->where('status','persiapan')->count(),
+						'pelaksanaan' => $monthEvents->where('status','pelaksanaan')->count(),
+						'pelaporan' => $monthEvents->where('status','pelaporan')->count(),
+						'selesai' => $monthEvents->where('status','selesai')->count(),
+					];
+					$monthTotal = array_sum($counts);
+				@endphp
+
+				<div class="md:flex md:items-center md:justify-between md:gap-4 mb-2">
+					<h3 class="text-lg font-semibold mb-0">Daftar Pelatihan</h3>
+					<div class="mt-0 w-full md:flex-1">
+						<div class="p-2 bg-gray-50 rounded">
+							<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
+							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Tentative</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-semibold">{{ $counts['tentative'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Belum</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 font-semibold">{{ $counts['belum_dimulai'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Persiapan</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold">{{ $counts['persiapan'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Pelaksanaan</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-semibold">{{ $counts['pelaksanaan'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Pelaporan</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-semibold">{{ $counts['pelaporan'] }}</span>
+								</div>
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-[11px]">Selesai</span>
+									<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">{{ $counts['selesai'] }}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 				@if(isset($events) && $events->count())
 					<ul class="space-y-2">
 						@foreach($events as $ev)
