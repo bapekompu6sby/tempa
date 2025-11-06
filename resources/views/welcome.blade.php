@@ -17,7 +17,7 @@
 			<div class="bg-white p-4 rounded shadow">
 				@php
 					// Use the controller-provided monthly summary when available. Fallback to zeros.
-					$monthName = \Carbon\Carbon::now()->format('F Y');
+					$monthName = \Carbon\Carbon::now()->format('Y');
 					$counts = $summaryCounts ?? [
 						'tentative' => 0,
 						'belum_dimulai' => 0,

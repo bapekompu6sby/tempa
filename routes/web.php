@@ -62,8 +62,9 @@ Route::get('public/events', function (\Illuminate\Http\Request $request) {
 
     // Default to current year/month when the user did not provide filter parameters.
     // Respect an explicit empty selection ("Semua") by checking has().
+    // Default view: filter by year only (current year). Month defaults to "all" when not provided.
     $year = $request->has('year') ? $request->query('year') : \Carbon\Carbon::now()->year;
-    $month = $request->has('month') ? $request->query('month') : \Carbon\Carbon::now()->month;
+    $month = $request->has('month') ? $request->query('month') : null;
     $status = $request->query('status');
 
     $eventsQuery = \App\Models\Event::orderBy('start_date', 'desc')

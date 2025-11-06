@@ -12,7 +12,7 @@
         <div>
             <label class="text-sm text-gray-600">Tahun</label>
             <select name="year" class="ml-2 border rounded px-2 py-1 text-sm">
-                <option value="">Semua</option>
+                <option value="" {{ empty($month) ? 'selected' : '' }}>Semua</option>
                 @if(!empty($years))
                     @foreach($years as $y)
                         <option value="{{ $y }}" {{ (isset($year) && $year == $y) ? 'selected' : '' }}>{{ $y }}</option>
