@@ -272,9 +272,45 @@ class Event extends Model
         }
 
         if ($newStatus !== $current) {
-            // persist change
-            $this->update(['status' => $newStatus]);
+            // persist change and then ensure related instructions are checked
+            DB::transaction(function () use ($newStatus) {
+                $this->update(['status' => $newStatus]);
+
+                // If event moved into 'pelaksanaan' ensure all 'persiapan' instructions are checked
+                if ($newStatus === 'pelaksanaan') {
+                    $this->markInstructionsCheckedForPhases(['persiapan']);
+                }
+
+                // If event moved into 'pelaporan' ensure both 'persiapan' and 'pelaksanaan' instructions are checked
+                if ($newStatus === 'pelaporan') {
+                    $this->markInstructionsCheckedForPhases(['persiapan', 'pelaksanaan']);
+                }
+            });
+
+            // refresh model state after transaction
             $this->refresh();
+        }
+    }
+
+    /**
+     * Mark all EventInstruction rows for the given phases as checked.
+     * Returns the number of instructions updated.
+     *
+     * @param array $phases
+     * @return int
+     */
+    public function markInstructionsCheckedForPhases(array $phases): int
+    {
+        if (empty($phases)) return 0;
+
+        // Use the relation's query builder to perform an efficient bulk update.
+        $query = $this->eventInstructions()->whereIn('phase', $phases)->where('checked', false);
+        try {
+            $updated = $query->update(['checked' => true]);
+            return (int) $updated;
+        } catch (\Exception $e) {
+            // On failure, return 0 — caller should continue gracefully.
+            return 0;
         }
     }
 }
