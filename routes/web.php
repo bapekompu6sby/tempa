@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     // Load events and pre-compute instruction counts per phase to avoid N+1 queries in the view
-    $events = \App\Models\Event::orderBy('start_date', 'desc')
+    $events = \App\Models\Event::whereNotIn('status', ['tentative','cancelled'])
+        ->orderBy('start_date', 'desc')
         ->withCount([
             // persiapan
             'eventInstructions as persiapan_total' => function ($q) { $q->where('phase', 'persiapan'); },
@@ -16,7 +17,8 @@ Route::get('/', function () {
             'eventInstructions as pelaporan_total' => function ($q) { $q->where('phase', 'pelaporan'); },
             'eventInstructions as pelaporan_checked' => function ($q) { $q->where('phase', 'pelaporan')->where('checked', true); },
         ])
-        ->get();
+    ->limit(5)
+    ->get();
 
     return view('welcome', compact('events'));
 });

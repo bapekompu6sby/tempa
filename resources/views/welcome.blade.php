@@ -42,7 +42,10 @@
 					<h3 class="text-lg font-semibold mb-0">Daftar Pelatihan</h3>
 					<div class="mt-0 w-full md:flex-1">
 						<div class="p-2 bg-gray-50 rounded">
-							<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
+							<div class="flex items-center justify-between">
+								<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
+								<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition ml-2">Lihat lebih detail</a>
+							</div>
 							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
 								<div class="flex items-center justify-between gap-2">
 									<span class="text-[11px]">Tentative</span>
@@ -221,7 +224,10 @@
 					<h3 class="text-lg font-semibold mb-0">Daftar Pelatihan</h3>
 					<div class="mt-0 w-full md:flex-1">
 						<div class="p-2 bg-gray-50 rounded">
-							<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
+								<div class="flex items-center justify-between">
+									<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
+									<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition ml-2">Lihat lebih detail</a>
+								</div>
 							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
 								<div class="flex items-center justify-between gap-2">
 									<span class="text-[11px]">Tentative</span>
