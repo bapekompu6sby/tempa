@@ -119,9 +119,35 @@
             {{-- Top: event detail (read-only, no actions) --}}
             <div class="mb-3">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <div class="font-medium text-lg">{{ $ev->name }}</div>
-                        <div class="mt-2">
+                        <div>
+                            <div class="font-medium text-lg">{{ $ev->name }}</div>
+                            @php
+                                $status = $ev->status ?? '';
+                                $statusLabels = [
+                                    'tentative' => 'Tentative',
+                                    'belum_dimulai' => 'Belum Dimulai',
+                                    'persiapan' => 'Persiapan',
+                                    'pelaksanaan' => 'Pelaksanaan',
+                                    'pelaporan' => 'Pelaporan',
+                                    'dibatalkan' => 'Dibatalkan',
+                                    'selesai' => 'Selesai',
+                                ];
+                                $statusClasses = [
+                                    'tentative' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold',
+                                    'belum_dimulai' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold',
+                                    'persiapan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold',
+                                    'pelaksanaan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold',
+                                    'pelaporan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold',
+                                    'dibatalkan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-semibold',
+                                    'selesai' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold',
+                                ];
+                                $stLabel = $statusLabels[$status] ?? $status;
+                                $stClass = $statusClasses[$status] ?? 'inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold';
+                            @endphp
+                            <div class="mt-2">
+                                <span class="{{ $stClass }}">{{ $stLabel }}</span>
+                            </div>
+                            <div class="mt-2">
                             @php
                                 $lm = $ev->learning_model ?? null;
                                 $lmLabel = null;

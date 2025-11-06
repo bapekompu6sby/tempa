@@ -39,11 +39,27 @@
                 <span class="text-sm text-gray-600">-</span>
             @endif
         </div>
+        @php
+            $statusLabels = [
+                'tentative' => 'Tentative',
+                'belum_dimulai' => 'Belum Dimulai',
+                'persiapan' => 'Persiapan',
+                'pelaksanaan' => 'Pelaksanaan',
+                'pelaporan' => 'Pelaporan',
+                'dibatalkan' => 'Dibatalkan',
+                'selesai' => 'Selesai',
+            ];
+            $displayStatus = $statusLabels[$event->status] ?? $event->status;
+        @endphp
         <div class="mb-4">
-            <strong>Tanggal Mulai:</strong> {{ $event->start_date }}
+            <strong>Status:</strong>
+            <span class="inline-flex items-center px-2 py-0.5 ml-2 rounded-full bg-gray-100 text-gray-800 font-semibold text-sm">{{ $displayStatus }}</span>
         </div>
         <div class="mb-4">
-            <strong>Tanggal Selesai:</strong> {{ $event->end_date }}
+            <strong>Tanggal Mulai:</strong> {{ optional($event->start_date)->format('d M Y') }}
+        </div>
+        <div class="mb-4">
+            <strong>Tanggal Selesai:</strong> {{ optional($event->end_date)->format('d M Y') }}
         </div>
         <div class="mb-4">
             <div class="grid grid-cols-3 gap-4">
