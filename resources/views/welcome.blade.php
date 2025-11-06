@@ -16,24 +16,15 @@
 			{{-- Events list --}}
 			<div class="bg-white p-4 rounded shadow">
 				@php
-					$startMonth = \Carbon\Carbon::now()->startOfMonth();
-					$endMonth = \Carbon\Carbon::now()->endOfMonth();
+					// Use the controller-provided monthly summary when available. Fallback to zeros.
 					$monthName = \Carbon\Carbon::now()->format('F Y');
-					$monthEvents = collect();
-					if (isset($events) && $events instanceof \Illuminate\Support\Collection) {
-						$monthEvents = $events->filter(function($ev) use ($startMonth, $endMonth) {
-							if (empty($ev->start_date)) return false;
-							$sd = $ev->start_date instanceof \Carbon\Carbon ? $ev->start_date : \Carbon\Carbon::parse($ev->start_date);
-							return $sd->between($startMonth, $endMonth);
-						});
-					}
-					$counts = [
-						'tentative' => $monthEvents->where('status','tentative')->count(),
-						'belum_dimulai' => $monthEvents->where('status','belum_dimulai')->count(),
-						'persiapan' => $monthEvents->where('status','persiapan')->count(),
-						'pelaksanaan' => $monthEvents->where('status','pelaksanaan')->count(),
-						'pelaporan' => $monthEvents->where('status','pelaporan')->count(),
-						'selesai' => $monthEvents->where('status','selesai')->count(),
+					$counts = $summaryCounts ?? [
+						'tentative' => 0,
+						'belum_dimulai' => 0,
+						'persiapan' => 0,
+						'pelaksanaan' => 0,
+						'pelaporan' => 0,
+						'selesai' => 0,
 					];
 					$monthTotal = array_sum($counts);
 				@endphp
@@ -198,24 +189,14 @@
 		<div class="w-full max-w-3xl mt-6">
 			<div class="bg-white p-4 rounded shadow">
 				@php
-					$startMonth = \Carbon\Carbon::now()->startOfMonth();
-					$endMonth = \Carbon\Carbon::now()->endOfMonth();
 					$monthName = \Carbon\Carbon::now()->format('F Y');
-					$monthEvents = collect();
-					if (isset($events) && $events instanceof \Illuminate\Support\Collection) {
-						$monthEvents = $events->filter(function($ev) use ($startMonth, $endMonth) {
-							if (empty($ev->start_date)) return false;
-							$sd = $ev->start_date instanceof \Carbon\Carbon ? $ev->start_date : \Carbon\Carbon::parse($ev->start_date);
-							return $sd->between($startMonth, $endMonth);
-						});
-					}
-					$counts = [
-						'tentative' => $monthEvents->where('status','tentative')->count(),
-						'belum_dimulai' => $monthEvents->where('status','belum_dimulai')->count(),
-						'persiapan' => $monthEvents->where('status','persiapan')->count(),
-						'pelaksanaan' => $monthEvents->where('status','pelaksanaan')->count(),
-						'pelaporan' => $monthEvents->where('status','pelaporan')->count(),
-						'selesai' => $monthEvents->where('status','selesai')->count(),
+					$counts = $summaryCounts ?? [
+						'tentative' => 0,
+						'belum_dimulai' => 0,
+						'persiapan' => 0,
+						'pelaksanaan' => 0,
+						'pelaporan' => 0,
+						'selesai' => 0,
 					];
 					$monthTotal = array_sum($counts);
 				@endphp

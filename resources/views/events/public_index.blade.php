@@ -57,7 +57,7 @@
             'selesai' => 'Selesai',
         ];
     @endphp
-    <nav class="flex flex-wrap gap-2">
+    <nav class="flex flex-wrap gap-2 mt-4">
         @foreach($tabStatuses as $key => $label)
             @php
                 $params = $baseParams;

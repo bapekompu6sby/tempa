@@ -20,7 +20,24 @@ Route::get('/', function () {
     ->limit(5)
     ->get();
 
-    return view('welcome', compact('events'));
+    // Also compute a monthly summary (counts by status) for the current month
+    $startMonth = \Carbon\Carbon::now()->startOfMonth();
+    $endMonth = \Carbon\Carbon::now()->endOfMonth();
+
+    $monthlyEventsQuery = \App\Models\Event::query()
+        ->whereNotNull('start_date')
+        ->whereBetween('start_date', [$startMonth->toDateString(), $endMonth->toDateString()]);
+
+    $summaryCounts = [
+        'tentative' => (int) $monthlyEventsQuery->clone()->where('status', 'tentative')->count(),
+        'belum_dimulai' => (int) $monthlyEventsQuery->clone()->where('status', 'belum_dimulai')->count(),
+        'persiapan' => (int) $monthlyEventsQuery->clone()->where('status', 'persiapan')->count(),
+        'pelaksanaan' => (int) $monthlyEventsQuery->clone()->where('status', 'pelaksanaan')->count(),
+        'pelaporan' => (int) $monthlyEventsQuery->clone()->where('status', 'pelaporan')->count(),
+        'selesai' => (int) $monthlyEventsQuery->clone()->where('status', 'selesai')->count(),
+    ];
+
+    return view('welcome', compact('events', 'summaryCounts'));
 });
 Route::post('/unlock', function (\Illuminate\Http\Request $request) {
     $request->validate(['password' => 'required']);
