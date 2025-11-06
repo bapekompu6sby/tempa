@@ -25,8 +25,7 @@ Route::get('/', function () {
     $endMonth = \Carbon\Carbon::now()->endOfMonth();
 
     $monthlyEventsQuery = \App\Models\Event::query()
-        ->whereNotNull('start_date')
-        ->whereBetween('start_date', [$startMonth->toDateString(), $endMonth->toDateString()]);
+        ->whereNotNull('start_date');
 
     $summaryCounts = [
         'tentative' => (int) $monthlyEventsQuery->clone()->where('status', 'tentative')->count(),
