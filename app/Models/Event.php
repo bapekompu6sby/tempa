@@ -214,7 +214,7 @@ class Event extends Model
      * Check and update the event status based on checked EventInstruction rows.
      *
      * Rules:
-     * - If current status is one of: 'tentative', 'cancelled', 'completed' => do nothing (exit).
+    * - If current status is one of: 'tentative', 'dibatalkan', 'selesai' => do nothing (exit).
      * - Otherwise determine status by priority: pelaporan -> pelaksanaan -> persiapan.
      *   If any checked instruction exists for a phase, set status to that phase and persist.
      * - If none found, set status back to 'tentative'.
@@ -225,8 +225,8 @@ class Event extends Model
     {
         $current = $this->status ?? null;
 
-        // do not override final statuses like cancelled or completed
-        if (in_array($current, ['cancelled', 'completed'], true)) {
+        // do not override final statuses like dibatalkan or selesai
+        if (in_array($current, ['dibatalkan', 'selesai'], true)) {
             return;
         }
 

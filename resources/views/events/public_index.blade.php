@@ -53,8 +53,8 @@
             'pelaksanaan' => 'Pelaksanaan',
             'pelaporan' => 'Pelaporan',
             'tentative' => 'Tentative',
-            'cancelled' => 'Cancelled',
-            'completed' => 'Completed',
+            'dibatalkan' => 'Dibatalkan',
+            'selesai' => 'Selesai',
         ];
     @endphp
     <nav class="flex flex-wrap gap-2">
@@ -77,7 +77,7 @@
             'persiapan' => $events->where('status','persiapan')->count(),
             'pelaksanaan' => $events->where('status','pelaksanaan')->count(),
             'pelaporan' => $events->where('status','pelaporan')->count(),
-            'completed' => $events->where('status','completed')->count(),
+            'selesai' => $events->where('status','selesai')->count(),
         ];
     @endphp
 
@@ -106,7 +106,7 @@
             </div>
             <div class="flex items-center justify-between gap-2">
                 <span class="text-sm">Selesai</span>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">{{ $counts['completed'] }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">{{ $counts['selesai'] }}</span>
             </div>
         </div>
     </div>

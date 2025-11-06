@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     // Load events and pre-compute instruction counts per phase to avoid N+1 queries in the view
-    $events = \App\Models\Event::whereNotIn('status', ['tentative','cancelled'])
+    $events = \App\Models\Event::whereNotIn('status', ['tentative','dibatalkan'])
         ->orderBy('start_date', 'desc')
         ->withCount([
             // persiapan
