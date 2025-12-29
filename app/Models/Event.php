@@ -26,6 +26,7 @@ class Event extends Model
         'preparation_date',
         'report_date',
         'status',
+        'documents_drive', // URL to documents drive
     ];
 
     /**
@@ -178,6 +179,14 @@ class Event extends Model
     public function eventInstructions()
     {
         return $this->hasMany(EventInstruction::class);
+    }
+
+    /**
+     * Get the attached event report file for this Event.
+     */
+    public function eventReport()
+    {
+        return $this->hasOne(EventDocument::class, 'event_id')->where('phase', 'event_report');
     }
 
     /**
