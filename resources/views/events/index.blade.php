@@ -3,9 +3,43 @@
 @section('content')
 <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-6">Daftar Pelatihan</h2>
+
     <div class="mb-4 flex items-center justify-between">
         <a href="{{ route('events.create') }}" class="inline-block px-4 py-2 bg-green-600 text-white rounded">Tambah Pelatihan</a>
     </div>
+
+    {{-- Filters: year and month --}}
+    <form method="GET" action="{{ route('events.index') }}" class="flex items-center gap-3 mb-4">
+        <div>
+            <label class="text-sm text-gray-600">Tahun</label>
+            <select name="year" class="ml-2 border rounded px-2 py-1 text-sm">
+                <option value="" {{ empty($year) ? 'selected' : '' }}>Semua</option>
+                @if(!empty($years))
+                    @foreach($years as $y)
+                        <option value="{{ $y }}" {{ (isset($year) && $year == $y) ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Bulan</label>
+            <select name="month" class="ml-2 border rounded px-2 py-1 text-sm">
+                <option value="">Semua</option>
+                @php
+                    $months = [1=> 'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'Mei',6=>'Jun',7=>'Jul',8=>'Agu',9=>'Sep',10=>'Okt',11=>'Nov',12=>'Des'];
+                @endphp
+                @foreach($months as $num => $label)
+                    <option value="{{ $num }}" {{ (isset($month) && (int)$month === $num) ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Filter</button>
+            @if(request()->hasAny(['year','month']) && (request('year') || request('month')))
+                <a href="{{ route('events.index') }}" class="ml-2 text-sm text-gray-600">Reset</a>
+            @endif
+        </div>
+    </form>
 
     <div class="space-y-4">
         @foreach($events as $ev)
