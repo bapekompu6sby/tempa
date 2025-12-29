@@ -88,8 +88,9 @@ class EventDocumentController extends Controller
      */
     public function upload(Request $request, EventDocument $eventDocument)
     {
+        
         $validated = $request->validate([
-            'file' => 'required|file|max:10240', // max 10MB
+            'file' => 'required|file|max:122880', // max 10MB
         ]);
 
         $file = $request->file('file');
@@ -114,7 +115,7 @@ class EventDocumentController extends Controller
     public function uploadMultiple(Request $request, EventDocument $eventDocument)
     {
         $validated = $request->validate([
-            'files.*' => 'required|file|max:10240',
+            'files.*' => 'required|file|max:122880',
         ]);
 
         $saved = [];
