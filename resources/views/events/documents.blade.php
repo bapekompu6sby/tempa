@@ -13,140 +13,147 @@
             </div>
         </div>
 
-        <div class="overflow-hidden shadow rounded bg-white">
-            <table class="min-w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama Dokumen</th>
-                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Lampiran / Link</th>
-                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Catatan</th>
-                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($documents as $doc)
-                        @php $hasAttachment = !empty($doc->link) || (!empty($doc->file_path) || (isset($doc->files) && $doc->files->count() > 0)); @endphp
-                        <tr class="border-t align-top {{ $hasAttachment ? 'bg-green-50' : '' }}" id="ed-row-{{ $doc->id }}">
-                            <td class="py-2 px-4 align-top">{{ $doc->name }}</td>
-                            <td class="py-2 px-4 align-top">
-                                <div class="flex flex-col gap-1">
-                                    @if(!empty($doc->file_path))
-                                        <a id="ed-filepath-display-{{ $doc->id }}" href="{{ route('documents.download', $doc) }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->file_path, 30) }}</a>
-                                    @endif
-                                    @if(!empty($doc->link))
-                                        @php
-                                            $href = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/');
-                                        @endphp
-                                        <a id="ed-link-display-{{ $doc->id }}" href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 30) }}</a>
-                                    @endif
-                                    {{-- If there are uploaded attachment records but no file_path/link to show in the main cell, indicate presence of attachments --}}
-                                    @if((isset($doc->files) && $doc->files->count() > 0) && empty($doc->file_path) && empty($doc->link))
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-sm font-medium bg-green-100 text-green-800">Ada lampiran ({{ $doc->files->count() }})</span>
-                                    @endif
-                                    @if(!$hasAttachment)
-                                        <span class="text-gray-600">Belum ada dokumen</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="py-2 px-4 align-top" id="ed-notes-{{ $doc->id }}">{{ $doc->notes ?? '-' }}</td>
-                            <td class="py-2 px-4 align-top">
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="ed-view px-2 py-1 bg-blue-500 text-white rounded text-sm" data-id="{{ $doc->id }}">Lihat File</button>
-                                    <button type="button" class="ed-edit px-2 py-1 bg-yellow-500 text-white rounded text-sm" data-id="{{ $doc->id }}">Edit</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr id="ed-view-row-{{ $doc->id }}" class="hidden bg-white">
-                            <td class="py-3 px-4" colspan="4">
-                                <div class="grid grid-cols-1 gap-3">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
-                                        @if(!empty($doc->link))
-                                            @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
-                                            <div class="mt-1"><a id="view-only-link-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 200) }}</a></div>
-                                        @else
-                                            <div class="mt-1 text-gray-600">-</div>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Lampiran</label>
-                                        <ul class="space-y-1 mt-2">
-                                            @forelse($doc->files as $file)
-                                                <li class="flex items-center justify-between">
-                                                    <span class="text-gray-800">{{ $file->original_name }}</span>
-                                                    <a href="{{ route('documents.files.download', $file) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Download</a>
-                                                </li>
-                                            @empty
-                                                <li class="text-gray-600">Tidak ada lampiran</li>
-                                            @endforelse
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Catatan</label>
-                                        <div class="mt-1 text-gray-700 whitespace-pre-wrap" id="view-only-notes-{{ $doc->id }}">{{ $doc->notes ?? '-' }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr id="ed-edit-row-{{ $doc->id }}" class="hidden bg-gray-50">
-                            <td class="py-3 px-4" colspan="4">
-                                <div class="grid grid-cols-1 gap-3">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
-                                        <input type="text" name="link" value="{{ $doc->link }}" class="ed-link-input mt-1 block w-full border rounded px-3 py-2" placeholder="https://..." />
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Upload file</label>
-                                        <div class="mt-1 flex items-center gap-2">
-                                                <input type="file" name="files[]" multiple class="ed-file-input hidden" id="ed-file-{{ $doc->id }}" />
-                                                <label for="ed-file-{{ $doc->id }}" class="inline-block px-3 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer text-sm">Pilih file</label>
-                                                <span class="text-sm text-gray-500 file-selected" id="ed-file-name-{{ $doc->id }}">{{ $doc->file_path ? \Illuminate\Support\Str::limit($doc->file_path, 30) : '' }}</span>
-                                            </div>
-                                    </div>
-
-                                    {{-- Inline attachments list shown while editing (moved above notes) --}}
-                                    <div id="ed-files-inline-{{ $doc->id }}" class="mt-2">
-                                        <div class="text-sm font-medium mb-2">Lampiran</div>
-                                        @if(!empty($doc->link))
-                                            @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
-                                            <div class="mb-2"><a id="ed-link-view-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 80) }}</a></div>
-                                        @else
-                                            <div id="ed-link-view-{{ $doc->id }}"></div>
-                                        @endif
-                                        <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
-                                            @foreach($doc->files as $file)
-                                                <li id="file-{{ $file->id }}" class="flex items-center justify-between">
-                                                    <a href="{{ route('documents.files.download', $file) }}" class="text-blue-600 underline">{{ $file->original_name }}</a>
-                                                    <div class="flex items-center gap-2">
-                                                        <a href="{{ route('documents.files.download', $file) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Download</a>
-                                                        <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn hidden text-sm text-red-600">Hapus</button>
-                                                    </div>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Catatan</label>
-                                        <textarea name="notes" class="ed-notes-input mt-1 block w-full border rounded px-3 py-2" rows="3">{{ $doc->notes }}</textarea>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button type="button" class="ed-save px-3 py-2 bg-blue-600 text-white rounded text-sm cursor-pointer" data-id="{{ $doc->id }}">Simpan</button>
-                                        <button type="button" class="ed-cancel px-3 py-2 bg-gray-300 rounded text-sm cursor-pointer" data-id="{{ $doc->id }}">Batal</button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    
-                        {{-- attachments list previously rendered in a separate row removed (now inline in edit row) --}}
-                    @empty
+        @if(!empty($event->document_drive_url))
+            <div class="p-8 text-center">
+                <div class="text-lg font-semibold mb-2">Dokumen pelatihan tersedia di:</div>
+                <a href="{{ $event->document_drive_url }}" target="_blank" class="text-blue-600 underline text-xl break-all">Dokumen {{ $event->name }}</a>
+            </div>
+        @else
+            <div class="overflow-hidden shadow rounded bg-white">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <td class="py-4 px-4 text-center text-gray-500" colspan="4">Tidak ada dokumen untuk pelatihan ini.</td>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama Dokumen</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Lampiran / Link</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Catatan</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @forelse($documents as $doc)
+                            @php $hasAttachment = !empty($doc->link) || (!empty($doc->file_path) || (isset($doc->files) && $doc->files->count() > 0)); @endphp
+                            <tr class="border-t align-top {{ $hasAttachment ? 'bg-green-50' : '' }}" id="ed-row-{{ $doc->id }}">
+                                <td class="py-2 px-4 align-top">{{ $doc->name }}</td>
+                                <td class="py-2 px-4 align-top">
+                                    <div class="flex flex-col gap-1">
+                                        @if(!empty($doc->file_path))
+                                            <a id="ed-filepath-display-{{ $doc->id }}" href="{{ route('documents.download', $doc) }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->file_path, 30) }}</a>
+                                        @endif
+                                        @if(!empty($doc->link))
+                                            @php
+                                                $href = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/');
+                                            @endphp
+                                            <a id="ed-link-display-{{ $doc->id }}" href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 30) }}</a>
+                                        @endif
+                                        {{-- If there are uploaded attachment records but no file_path/link to show in the main cell, indicate presence of attachments --}}
+                                        @if((isset($doc->files) && $doc->files->count() > 0) && empty($doc->file_path) && empty($doc->link))
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-sm font-medium bg-green-100 text-green-800">Ada lampiran ({{ $doc->files->count() }})</span>
+                                        @endif
+                                        @if(!$hasAttachment)
+                                            <span class="text-gray-600">Belum ada dokumen</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 align-top" id="ed-notes-{{ $doc->id }}">{{ $doc->notes ?? '-' }}</td>
+                                <td class="py-2 px-4 align-top">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" class="ed-view px-2 py-1 bg-blue-500 text-white rounded text-sm" data-id="{{ $doc->id }}">Lihat File</button>
+                                        <button type="button" class="ed-edit px-2 py-1 bg-yellow-500 text-white rounded text-sm" data-id="{{ $doc->id }}">Edit</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="ed-view-row-{{ $doc->id }}" class="hidden bg-white">
+                                <td class="py-3 px-4" colspan="4">
+                                    <div class="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
+                                            @if(!empty($doc->link))
+                                                @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
+                                                <div class="mt-1"><a id="view-only-link-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 200) }}</a></div>
+                                            @else
+                                                <div class="mt-1 text-gray-600">-</div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Lampiran</label>
+                                            <ul class="space-y-1 mt-2">
+                                                @forelse($doc->files as $file)
+                                                    <li class="flex items-center justify-between">
+                                                        <span class="text-gray-800">{{ $file->original_name }}</span>
+                                                        <a href="{{ route('documents.files.download', $file) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Download</a>
+                                                    </li>
+                                                @empty
+                                                    <li class="text-gray-600">Tidak ada lampiran</li>
+                                                @endforelse
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Catatan</label>
+                                            <div class="mt-1 text-gray-700 whitespace-pre-wrap" id="view-only-notes-{{ $doc->id }}">{{ $doc->notes ?? '-' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr id="ed-edit-row-{{ $doc->id }}" class="hidden bg-gray-50">
+                                <td class="py-3 px-4" colspan="4">
+                                    <div class="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
+                                            <input type="text" name="link" value="{{ $doc->link }}" class="ed-link-input mt-1 block w-full border rounded px-3 py-2" placeholder="https://..." />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Upload file</label>
+                                            <div class="mt-1 flex items-center gap-2">
+                                                    <input type="file" name="files[]" multiple class="ed-file-input hidden" id="ed-file-{{ $doc->id }}" />
+                                                    <label for="ed-file-{{ $doc->id }}" class="inline-block px-3 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer text-sm">Pilih file</label>
+                                                    <span class="text-sm text-gray-500 file-selected" id="ed-file-name-{{ $doc->id }}">{{ $doc->file_path ? \Illuminate\Support\Str::limit($doc->file_path, 30) : '' }}</span>
+                                                </div>
+                                        </div>
+
+                                        {{-- Inline attachments list shown while editing (moved above notes) --}}
+                                        <div id="ed-files-inline-{{ $doc->id }}" class="mt-2">
+                                            <div class="text-sm font-medium mb-2">Lampiran</div>
+                                            @if(!empty($doc->link))
+                                                @php $hrefView = (strpos($doc->link, '://') !== false) ? $doc->link : 'https://' . ltrim($doc->link, '/'); @endphp
+                                                <div class="mb-2"><a id="ed-link-view-{{ $doc->id }}" href="{{ $hrefView }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ \Illuminate\Support\Str::limit($doc->link, 80) }}</a></div>
+                                            @else
+                                                <div id="ed-link-view-{{ $doc->id }}"></div>
+                                            @endif
+                                            <ul id="ed-files-list-{{ $doc->id }}" class="space-y-1">
+                                                @foreach($doc->files as $file)
+                                                    <li id="file-{{ $file->id }}" class="flex items-center justify-between">
+                                                        <a href="{{ route('documents.files.download', $file) }}" class="text-blue-600 underline">{{ $file->original_name }}</a>
+                                                        <div class="flex items-center gap-2">
+                                                            <a href="{{ route('documents.files.download', $file) }}" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Download</a>
+                                                            <button type="button" data-file-id="{{ $file->id }}" class="delete-file-btn hidden text-sm text-red-600">Hapus</button>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Catatan</label>
+                                            <textarea name="notes" class="ed-notes-input mt-1 block w-full border rounded px-3 py-2" rows="3">{{ $doc->notes }}</textarea>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button type="button" class="ed-save px-3 py-2 bg-blue-600 text-white rounded text-sm cursor-pointer" data-id="{{ $doc->id }}">Simpan</button>
+                                            <button type="button" class="ed-cancel px-3 py-2 bg-gray-300 rounded text-sm cursor-pointer" data-id="{{ $doc->id }}">Batal</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            {{-- attachments list previously rendered in a separate row removed (now inline in edit row) --}}
+                        @empty
+                            <tr>
+                                <td class="py-4 px-4 text-center text-gray-500" colspan="4">Tidak ada dokumen untuk pelatihan ini.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

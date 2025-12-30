@@ -7,9 +7,19 @@
         {{-- Top-right action buttons --}}
         <div class="absolute top-4 right-4 flex space-x-2">
             <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 text-white rounded text-sm">Edit</a>
-            <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Lihat Kelengkapan Dokumen</a>
+            <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Dokumen</a>
+            <form method="POST" action="{{ route('events.finish', $event) }}" class="inline">
+                @csrf
+                <button type="submit" class="px-3 py-1.5 bg-green-600 text-white rounded text-sm cursor-pointer" onclick="return confirm('Tandai pelatihan sebagai selesai?')">Selesaikan Pelatihan</button>
+            </form>
             <a href="{{ route('events.index') }}" class="px-3 py-1.5 bg-gray-300 rounded text-sm">Kembali</a>
         </div>
+                @if(!empty($event->event_report_url))
+                <div class="mb-4">
+                    <strong>File Laporan Pelatihan:</strong>
+                    <a href="{{ asset('storage/' . $event->event_report_url) }}" target="_blank" class="text-blue-600 underline ml-2">Download / Lihat</a>
+                </div>
+                @endif
         <div class="mb-4">
             <strong>Nama:</strong> {{ $event->name }}
         </div>

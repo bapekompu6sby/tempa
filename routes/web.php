@@ -97,6 +97,7 @@ Route::get('public/events', function (\Illuminate\Http\Request $request) {
 Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function () {
     Route::resource('instructions', App\Http\Controllers\InstructionController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
+    Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');
     // view event documents
     Route::get('events/{event}/documents', [App\Http\Controllers\EventController::class, 'documents'])->name('events.documents');
     // Use 'eventDocument' as the route parameter name so it matches controller method signatures

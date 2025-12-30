@@ -26,7 +26,8 @@ class Event extends Model
         'preparation_date',
         'report_date',
         'status',
-        'documents_drive', // URL to documents drive
+        'document_drive_url', // URL to documents drive
+        'event_report_url', // URL to event report file
     ];
 
     /**

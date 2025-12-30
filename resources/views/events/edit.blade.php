@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-6">Edit Pelatihan</h2>
-    <form action="{{ route('events.update', $event) }}" method="POST" class="max-w-lg mx-auto bg-white p-6 rounded shadow">
+    <form action="{{ route('events.update', $event) }}" method="POST" class="max-w-lg mx-auto bg-white p-6 rounded shadow" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="mb-4">
@@ -43,6 +43,25 @@
                 <option value="dibatalkan" {{ old('status', $event->status) == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                 <option value="selesai" {{ old('status', $event->status) == 'selesai' ? 'selected' : '' }}>Selesai</option>
             </select>
+        </div>
+        <div class="mb-4 mt-8">
+            <label for="event_report_file" class="block mb-2 font-semibold">File Laporan Pelatihan</label>
+            <div class="flex items-center space-x-4">
+                <label class="flex flex-col items-center px-4 py-6 bg-white text-blue-600 rounded-lg shadow-lg tracking-wide border border-blue-200 cursor-pointer hover:bg-blue-50 transition">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4a1 1 0 011-1h8a1 1 0 011 1v12m-5 4h.01M12 20a2 2 0 100-4 2 2 0 000 4z" /></svg>
+                    <span class="mt-2 text-base leading-normal">Pilih file (PDF/DOC/DOCX)</span>
+                    <input type="file" name="event_report_file" id="event_report_file" class="hidden" accept=".pdf,.doc,.docx">
+                </label>
+                @if($event->event_report_url)
+                    <div>
+                        <a href="{{ asset('storage/' . $event->event_report_url) }}" target="_blank" class="text-blue-600 underline">Lihat file laporan saat ini</a>
+                    </div>
+                @endif
+            </div>
+        </div>
+        <div class="mb-6">
+            <label for="document_drive_url" class="block mb-2 font-semibold">URL Dokumen Drive</label>
+            <input type="url" name="document_drive_url" id="document_drive_url" class="w-full border px-3 py-2 rounded" value="{{ old('document_drive_url', $event->document_drive_url) }}" placeholder="https://drive.google.com/...">
         </div>
         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Update</button>
         <a href="{{ route('events.index') }}" class="ml-2 px-4 py-2 bg-gray-300 rounded">Batal</a>

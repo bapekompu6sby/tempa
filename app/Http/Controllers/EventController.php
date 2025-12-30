@@ -131,9 +131,28 @@ class EventController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'note' => 'nullable|string',
+            'document_drive_url' => 'nullable|url',
+            'event_report_file' => 'nullable|file|mimes:pdf,doc,docx',
         ]);
+
+        // Handle file upload if present
+        if ($request->hasFile('event_report_file')) {
+            $file = $request->file('event_report_file');
+            $path = $file->store('event_reports', 'public');
+            $validated['event_report_url'] = $path;
+        }
+
         $event->update($validated);
         return redirect()->route('events.index')->with('success', 'Pelatihan berhasil diupdate');
+    }
+
+    /**
+     * Mark event as selesai.
+     */
+    public function finish(Event $event)
+    {
+        $event->update(['status' => 'selesai']);
+        return redirect()->route('events.show', $event)->with('success', 'Pelatihan telah ditandai sebagai selesai.');
     }
 
     /**
