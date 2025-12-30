@@ -144,7 +144,7 @@ class EventController extends Controller
             'end_date' => 'nullable|date',
             'note' => 'nullable|string',
             'document_drive_url' => 'nullable|url',
-            'event_report_file' => 'nullable|file|mimes:pdf,doc,docx',
+            'event_report_file' => 'nullable|file|mimes:pdf,doc,docx,zip,rar',
         ]);
 
         // Handle file upload if present
