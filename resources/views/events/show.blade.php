@@ -14,12 +14,20 @@
             </form>
             <a href="{{ route('events.index') }}" class="px-3 py-1.5 bg-gray-300 rounded text-sm">Kembali</a>
         </div>
-                @if(!empty($event->event_report_url))
-                <div class="mb-4">
-                    <strong>File Laporan Pelatihan:</strong>
-                    <a href="{{ asset('storage/' . $event->event_report_url) }}" target="_blank" class="text-blue-600 underline ml-2">Download / Lihat</a>
+        @if(!empty($event->event_report_url))
+        <div class="mb-6 flex items-center justify-between bg-green-50 border border-green-200 rounded p-4 shadow-sm">
+            <div>
+                <div class="text-lg font-semibold text-green-900 mb-1 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    File Laporan Pelatihan
                 </div>
-                @endif
+                <div class="text-sm text-green-800 break-all">{{ basename($event->event_report_url) }}</div>
+            </div>
+            <div>
+                <a href="{{ route('events.downloadReport', $event) }}" target="_blank" class="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 transition cursor-pointer font-semibold">Download</a>
+            </div>
+        </div>
+        @endif
         <div class="mb-4">
             <strong>Nama:</strong> {{ $event->name }}
         </div>

@@ -120,6 +120,18 @@ class EventController extends Controller
     return view('events.edit', compact('event'));
     }
 
+        /**
+     * Download the event report file.
+     */
+    public function downloadReport(Event $event)
+    {
+        if (!$event->event_report_url || !\Storage::disk('public')->exists($event->event_report_url)) {
+            abort(404, 'File laporan tidak ditemukan.');
+        }
+        $filename = basename($event->event_report_url);
+        return response()->download(storage_path('app/public/' . $event->event_report_url), $filename);
+    }
+
     /**
      * Update the specified resource in storage.
      */
