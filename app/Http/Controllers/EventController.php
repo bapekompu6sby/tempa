@@ -12,10 +12,28 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-    $events = Event::all();
-    return view('events.index', compact('events'));
+        // Filter by year and month
+        $year = $request->input('year');
+        $month = $request->input('month');
+        $query = Event::query();
+        if (in_array($year, ['2025', '2026'])) {
+            $query->whereYear('start_date', $year);
+        }
+        if (!empty($month)) {
+            $query->whereMonth('start_date', $month);
+        }
+        // Sort by start_date descending
+        $query->orderBy('start_date', 'desc');
+        // Paginate (10 per page)
+        $events = $query->paginate(10)->appends($request->except('page'));
+
+        // For filter dropdown
+        $years = ['2025', '2026'];
+
+        // Pass year, month, years to view
+        return view('events.index', compact('events', 'year', 'month', 'years'));
     }
 
     /**

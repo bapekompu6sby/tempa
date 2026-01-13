@@ -14,11 +14,8 @@
             <label class="text-sm text-gray-600">Tahun</label>
             <select name="year" class="ml-2 border rounded px-2 py-1 text-sm">
                 <option value="" {{ empty($year) ? 'selected' : '' }}>Semua</option>
-                @if(!empty($years))
-                    @foreach($years as $y)
-                        <option value="{{ $y }}" {{ (isset($year) && $year == $y) ? 'selected' : '' }}>{{ $y }}</option>
-                    @endforeach
-                @endif
+                <option value="2025" {{ (isset($year) && $year == '2025') ? 'selected' : '' }}>2025</option>
+                <option value="2026" {{ (isset($year) && $year == '2026') ? 'selected' : '' }}>2026</option>
             </select>
         </div>
         <div>
@@ -42,7 +39,8 @@
     </form>
 
     <div class="space-y-4">
-        @foreach($events as $ev)
+        @forelse($events as $ev)
+            {{-- existing event card code unchanged --}}
             <div class="border rounded px-4 py-4 bg-white">
                 {{-- Top: event detail --}}
                 <div class="mb-3">
@@ -166,7 +164,14 @@
                     @endforeach
                 </div>
             </div>
-        @endforeach
+        @empty
+            <div class="text-center text-gray-500 py-8">Tidak ada pelatihan ditemukan.</div>
+        @endforelse
+    </div>
+
+    {{-- Pagination --}}
+    <div class="mt-8 flex justify-center">
+        {{ $events->links() }}
     </div>
 </div>
 @endsection

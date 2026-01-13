@@ -232,5 +232,10 @@
     @empty
         <div class="text-gray-600">Tidak ada acara publik saat ini.</div>
     @endforelse
+
+    {{-- Pagination --}}
+    <div class="mt-8 flex justify-center">
+        {{ $events->links() }}
+    </div>
 </div>
 @endsection
