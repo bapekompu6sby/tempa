@@ -87,7 +87,8 @@ Route::get('public/events', function (\Illuminate\Http\Request $request) {
         $eventsQuery->where('status', $status);
     }
 
-    $events = $eventsQuery->get();
+    // Use pagination (default 10 per page, can be adjusted)
+    $events = $eventsQuery->paginate(10)->withQueryString();
 
     return view('events.public_index', compact('events', 'years', 'year', 'month', 'status'));
 });

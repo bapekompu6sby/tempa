@@ -28,6 +28,11 @@ class Event extends Model
         'status',
         'document_drive_url', // URL to documents drive
         'event_report_url', // URL to event report file
+        // Added fields
+        'target', // integer: target participant count
+        'jp_module', // integer: JP for module
+        'jp_facilitator', // integer: JP for facilitator
+        'field', // string: field/area
     ];
 
     /**
