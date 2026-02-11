@@ -32,6 +32,12 @@
         <div class="mb-4">
             <strong>Nama:</strong> {{ $event->name }}
         </div>
+        <div class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div><strong>Target:</strong> {{ $event->target ?? '-' }}</div>
+            <div><strong>JP Kurmod:</strong> {{ $event->jp_module ?? '-' }}</div>
+            <div><strong>JP Pengajar:</strong> {{ $event->jp_facilitator ?? '-' }}</div>
+            <div><strong>Bidang:</strong> {{ $event->field ?? '-' }}</div>
+        </div>
         <div class="mb-4">
             <strong>Model Pembelajaran:</strong>
             @php

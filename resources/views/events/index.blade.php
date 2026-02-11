@@ -40,13 +40,18 @@
 
     <div class="space-y-4">
         @forelse($events as $ev)
-            {{-- existing event card code unchanged --}}
             <div class="border rounded px-4 py-4 bg-white">
                 {{-- Top: event detail --}}
                 <div class="mb-3">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="font-medium text-lg">{{ $ev->name }}</div>
+                            <div class="text-sm text-gray-700 mt-1 flex flex-wrap gap-4">
+                                <span><strong>Target:</strong> {{ $ev->target ?? '-' }}</span>
+                                <span><strong>JP Kurmod:</strong> {{ $ev->jp_module ?? '-' }}</span>
+                                <span><strong>JP Pengajar:</strong> {{ $ev->jp_facilitator ?? '-' }}</span>
+                                <span><strong>Bidang:</strong> {{ $ev->field ?? '-' }}</span>
+                            </div>
                             @php
                                 $status = $ev->status ?? '';
                                 $statusLabels = [

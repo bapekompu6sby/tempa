@@ -33,6 +33,22 @@
             <textarea name="note" id="note" class="w-full border px-3 py-2 rounded" rows="4">{{ old('note', $event->note) }}</textarea>
         </div>
         <div class="mb-4">
+            <label for="target" class="block mb-2 font-semibold">Target</label>
+            <input type="number" name="target" id="target" class="w-full border px-3 py-2 rounded" value="{{ old('target', $event->target) }}" min="0">
+        </div>
+        <div class="mb-4">
+            <label for="jp_module" class="block mb-2 font-semibold">JP Kurmod</label>
+            <input type="number" name="jp_module" id="jp_module" class="w-full border px-3 py-2 rounded" value="{{ old('jp_module', $event->jp_module) }}" min="0">
+        </div>
+        <div class="mb-4">
+            <label for="jp_facilitator" class="block mb-2 font-semibold">JP Pengajar</label>
+            <input type="number" name="jp_facilitator" id="jp_facilitator" class="w-full border px-3 py-2 rounded" value="{{ old('jp_facilitator', $event->jp_facilitator) }}" min="0">
+        </div>
+        <div class="mb-4">
+            <label for="field" class="block mb-2 font-semibold">Bidang</label>
+            <input type="text" name="field" id="field" class="w-full border px-3 py-2 rounded" value="{{ old('field', $event->field) }}">
+        </div>
+        <div class="mb-4">
             <label for="status" class="block mb-2 font-semibold">Status</label>
             <select name="status" id="status" class="w-full border px-3 py-2 rounded">
                 <option value="tentative" {{ old('status', $event->status) == 'tentative' ? 'selected' : '' }}>Tentative</option>

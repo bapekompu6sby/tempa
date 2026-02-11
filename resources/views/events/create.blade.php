@@ -31,6 +31,22 @@
             <label for="note" class="block mb-2 font-semibold">Catatan</label>
             <textarea name="note" id="note" class="w-full border px-3 py-2 rounded" rows="4">{{ old('note') }}</textarea>
         </div>
+        <div class="mb-4">
+            <label for="target" class="block mb-2 font-semibold">Target</label>
+            <input type="number" name="target" id="target" class="w-full border px-3 py-2 rounded" value="{{ old('target') }}" min="0">
+        </div>
+        <div class="mb-4">
+            <label for="jp_module" class="block mb-2 font-semibold">JP Kurmod</label>
+            <input type="number" name="jp_module" id="jp_module" class="w-full border px-3 py-2 rounded" value="{{ old('jp_module') }}" min="0">
+        </div>
+        <div class="mb-4">
+            <label for="jp_facilitator" class="block mb-2 font-semibold">JP Pengajar</label>
+            <input type="number" name="jp_facilitator" id="jp_facilitator" class="w-full border px-3 py-2 rounded" value="{{ old('jp_facilitator') }}" min="0">
+        </div>
+        <div class="mb-4">
+            <label for="field" class="block mb-2 font-semibold">Bidang</label>
+            <input type="text" name="field" id="field" class="w-full border px-3 py-2 rounded" value="{{ old('field') }}">
+        </div>
         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Simpan</button>
         <a href="{{ route('events.index') }}" class="ml-2 px-4 py-2 bg-gray-300 rounded">Batal</a>
     </form>
