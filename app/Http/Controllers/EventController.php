@@ -198,7 +198,7 @@ class EventController extends Controller
      */
     public function kalender(Request $request)
     {
-        $years = range(date('Y') - 5, date('Y') + 2); // Example: 5 years back, 2 years forward
+        $years = range(2025, date('Y') + 1); // Example: 5 years back, 2 years forward
         $year = $request->input('year', now()->year);
         $events = Event::whereYear('start_date', $year)
             ->orderBy('start_date', 'asc')
