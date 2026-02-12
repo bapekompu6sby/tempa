@@ -3,12 +3,33 @@
 @section('content')
 <div class="container mx-auto py-8">
     <h1 class="text-2xl font-bold mb-6">Kalender Pelatihan</h1>
+    <style>
+        .event-bar { min-height: 20px; font-size: 11px; padding: 0 4px; cursor: pointer; position: relative; }
+        .event-tooltip {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #222;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            padding: 8px 12px;
+            white-space: pre-line;
+            min-width: 180px;
+            font-size: 12px;
+        }
+        .event-bar:hover .event-tooltip { display: block; }
+    </style>
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-200">
             <thead>
                 <tr>
                     @foreach($allMonths as $month)
-                        <th class="border px-4 py-2 bg-gray-100 text-center">{{ explode(' ', $month)[0] }}</th>
+                        <th class="border px-1 py-1 bg-gray-100 text-center whitespace-nowrap">{{ explode(' ', $month)[0] }}</th>
                     @endforeach
                 </tr>
             </thead>
@@ -19,22 +40,28 @@
                             $monthNames = ['Januari', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
                             $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
-                            // Color coding for neatness
                             $colors = ['bg-green-400', 'bg-yellow-300', 'bg-blue-400', 'bg-pink-400', 'bg-purple-400', 'bg-red-400', 'bg-orange-400'];
                             $color = $colors[$loop->index % count($colors)];
                         @endphp
                         @for($i = 0; $i < count($allMonths); $i++)
                             @if($i == $startIdx)
-                                <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-2 text-center align-middle">
-                                    <div class="h-full w-full flex flex-col items-center justify-center rounded shadow {{ $color }} text-black font-semibold text-base"
-                                         style="min-height: 36px;">
-                                        <span>{{ $event->name }}</span>
-                                        <span class="block text-xs font-normal">{{ $event->start_date->format('d-m-Y') }} - {{ $event->end_date->format('d-m-Y') }}</span>
+                                <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
+                                    <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
+                                         style="width: 100%; max-width: 100%;">
+                                        <span class="truncate">{{ $event->name }}</span>
+                                        <div class="event-tooltip">
+                                            <strong>{{ $event->name }}</strong><br>
+                                            Tanggal: {{ $event->start_date->format('d-m-Y') }} - {{ $event->end_date->format('d-m-Y') }}<br>
+                                            @if(!empty($event->note))
+                                            Catatan: {{ $event->note }}<br>
+                                            @endif
+                                            Model: {{ $event->learning_model ?? '-' }}
+                                        </div>
                                     </div>
                                 </td>
                                 @php $i = $endIdx; @endphp
                             @else
-                                <td class="border px-0 py-2"></td>
+                                <td class="border px-0 py-1"></td>
                             @endif
                         @endfor
                     </tr>
