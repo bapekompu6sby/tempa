@@ -203,16 +203,20 @@ class EventController extends Controller
             ->orderBy('start_date', 'asc')
             ->get();
 
-        // Build allMonths array (e.g., ['Januari 2026', 'Februari 2026', ...])
-        $monthNames = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        // Group events by month (Jan - Dec)
+        $months = [
+            'Januari' => [], 'Februari' => [], 'Maret' => [], 'April' => [],
+            'Mei' => [], 'Juni' => [], 'Juli' => [], 'Agustus' => [],
+            'September' => [], 'Oktober' => [], 'November' => [], 'Desember' => []
         ];
-        $allMonths = [];
-        foreach ($monthNames as $i => $name) {
-            $allMonths[] = $name . ' ' . $year;
+        foreach ($events as $event) {
+            $monthNum = $event->start_date ? $event->start_date->format('n') : null;
+            if ($monthNum) {
+                $monthName = array_keys($months)[$monthNum - 1];
+                $months[$monthName][] = $event;
+            }
         }
 
-        return view('events.kalender', compact('events', 'allMonths', 'year'));
+        return view('events.kalender', compact('months', 'year'));
     }
 }
