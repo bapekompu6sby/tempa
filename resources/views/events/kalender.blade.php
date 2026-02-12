@@ -16,27 +16,32 @@
             <tbody>
                 @forelse($events as $event)
                     <tr>
-                        <td class="border px-4 py-2 font-medium">
-                            {{ $event->name }}<br>
-                            <span class="text-xs text-gray-600">{{ $event->start_date->format('d M Y') }} - {{ $event->end_date->format('d M Y') }}</span>
-                        </td>
-                        @foreach($allMonths as $month)
+                        @foreach($allMonths as $idx => $month)
                             @php
-                                $startMonth = $event->start_date->format('F Y');
-                                $endMonth = $event->end_date->format('F Y');
-                                $currentMonth = $month;
-                                $isInRange = (strtotime('01 ' . $currentMonth) >= strtotime('01 ' . $startMonth)) && (strtotime('01 ' . $currentMonth) <= strtotime('01 ' . $endMonth));
+                                // $month is like 'Januari 2026', convert to month number and year
+                                [$monthName, $monthYear] = explode(' ', $month);
+                                $monthNum = array_search($monthName, [
+                                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                                ]) + 1;
+                                $cellDate = \Carbon\Carbon::createFromDate($monthYear, $monthNum, 1);
+                                $startMonth = $event->start_date->copy()->startOfMonth();
+                                $endMonth = $event->end_date->copy()->startOfMonth();
+                                $isInRange = $cellDate->between($startMonth, $endMonth);
                             @endphp
-                            <td class="border px-4 py-2 text-center">
+                            <td class="border px-4 py-2 text-center align-middle">
                                 @if($isInRange)
-                                    <span class="inline-block w-3 h-3 rounded-full bg-blue-500"></span>
+                                    <div class="bg-blue-500 text-white rounded p-2 text-xs font-semibold">
+                                        {{ $event->name }}<br>
+                                        <span class="block text-[10px] text-white opacity-80">{{ $event->start_date->format('d M') }} - {{ $event->end_date->format('d M') }}</span>
+                                    </div>
                                 @endif
                             </td>
                         @endforeach
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($allMonths) + 1 }}" class="border px-4 py-2 text-center text-gray-500">Tidak ada pelatihan.</td>
+                        <td colspan="{{ count($allMonths) }}" class="border px-4 py-2 text-center text-gray-500">Tidak ada pelatihan.</td>
                     </tr>
                 @endforelse
             </tbody>
