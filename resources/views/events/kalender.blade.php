@@ -3,6 +3,14 @@
 @section('content')
 <div class="container mx-auto py-8">
     <h1 class="text-2xl font-bold mb-6">Kalender Pelatihan</h1>
+    <form method="GET" class="mb-4 flex items-center gap-2">
+        <label for="year" class="font-medium">Tahun:</label>
+        <select name="year" id="year" class="border rounded px-2 py-1" onchange="this.form.submit()">
+            @foreach($years as $y)
+                <option value="{{ $y }}" @if($y == $year) selected @endif>{{ $y }}</option>
+            @endforeach
+        </select>
+    </form>
     <style>
         .event-bar {
             min-height: 20px;
@@ -79,15 +87,16 @@
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
                             $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
-                            $colors = [
-                                'bg-green-400', 'bg-yellow-300', 'bg-blue-400', 'bg-pink-400', 'bg-purple-400', 'bg-red-400', 'bg-orange-400',
-                                'bg-cyan-400', 'bg-lime-400', 'bg-fuchsia-400', 'bg-amber-400', 'bg-emerald-400', 'bg-teal-400', 'bg-indigo-400',
-                                'bg-sky-400', 'bg-rose-400', 'bg-violet-400', 'bg-slate-400', 'bg-zinc-400', 'bg-stone-400', 'bg-blue-300',
-                                'bg-green-300', 'bg-yellow-200', 'bg-pink-200', 'bg-purple-200', 'bg-red-200', 'bg-orange-200', 'bg-cyan-200',
-                                'bg-lime-200', 'bg-fuchsia-200', 'bg-amber-200', 'bg-emerald-200', 'bg-teal-200', 'bg-indigo-200', 'bg-sky-200',
-                                'bg-rose-200', 'bg-violet-200', 'bg-slate-200', 'bg-zinc-200', 'bg-stone-200'
+                            // Color by learning model
+                            $modelColors = [
+                                'full_elearning' => 'bg-blue-400',
+                                'distance_learning' => 'bg-yellow-300',
+                                'blended_learning' => 'bg-green-400',
+                                'classical' => 'bg-pink-400',
+                                null => 'bg-gray-300',
+                                '' => 'bg-gray-300',
                             ];
-                            $color = $colors[$loop->index % count($colors)];
+                            $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
                         @for($i = 0; $i < count($allMonths); $i++)
                             @if($i == $startIdx)
