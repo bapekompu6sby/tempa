@@ -198,21 +198,18 @@ class EventController extends Controller
      */
     public function kalender(Request $request)
     {
+        $years = range(date('Y') - 5, date('Y') + 2); // Example: 5 years back, 2 years forward
         $year = $request->input('year', now()->year);
         $events = Event::whereYear('start_date', $year)
             ->orderBy('start_date', 'asc')
             ->get();
 
-        // Build allMonths array (e.g., ['Januari 2026', 'Februari 2026', ...])
-        $monthNames = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
+        $monthNames = ['Januari', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
         $allMonths = [];
         foreach ($monthNames as $i => $name) {
-            $allMonths[] = $name . ' ' . $year;
+            $allMonths[] = $name;
         }
 
-        return view('events.kalender', compact('events', 'allMonths', 'year'));
+        return view('events.kalender', compact('events', 'allMonths', 'year', 'years'));
     }
 }
