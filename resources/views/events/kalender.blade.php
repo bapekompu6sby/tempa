@@ -15,25 +15,11 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             margin: 0 auto;
+            transition: box-shadow 0.2s;
         }
-        .event-tooltip {
-            display: none;
-            position: absolute;
-            z-index: 10;
-            left: 50%;
-            top: 100%;
-            transform: translateX(-50%);
-            background: #fff;
-            color: #222;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            padding: 8px 12px;
-            white-space: pre-line;
-            min-width: 180px;
-            font-size: 12px;
+        .event-bar:active, .event-bar:focus {
+            box-shadow: 0 0 0 2px #2563eb;
         }
-        .event-bar:hover .event-tooltip { display: block; }
         .month-col {
             width: 90px;
             min-width: 90px;
@@ -46,6 +32,35 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             vertical-align: middle;
+        }
+        .modal-bg {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0; top: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-bg.active { display: flex; }
+        .modal-content {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            padding: 24px 32px;
+            min-width: 300px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 20px;
+            color: #888;
+            cursor: pointer;
         }
     </style>
     <div class="overflow-x-auto">
@@ -64,22 +79,34 @@
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
                             $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
-                            $colors = ['bg-green-400', 'bg-yellow-300', 'bg-blue-400', 'bg-pink-400', 'bg-purple-400', 'bg-red-400', 'bg-orange-400', 'bg-cyan-400', 'bg-lime-400', 'bg-fuchsia-400', 'bg-amber-400', 'bg-emerald-400'];
+                            $colors = [
+                                'bg-green-400', 'bg-yellow-300', 'bg-blue-400', 'bg-pink-400', 'bg-purple-400', 'bg-red-400', 'bg-orange-400',
+                                'bg-cyan-400', 'bg-lime-400', 'bg-fuchsia-400', 'bg-amber-400', 'bg-emerald-400', 'bg-teal-400', 'bg-indigo-400',
+                                'bg-sky-400', 'bg-rose-400', 'bg-violet-400', 'bg-slate-400', 'bg-zinc-400', 'bg-stone-400', 'bg-blue-300',
+                                'bg-green-300', 'bg-yellow-200', 'bg-pink-200', 'bg-purple-200', 'bg-red-200', 'bg-orange-200', 'bg-cyan-200',
+                                'bg-lime-200', 'bg-fuchsia-200', 'bg-amber-200', 'bg-emerald-200', 'bg-teal-200', 'bg-indigo-200', 'bg-sky-200',
+                                'bg-rose-200', 'bg-violet-200', 'bg-slate-200', 'bg-zinc-200', 'bg-stone-200'
+                            ];
                             $color = $colors[$loop->index % count($colors)];
                         @endphp
                         @for($i = 0; $i < count($allMonths); $i++)
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
-                                         style="width: 100%; max-width: 100%;">
+                                         style="width: 100%; max-width: 100%;"
+                                         tabindex="0"
+                                         onclick="showEventModal({{ $event->id }})">
                                         <span class="event-title">{{ \Illuminate\Support\Str::limit($event->name, 18) }}</span>
-                                        <div class="event-tooltip">
-                                            <strong>{{ $event->name }}</strong><br>
-                                            Tanggal: {{ $event->start_date->format('d-m-Y') }} - {{ $event->end_date->format('d-m-Y') }}<br>
+                                    </div>
+                                    <div id="event-modal-{{ $event->id }}" class="modal-bg" onclick="hideEventModal(event, {{ $event->id }})">
+                                        <div class="modal-content" onclick="event.stopPropagation()">
+                                            <span class="modal-close" onclick="hideEventModal(event, {{ $event->id }})">&times;</span>
+                                            <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
+                                            <div class="mb-1 text-sm">Tanggal: <b>{{ $event->start_date->format('d-m-Y') }}</b> - <b>{{ $event->end_date->format('d-m-Y') }}</b></div>
                                             @if(!empty($event->note))
-                                            Catatan: {{ $event->note }}<br>
+                                            <div class="mb-1 text-sm">Catatan: {{ $event->note }}</div>
                                             @endif
-                                            Model: {{ $event->learning_model ?? '-' }}
+                                            <div class="mb-1 text-sm">Model: {{ $event->learning_model ?? '-' }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -97,5 +124,22 @@
             </tbody>
         </table>
     </div>
+    <script>
+        function showEventModal(id) {
+            document.getElementById('event-modal-' + id).classList.add('active');
+        }
+        function hideEventModal(e, id) {
+            e.stopPropagation();
+            document.getElementById('event-modal-' + id).classList.remove('active');
+        }
+        // Optional: close modal on ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-bg.active').forEach(function(modal) {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+    </script>
 </div>
 @endsection
