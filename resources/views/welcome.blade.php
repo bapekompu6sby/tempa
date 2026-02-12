@@ -11,6 +11,7 @@
 		<div class="w-full max-w-3xl">
 			<div class="flex gap-6 mb-6">
 				<a href="{{ route('instructions.index') }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold shadow hover:bg-blue-700 transition">Referensi Instruksi</a>
+				<a href="{{ route('events.kalender') }}" class="px-6 py-3 bg-green-600 text-white rounded-lg text-lg font-semibold shadow hover:bg-green-700 transition">Kalender Pelatihan</a>
 			</div>
 
 			{{-- Events list --}}

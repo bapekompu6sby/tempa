@@ -193,4 +193,30 @@ class EventController extends Controller
     $event->delete();
     return redirect()->route('events.index')->with('success', 'Pelatihan berhasil dihapus');
     }
+    /**
+     * Display yearly calendar of events grouped by month.
+     */
+    public function kalender(Request $request)
+    {
+        $year = $request->input('year', now()->year);
+        $events = Event::whereYear('start_date', $year)
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        // Group events by month (Jan - Dec)
+        $months = [
+            'Januari' => [], 'Februari' => [], 'Maret' => [], 'April' => [],
+            'Mei' => [], 'Juni' => [], 'Juli' => [], 'Agustus' => [],
+            'September' => [], 'Oktober' => [], 'November' => [], 'Desember' => []
+        ];
+        foreach ($events as $event) {
+            $monthNum = $event->start_date ? $event->start_date->format('n') : null;
+            if ($monthNum) {
+                $monthName = array_keys($months)[$monthNum - 1];
+                $months[$monthName][] = $event;
+            }
+        }
+
+        return view('events.kalender', compact('months', 'year'));
+    }
 }
