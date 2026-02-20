@@ -24,6 +24,11 @@ class EventController extends Controller
         if (!empty($month)) {
             $query->whereMonth('start_date', $month);
         }
+        // Search by event name
+        $q = $request->input('q');
+        if (!empty($q)) {
+            $query->where('name', 'like', "%{$q}%");
+        }
         // Sort by start_date descending
         $query->orderBy('start_date', 'desc');
         // Paginate (10 per page)

@@ -11,6 +11,10 @@
     {{-- Filters: year and month --}}
     <form method="GET" action="{{ route('events.index') }}" class="flex items-center gap-3 mb-4">
         <div>
+            <label class="text-sm text-gray-600">Cari Nama</label>
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama pelatihan..." class="ml-2 border rounded px-2 py-1 text-sm" />
+        </div>
+        <div>
             <label class="text-sm text-gray-600">Tahun</label>
             <select name="year" class="ml-2 border rounded px-2 py-1 text-sm">
                 <option value="" {{ empty($year) ? 'selected' : '' }}>Semua</option>
@@ -32,7 +36,7 @@
         </div>
         <div class="flex items-end">
             <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Filter</button>
-            @if(request()->hasAny(['year','month']) && (request('year') || request('month')))
+            @if(request()->hasAny(['year','month','q']) && (request('year') || request('month') || request('q')))
                 <a href="{{ route('events.index') }}" class="ml-2 text-sm text-gray-600">Reset</a>
             @endif
         </div>
