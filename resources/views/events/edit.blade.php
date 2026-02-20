@@ -46,7 +46,14 @@
         </div>
         <div class="mb-4">
             <label for="field" class="block mb-2 font-semibold">Bidang</label>
-            <input type="text" name="field" id="field" class="w-full border px-3 py-2 rounded" value="{{ old('field', $event->field) }}">
+            <select name="field" id="field" class="w-full border px-3 py-2 rounded">
+                <option value="" {{ old('field', $event->field) == '' ? 'selected' : '' }}>-- Pilih bidang --</option>
+                <option value="SDA" {{ old('field', $event->field) == 'SDA' ? 'selected' : '' }}>SDA</option>
+                <option value="CKPS" {{ old('field', $event->field) == 'CKPS' ? 'selected' : '' }}>CKPS</option>
+                <option value="BM" {{ old('field', $event->field) == 'BM' ? 'selected' : '' }}>BM</option>
+                <option value="PIW" {{ old('field', $event->field) == 'PIW' ? 'selected' : '' }}>PIW</option>
+                <option value="Manajemen" {{ old('field', $event->field) == 'Manajemen' ? 'selected' : '' }}>Manajemen</option>
+            </select>
         </div>
         <div class="mb-4">
             <label for="status" class="block mb-2 font-semibold">Status</label>

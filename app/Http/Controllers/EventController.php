@@ -168,6 +168,10 @@ class EventController extends Controller
             'note' => 'nullable|string',
             'document_drive_url' => 'nullable|url',
             'event_report_file' => 'nullable|file|mimes:pdf,doc,docx,zip,rar',
+            'target' => 'nullable|integer',
+            'jp_module' => 'nullable|integer',
+            'jp_facilitator' => 'nullable|integer',
+            'field' => 'nullable|string|max:255',
         ]);
 
         // Handle file upload if present
