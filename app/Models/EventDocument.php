@@ -22,6 +22,16 @@ class EventDocument extends Model
         'notes',
         'link',
         'file_path',
+        'checked',
+    ];
+
+    /**
+     * Type casts for attributes.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'checked' => 'boolean',
     ];
 
     /**
