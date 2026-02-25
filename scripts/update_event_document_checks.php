@@ -31,10 +31,11 @@ $total = 0;
 $changed = 0;
 
 try {
-    // include files relationship to avoid N+1
-    foreach (EventDocument::with('files')->cursor() as $doc) {
+    // include both files and parent event (for start_date) to avoid N+1
+    foreach (EventDocument::with(['files','event'])->cursor() as $doc) {
         $total++;
 
+        // base check: link, stored file, or any uploaded attachment
         $hasAttachment = false;
         if (!empty($doc->link)) {
             $hasAttachment = true;
@@ -42,11 +43,26 @@ try {
         if (!$hasAttachment && !empty($doc->file_path)) {
             $hasAttachment = true;
         }
-        if (!$hasAttachment && $doc->relationLoaded('files') && $doc->files->count() > 0) {
-            $hasAttachment = true;
+        if (!$hasAttachment) {
+            // use files count directly (we eager-loaded relationship)
+            if ($doc->files && $doc->files->count() > 0) {
+                $hasAttachment = true;
+            }
         }
 
-        $desired = $hasAttachment ? true : false;
+        // override: if the parent event starts in 2025, consider this document checked
+        if (!$hasAttachment && $doc->event && $doc->event->start_date) {
+            try {
+                $year = \Carbon\Carbon::parse($doc->event->start_date)->year;
+                if ($year === 2025) {
+                    $hasAttachment = true;
+                }
+            } catch (\Exception $e) {
+                // ignore parse errors and leave hasAttachment as-is
+            }
+        }
+
+        $desired = (bool) $hasAttachment;
         if ($doc->checked !== $desired) {
             $doc->checked = $desired;
             $doc->save();
