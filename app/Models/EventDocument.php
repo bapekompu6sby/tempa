@@ -43,6 +43,20 @@ class EventDocument extends Model
     }
 
     /**
+     * Automatically set checked attribute based on link, file_path, or attachments.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        static::saving(function ($model) {
+            $hasLink = !empty($model->link);
+            $hasFilePath = !empty($model->file_path);
+            $hasAttachment = $model->files()->count() > 0;
+            $model->checked = $hasLink || $hasFilePath || $hasAttachment;
+        });
+    }
+
+    /**
      * Multiple files (attachments) for this document.
      */
     public function files()

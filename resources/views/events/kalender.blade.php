@@ -53,14 +53,16 @@
         .modal-bg.active { display: flex; }
         .modal-content {
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-            padding: 24px 32px;
-            min-width: 300px;
-            max-width: 90vw;
-            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(37,99,235,0.18);
+            padding: 32px 40px;
+            min-width: 340px;
+            max-width: 95vw;
+            max-height: 95vh;
             overflow-y: auto;
             position: relative;
+            border: 2px solid #2563eb;
+            transition: box-shadow 0.2s, border-color 0.2s;
         }
         .modal-close {
             position: absolute;
@@ -111,11 +113,17 @@
                                         <div class="modal-content" onclick="event.stopPropagation()">
                                             <span class="modal-close" onclick="hideEventModal(event, {{ $event->id }})">&times;</span>
                                             <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
-                                            <div class="mb-1 text-sm">Tanggal: <b>{{ $event->start_date->format('d-m-Y') }}</b> - <b>{{ $event->end_date->format('d-m-Y') }}</b></div>
-                                            @if(!empty($event->note))
-                                            <div class="mb-1 text-sm">Catatan: {{ $event->note }}</div>
-                                            @endif
-                                            <div class="mb-1 text-sm">Model: {{ $event->learning_model ?? '-' }}</div>
+                                            <div class="mb-2 text-sm flex flex-col gap-1">
+                                                <div><span class="font-medium">Tanggal:</span> <b>{{ $event->start_date->format('d-m-Y') }}</b> - <b>{{ $event->end_date->format('d-m-Y') }}</b></div>
+                                                @if(!empty($event->note))
+                                                <div><span class="font-medium">Catatan:</span> {{ $event->note }}</div>
+                                                @endif
+                                                <div><span class="font-medium">Model:</span> {{ $event->learning_model ?? '-' }}</div>
+                                                <div><span class="font-medium">Target:</span> {{ $event->target ?? '-' }}</div>
+                                                <div><span class="font-medium">Bidang:</span> {{ $event->field ?? '-' }}</div>
+                                                <div><span class="font-medium">JP Kurmod:</span> {{ $event->jp_module ?? '-' }}</div>
+                                                <div><span class="font-medium">JP Pengajar:</span> {{ $event->jp_facilitator ?? '-' }}</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
