@@ -119,6 +119,29 @@
                                         <div class="modal-content" onclick="event.stopPropagation()">
                                             <span class="modal-close" onclick="hideEventModal(event, {{ $event->id }})">&times;</span>
                                             <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
+                                            @php
+                                                $statusLabels = [
+                                                    'tentative' => 'Tentative',
+                                                    'belum_dimulai' => 'Belum Dimulai',
+                                                    'persiapan' => 'Persiapan',
+                                                    'pelaksanaan' => 'Pelaksanaan',
+                                                    'pelaporan' => 'Pelaporan',
+                                                    'dibatalkan' => 'Dibatalkan',
+                                                    'selesai' => 'Selesai',
+                                                ];
+                                                $statusClasses = [
+                                                    'tentative' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold',
+                                                    'belum_dimulai' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold',
+                                                    'persiapan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold',
+                                                    'pelaksanaan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold',
+                                                    'pelaporan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold',
+                                                    'dibatalkan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-semibold',
+                                                    'selesai' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold',
+                                                ];
+                                                $stLabel = $statusLabels[$event->status ?? ''] ?? ($event->status ?? '-');
+                                                $stClass = $statusClasses[$event->status ?? ''] ?? 'inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold';
+                                            @endphp
+                                            <div class="mb-1 text-sm">Status: <span class="{{ $stClass }}">{{ $stLabel }}</span></div>
                                             <div class="mb-1 text-sm">Tanggal: <b>{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d F Y') }}</b> - <b>{{ \Carbon\Carbon::parse($event->end_date)->translatedFormat('d F Y') }}</b></div>
                                             @if(!empty($event->note))
                                             <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
