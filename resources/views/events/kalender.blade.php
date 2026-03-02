@@ -119,13 +119,13 @@
                                         <div class="modal-content" onclick="event.stopPropagation()">
                                             <span class="modal-close" onclick="hideEventModal(event, {{ $event->id }})">&times;</span>
                                             <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
-                                            <div class="mb-1 text-sm">Tanggal: <b>{{ $event->start_date->format('d-m-Y') }}</b> - <b>{{ $event->end_date->format('d-m-Y') }}</b></div>
+                                            <div class="mb-1 text-sm">Tanggal: <b>{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d F Y') }}</b> - <b>{{ \Carbon\Carbon::parse($event->end_date)->translatedFormat('d F Y') }}</b></div>
                                             @if(!empty($event->note))
                                             <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
                                             @endif
                                             <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_kurmod ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_pengajar ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
                                         </div>
                                     </div>
