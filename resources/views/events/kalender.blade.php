@@ -105,6 +105,13 @@
                                          style="width: 100%; max-width: 100%;"
                                          tabindex="0"
                                          onclick="showEventModal({{ $event->id }})">
+                                        <span class="inline-block w-3 h-3 rounded-full mr-2 border border-gray-400"
+                                            style="background-color: {{
+                                                $event->learning_model === 'full_elearning' ? '#60a5fa' :
+                                                ($event->learning_model === 'distance_learning' ? '#fde68a' :
+                                                ($event->learning_model === 'blended_learning' ? '#34d399' :
+                                                ($event->learning_model === 'classical' ? '#f9a8d4' : '#d1d5db')))
+                                            }};"></span>
                                         <span class="event-title">{{ \Illuminate\Support\Str::limit($event->name, 18) }}</span>
                                     </div>
                                     <div id="event-modal-{{ $event->id }}" class="modal-bg" onclick="hideEventModal(event, {{ $event->id }})">
@@ -115,7 +122,10 @@
                                             @if(!empty($event->note))
                                             <div class="mb-1 text-sm">Catatan: {{ $event->note }}</div>
                                             @endif
-                                            <div class="mb-1 text-sm">Model: {{ $event->learning_model ?? '-' }}</div>
+                                            <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_kurmod ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_pengajar ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
                                         </div>
                                     </div>
                                 </td>
