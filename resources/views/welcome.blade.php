@@ -210,9 +210,6 @@
 					   </div>
 				   </div>
 			   </form>
-			   <div class="mt-4 text-center">
-				   <a href="{{ route('events.kalender') }}" class="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-base font-semibold shadow hover:bg-green-700 transition">Lihat Kalender Pelatihan tanpa login</a>
-			   </div>
 		   </div>
 
 		{{-- Always show read-only events list below the password form when not unlocked --}}
