@@ -93,11 +93,10 @@ Route::get('public/events', function (\Illuminate\Http\Request $request) {
     return view('events.public_index', compact('events', 'years', 'year', 'month', 'status'));
 });
 // (public event detail route removed — only public events index remains)
-
+Route::get('events/kalender', [App\Http\Controllers\EventController::class, 'kalender'])->name('events.kalender');
 // Protect application routes behind the simple password middleware (welcome page stays public)
 Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function () {
     // Kalender Pelatihan yearly calendar
-    Route::get('events/kalender', [App\Http\Controllers\EventController::class, 'kalender'])->name('events.kalender');
     Route::resource('instructions', App\Http\Controllers\InstructionController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
     Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');

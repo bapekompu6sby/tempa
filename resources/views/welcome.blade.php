@@ -36,7 +36,10 @@
 						<div class="p-2 bg-gray-50 rounded">
 							<div class="flex items-center justify-between">
 								<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
-								<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition ml-2">Lihat lebih detail</a>
+								<div class="flex gap-2">
+									<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition">Lihat lebih detail</a>
+									<a href="{{ route('events.kalender') }}" class="text-xs px-3 py-1 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 transition">Lihat Kalender</a>
+								</div>
 							</div>
 							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
 								<div class="flex items-center justify-between gap-2">
@@ -234,7 +237,10 @@
 						<div class="p-2 bg-gray-50 rounded">
 								<div class="flex items-center justify-between">
 									<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
-									<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition ml-2">Lihat lebih detail</a>
+									<div class="flex gap-2">
+										<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition">Lihat lebih detail</a>
+										<a href="{{ route('events.kalender') }}" class="text-xs px-3 py-1 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 transition">Lihat Kalender</a>
+									</div>
 								</div>
 							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
 								<div class="flex items-center justify-between gap-2">
