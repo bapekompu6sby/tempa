@@ -71,6 +71,14 @@
             cursor: pointer;
         }
     </style>
+    <!-- Legend for learning model colors -->
+    <div class="mb-4 flex flex-wrap gap-4 items-center">
+        <span class="font-semibold mr-2">Model Pelatihan:</span>
+        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-400 border border-gray-400 inline-block"></span> E-Learning</span>
+        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-yellow-300 border border-gray-400 inline-block"></span> Distance</span>
+        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-400 border border-gray-400 inline-block"></span> Blended</span>
+        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-pink-400 border border-gray-400 inline-block"></span> Klasikal</span>
+    </div>
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-200">
             <thead>
@@ -105,13 +113,6 @@
                                          style="width: 100%; max-width: 100%;"
                                          tabindex="0"
                                          onclick="showEventModal({{ $event->id }})">
-                                        <span class="inline-block w-3 h-3 rounded-full mr-2 border border-gray-400"
-                                            style="background-color: {{
-                                                $event->learning_model === 'full_elearning' ? '#60a5fa' :
-                                                ($event->learning_model === 'distance_learning' ? '#fde68a' :
-                                                ($event->learning_model === 'blended_learning' ? '#34d399' :
-                                                ($event->learning_model === 'classical' ? '#f9a8d4' : '#d1d5db')))
-                                            }};"></span>
                                         <span class="event-title">{{ \Illuminate\Support\Str::limit($event->name, 18) }}</span>
                                     </div>
                                     <div id="event-modal-{{ $event->id }}" class="modal-bg" onclick="hideEventModal(event, {{ $event->id }})">
@@ -120,7 +121,7 @@
                                             <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
                                             <div class="mb-1 text-sm">Tanggal: <b>{{ $event->start_date->format('d-m-Y') }}</b> - <b>{{ $event->end_date->format('d-m-Y') }}</b></div>
                                             @if(!empty($event->note))
-                                            <div class="mb-1 text-sm">Catatan: {{ $event->note }}</div>
+                                            <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
                                             @endif
                                             <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_kurmod ?? '-' }}</b></div>
