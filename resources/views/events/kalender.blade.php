@@ -93,8 +93,12 @@
                     <tr>
                         @php
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-                            $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
-                            $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
+                            $startMonthName = $event->start_date->format('M');
+                            $endMonthName = $event->end_date->format('M');
+                            $startIdx = ($event->start_date->format('Y') == $year) ? array_search($startMonthName, $allMonths) : 0;
+                            $endIdx = ($event->end_date->format('Y') == $year) ? array_search($endMonthName, $allMonths) : count($allMonths) - 1;
+                            if ($startIdx === false) $startIdx = 0;
+                            if ($endIdx === false) $endIdx = count($allMonths) - 1;
                             // Color by learning model
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
@@ -106,8 +110,7 @@
                             ];
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
-                        @php $i = 0; @endphp
-                        @while($i < count($allMonths))
+                        @for($i = 0; $i < count($allMonths); $i++)
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
@@ -148,18 +151,17 @@
                                             <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
                                             @endif
                                             <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">Total JP: <b>{{ $event->jp_module ?? '-' }}</b></div>
-                                        
+                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
                                         </div>
                                     </div>
                                 </td>
-                                @php $i = $endIdx + 1; @endphp
+                                @php $i = $endIdx; @endphp
                             @else
                                 <td class="border px-0 py-1 month-col"></td>
-                                @php $i++; @endphp
                             @endif
-                        @endwhile
+                        @endfor
                     </tr>
                 @empty
                     <tr>
