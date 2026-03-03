@@ -172,6 +172,7 @@ class EventController extends Controller
             'jp_module' => 'nullable|integer',
             'jp_facilitator' => 'nullable|integer',
             'field' => 'nullable|string|max:255',
+            'status' => 'nullable|in:tentative,belum_dimulai,persiapan,pelaksanaan,pelaporan,dibatalkan,selesai',
         ]);
 
         // Handle file upload if present
