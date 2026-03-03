@@ -211,7 +211,7 @@ class EventController extends Controller
         $year = $request->input('year', now()->year);
         $events = Event::whereYear('start_date', $year)
             ->orderBy('start_date', 'asc')
-            ->select(['id', 'name', 'start_date', 'end_date', 'learning_model', 'status', 'note', 'target', 'jp_module', 'jp_facilitator'])
+            ->select(['id', 'name', 'start_date', 'end_date', 'learning_model', 'status', 'note', 'target', 'jp_module', 'jp_facilitator', 'field'])
             ->get();
 
         $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
