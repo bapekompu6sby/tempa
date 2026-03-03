@@ -141,11 +141,11 @@
                                 '' => 'bg-gray-300',
                             ];
                             $fieldColors = [
-                                'sda' => 'bg-blue-400',
-                                'ckps' => 'bg-orange-400',
-                                'bm' => 'bg-green-400',
-                                'piw' => 'bg-pink-400',
-                                'manajemen' => 'bg-purple-400',
+                                'SDA' => 'bg-blue-400',
+                                'CKPS' => 'bg-orange-400',
+                                'BM' => 'bg-green-400',
+                                'PIW' => 'bg-pink-400',
+                                'Manajemenfi' => 'bg-purple-400',
                                 null => 'bg-gray-300',
                                 '' => 'bg-gray-300',
                             ];
