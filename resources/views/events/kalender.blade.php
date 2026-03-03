@@ -89,7 +89,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($events as $event)
+                @foreach($events as $event)
                     <tr>
                         @php
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
