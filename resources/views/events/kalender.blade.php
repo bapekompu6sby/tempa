@@ -10,6 +10,12 @@
                 <option value="{{ $y }}" @if($y == $year) selected @endif>{{ $y }}</option>
             @endforeach
         </select>
+        <label for="colorBy" class="font-medium ml-4">Indikator Warna:</label>
+        <select id="colorBy" class="border rounded px-2 py-1">
+            <option value="model" selected>Model Pelatihan</option>
+            <option value="status">Status</option>
+            <option value="field">Bidang</option>
+        </select>
     </form>
     <style>
         .event-bar {
@@ -73,11 +79,25 @@
     </style>
     <!-- Legend for learning model colors -->
     <div class="mb-4 flex flex-wrap gap-4 items-center">
-        <span class="font-semibold mr-2">Model Pelatihan:</span>
-        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-400 border border-gray-400 inline-block"></span> E-Learning</span>
-        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-yellow-300 border border-gray-400 inline-block"></span> Distance</span>
-        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-400 border border-gray-400 inline-block"></span> Blended</span>
-        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-pink-400 border border-gray-400 inline-block"></span> Klasikal</span>
+        <span class="font-semibold mr-2" id="legend-title">Model Pelatihan:</span>
+        <span id="legend-model">
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-400 border border-gray-400 inline-block"></span> E-Learning</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-yellow-300 border border-gray-400 inline-block"></span> Distance</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-400 border border-gray-400 inline-block"></span> Blended</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-pink-400 border border-gray-400 inline-block"></span> Klasikal</span>
+        </span>
+        <span id="legend-status" style="display:none">
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-gray-400 border border-gray-400 inline-block"></span> Draft</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-500 border border-gray-400 inline-block"></span> Berjalan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-500 border border-gray-400 inline-block"></span> Selesai</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-red-400 border border-gray-400 inline-block"></span> Dibatalkan</span>
+        </span>
+        <span id="legend-field" style="display:none">
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-purple-400 border border-gray-400 inline-block"></span> Kesehatan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-orange-400 border border-gray-400 inline-block"></span> Pendidikan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-teal-400 border border-gray-400 inline-block"></span> Teknologi</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-gray-300 border border-gray-400 inline-block"></span> Lainnya</span>
+        </span>
     </div>
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-200">
@@ -95,6 +115,7 @@
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
                             $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
+                            // Color maps for each indicator
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
                                 'distance_learning' => 'bg-yellow-300',
@@ -103,13 +124,29 @@
                                 null => 'bg-gray-300',
                                 '' => 'bg-gray-300',
                             ];
-                            $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
+                            $statusColors = [
+                                'draft' => 'bg-gray-400',
+                                'berjalan' => 'bg-blue-500',
+                                'selesai' => 'bg-green-500',
+                                'dibatalkan' => 'bg-red-400',
+                                null => 'bg-gray-300',
+                                '' => 'bg-gray-300',
+                            ];
+                            $fieldColors = [
+                                'kesehatan' => 'bg-purple-400',
+                                'pendidikan' => 'bg-orange-400',
+                                'teknologi' => 'bg-teal-400',
+                                null => 'bg-gray-300',
+                                '' => 'bg-gray-300',
+                            ];
                         @endphp
                         @foreach($allMonths as $idx => $month)
                             @if($idx == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
-                                    <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
-                                         style="width: 100%; max-width: 100%;"
+                                    <div class="event-bar"
+                                         data-model="{{ $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300' }}"
+                                         data-status="{{ $statusColors[$event->status ?? ''] ?? 'bg-gray-300' }}"
+                                         data-field="{{ $fieldColors[Str::lower($event->field ?? '')] ?? 'bg-gray-300' }}"
                                          tabindex="0"
                                          onclick="showEventModal({{ $event->id }})">
                                         <span class="event-title">{{ \Illuminate\Support\Str::limit($event->name, 18) }}</span>
@@ -126,6 +163,8 @@
                                             <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
+                                            <div class="mb-1 text-sm">Status: <b>{{ $event->status ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">Bidang: <b>{{ $event->field ?? '-' }}</b></div>
                                         </div>
                                     </div>
                                 </td>
@@ -159,6 +198,28 @@
                 });
             }
         });
+
+        // Color indicator logic
+        function updateColorIndicator() {
+            var colorBy = document.getElementById('colorBy').value;
+            // Update legend
+            document.getElementById('legend-model').style.display = colorBy === 'model' ? '' : 'none';
+            document.getElementById('legend-status').style.display = colorBy === 'status' ? '' : 'none';
+            document.getElementById('legend-field').style.display = colorBy === 'field' ? '' : 'none';
+            document.getElementById('legend-title').textContent =
+                colorBy === 'model' ? 'Model Pelatihan:' :
+                colorBy === 'status' ? 'Status:' :
+                'Bidang:';
+            // Update event bar colors
+            document.querySelectorAll('.event-bar').forEach(function(bar) {
+                bar.classList.remove('bg-blue-400','bg-yellow-300','bg-green-400','bg-pink-400','bg-gray-300','bg-gray-400','bg-blue-500','bg-green-500','bg-red-400','bg-purple-400','bg-orange-400','bg-teal-400');
+                var colorClass = bar.getAttribute('data-' + colorBy);
+                if (colorClass) bar.classList.add(colorClass);
+            });
+        }
+        document.getElementById('colorBy').addEventListener('change', updateColorIndicator);
+        // Initial call
+        updateColorIndicator();
     </script>
 </div>
 @endsection
