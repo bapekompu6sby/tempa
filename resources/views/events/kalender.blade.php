@@ -111,7 +111,18 @@
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
                         @php $i = 0; @endphp
-                        @while($i < count($monthNames))
+                        <script>
+                            console.log(@json($allMonths));
+                            console.log(@json($startIdx));
+                            console.log(@json($endIdx));
+                            
+                        </script>
+                        @while($i < count($allMonths))
+                            <script>
+                                console.log(@json($i));
+                                console.log(@json($startIdx));
+                                console.log(@json($endIdx));                
+                              </script>
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
