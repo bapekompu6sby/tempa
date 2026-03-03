@@ -87,15 +87,20 @@
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-pink-400 border border-gray-400 inline-block"></span> Klasikal</span>
         </span>
         <span id="legend-status" style="display:none">
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-gray-400 border border-gray-400 inline-block"></span> Draft</span>
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-500 border border-gray-400 inline-block"></span> Berjalan</span>
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-500 border border-gray-400 inline-block"></span> Selesai</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-gray-400 border border-gray-400 inline-block"></span> Tentative</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-300 border border-gray-400 inline-block"></span> Belum Dimulai</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-yellow-400 border border-gray-400 inline-block"></span> Persiapan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-500 border border-gray-400 inline-block"></span> Pelaksanaan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-purple-400 border border-gray-400 inline-block"></span> Pelaporan</span>
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-red-400 border border-gray-400 inline-block"></span> Dibatalkan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-500 border border-gray-400 inline-block"></span> Selesai</span>
         </span>
         <span id="legend-field" style="display:none">
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-purple-400 border border-gray-400 inline-block"></span> Kesehatan</span>
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-orange-400 border border-gray-400 inline-block"></span> Pendidikan</span>
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-teal-400 border border-gray-400 inline-block"></span> Teknologi</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-400 border border-gray-400 inline-block"></span> SDA</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-orange-400 border border-gray-400 inline-block"></span> CKPS</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-green-400 border border-gray-400 inline-block"></span> BM</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-pink-400 border border-gray-400 inline-block"></span> PIW</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-purple-400 border border-gray-400 inline-block"></span> Manajemen</span>
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-gray-300 border border-gray-400 inline-block"></span> Lainnya</span>
         </span>
     </div>
@@ -125,17 +130,22 @@
                                 '' => 'bg-gray-300',
                             ];
                             $statusColors = [
-                                'draft' => 'bg-gray-400',
-                                'berjalan' => 'bg-blue-500',
-                                'selesai' => 'bg-green-500',
+                                'tentative' => 'bg-gray-400',
+                                'belum_dimulai' => 'bg-blue-300',
+                                'persiapan' => 'bg-yellow-400',
+                                'pelaksanaan' => 'bg-blue-500',
+                                'pelaporan' => 'bg-purple-400',
                                 'dibatalkan' => 'bg-red-400',
+                                'selesai' => 'bg-green-500',
                                 null => 'bg-gray-300',
                                 '' => 'bg-gray-300',
                             ];
                             $fieldColors = [
-                                'kesehatan' => 'bg-purple-400',
-                                'pendidikan' => 'bg-orange-400',
-                                'teknologi' => 'bg-teal-400',
+                                'sda' => 'bg-blue-400',
+                                'ckps' => 'bg-orange-400',
+                                'bm' => 'bg-green-400',
+                                'piw' => 'bg-pink-400',
+                                'manajemen' => 'bg-purple-400',
                                 null => 'bg-gray-300',
                                 '' => 'bg-gray-300',
                             ];
