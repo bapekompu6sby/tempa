@@ -150,8 +150,11 @@
                                 '' => 'bg-gray-300',
                             ];
                         @endphp
+                        @php $skip = false; @endphp
                         @foreach($allMonths as $idx => $month)
-                            @if($idx == $startIdx)
+                            @if($idx < $startIdx || $idx > $endIdx)
+                                <td class="border px-0 py-1 month-col"></td>
+                            @elseif($idx == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar"
                                          data-model="{{ $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300' }}"
@@ -178,9 +181,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                @php $idx = $endIdx; @endphp
-                            @elseif($idx < $startIdx || $idx > $endIdx)
-                                <td class="border px-0 py-1 month-col"></td>
+                                @php $skip = true; @endphp
+                            @elseif($skip)
+                                @php if($idx == $endIdx) $skip = false; @endphp
+                                @continue
                             @endif
                         @endforeach
                     </tr>
