@@ -92,7 +92,6 @@
                 @forelse($events as $event)
                     <tr>
                         @php
-                            $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
                             $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
                             // Color by learning model
@@ -140,6 +139,14 @@
                                                 ];
                                                 $stLabel = $statusLabels[$event->status ?? ''] ?? ($event->status ?? '-');
                                                 $stClass = $statusClasses[$event->status ?? ''] ?? 'inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold';
+                                                $stModel = [
+                                                    'full_elearning' => 'E-Learning',
+                                                    'distance_learning' => 'Distance',
+                                                    'blended_learning' => 'Blended',
+                                                    'classical' => 'Klasikal',
+                                                    null => '-',
+                                                    '' => '-'
+                                                ];
                                             @endphp
                                             <div class="mb-1 text-sm">Status: <span class="{{ $stClass }}">{{ $stLabel }}</span></div>
                                             <div class="mb-1 text-sm">Tanggal: <b>{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d F Y') }}</b> - <b>{{ \Carbon\Carbon::parse($event->end_date)->translatedFormat('d F Y') }}</b></div>
@@ -149,7 +156,7 @@
                                             <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
+                                            <div class="mb-1 text-sm">Model: <b>{{ $stModel[$event->learning_model] ?? '-' }}</b></div>
                                         </div>
                                     </div>
                                 </td>
