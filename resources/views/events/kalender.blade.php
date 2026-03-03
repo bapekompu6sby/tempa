@@ -92,8 +92,10 @@
                 @forelse($events as $event)
                     <tr>
                         @php
-                            $startIdx = ($event->start_date instanceof \Carbon\Carbon ? $event->start_date : \Carbon\Carbon::parse($event->start_date))->format('Y') == $year ? ($event->start_date instanceof \Carbon\Carbon ? $event->start_date : \Carbon\Carbon::parse($event->start_date))->format('n') - 1 : 0;
-                            $endIdx = ($event->end_date instanceof \Carbon\Carbon ? $event->end_date : \Carbon\Carbon::parse($event->end_date))->format('Y') == $year ? ($event->end_date instanceof \Carbon\Carbon ? $event->end_date : \Carbon\Carbon::parse($event->end_date))->format('n') - 1 : count($allMonths) - 1;
+                            $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                            $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
+                            $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
+                            // Color by learning model
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
                                 'distance_learning' => 'bg-yellow-300',
@@ -104,24 +106,35 @@
                             ];
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
-                        @php $i = 0; @endphp
-                        @while($i < count($allMonths))
+                        @for($i = 0; $i < count($allMonths); $i++)
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
                                          style="width: 100%; max-width: 100%;"
                                          tabindex="0"
-                                         data-event='@json($event)'
-                                         onclick="showEventModal(this)">
+                                         onclick="showEventModal({{ $event->id }})">
                                         <span class="event-title">{{ \Illuminate\Support\Str::limit($event->name, 18) }}</span>
                                     </div>
+                                    <div id="event-modal-{{ $event->id }}" class="modal-bg" onclick="hideEventModal(event, {{ $event->id }})">
+                                        <div class="modal-content" onclick="event.stopPropagation()">
+                                            <span class="modal-close" onclick="hideEventModal(event, {{ $event->id }})">&times;</span>
+                                            <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
+                                            <div class="mb-1 text-sm">Tanggal: <b>{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d F Y') }}</b> - <b>{{ \Carbon\Carbon::parse($event->end_date)->translatedFormat('d F Y') }}</b></div>
+                                            @if(!empty($event->note))
+                                            <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
+                                            @endif
+                                            <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
+                                        </div>
+                                    </div>
                                 </td>
-                                @php $i = $endIdx + 1; @endphp
+                                @php $i = $endIdx; @endphp
                             @else
                                 <td class="border px-0 py-1 month-col"></td>
-                                @php $i++; @endphp
                             @endif
-                        @endwhile
+                        @endfor
                     </tr>
                 @empty
                     <tr>
@@ -131,87 +144,20 @@
             </tbody>
         </table>
     </div>
-    <!-- Single modal for all events -->
-    <div id="event-modal" class="modal-bg" onclick="hideEventModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <span class="modal-close" onclick="hideEventModal(event)">&times;</span>
-            <h2 id="modal-event-name" class="text-lg font-bold mb-2"></h2>
-            <div class="mb-1 text-sm">Status: <span id="modal-event-status" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"></span></div>
-            <div class="mb-1 text-sm">Tanggal: <b id="modal-event-date"></b></div>
-            <div class="mb-1 text-sm" id="modal-event-note"></div>
-            <div class="mb-1 text-sm">Target: <b id="modal-event-target"></b></div>
-            <div class="mb-1 text-sm">JP Kurmod: <b id="modal-event-jp-module"></b></div>
-            <div class="mb-1 text-sm">JP Pengajar: <b id="modal-event-jp-facilitator"></b></div>
-            <div class="mb-1 text-sm">Model: <b id="modal-event-model"></b></div>
-        </div>
-    </div>
     <script>
-        const statusLabels = {
-            'tentative': 'Tentative',
-            'belum_dimulai': 'Belum Dimulai',
-            'persiapan': 'Persiapan',
-            'pelaksanaan': 'Pelaksanaan',
-            'pelaporan': 'Pelaporan',
-            'dibatalkan': 'Dibatalkan',
-            'selesai': 'Selesai',
-        };
-        const statusClasses = {
-            'tentative': 'inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold',
-            'belum_dimulai': 'inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold',
-            'persiapan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold',
-            'pelaksanaan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold',
-            'pelaporan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold',
-            'dibatalkan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-semibold',
-            'selesai': 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold',
-        };
-        const stModel = {
-            'full_elearning': 'E-Learning',
-            'distance_learning': 'Distance',
-            'blended_learning': 'Blended',
-            'classical': 'Klasikal',
-            null: '-',
-            '': '-'
-        };
-        function showEventModal(el) {
-            const event = JSON.parse(el.getAttribute('data-event'));
-            document.getElementById('modal-event-name').textContent = event.name || '-';
-            // Status
-            const stLabel = statusLabels[event.status] || event.status || '-';
-            const stClass = statusClasses[event.status] || 'inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold';
-            const statusSpan = document.getElementById('modal-event-status');
-            statusSpan.textContent = stLabel;
-            statusSpan.className = stClass;
-            // Date
-            let start = event.start_date ? new Date(event.start_date) : null;
-            let end = event.end_date ? new Date(event.end_date) : null;
-            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-            function formatDate(d) {
-                if (!d) return '-';
-                return d.getDate().toString().padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-            }
-            document.getElementById('modal-event-date').textContent = `${formatDate(start)} - ${formatDate(end)}`;
-            // Note
-            const noteDiv = document.getElementById('modal-event-note');
-            if (event.note) {
-                noteDiv.innerHTML = `<b>Catatan:</b> ${event.note}`;
-                noteDiv.style.display = '';
-            } else {
-                noteDiv.innerHTML = '';
-                noteDiv.style.display = 'none';
-            }
-            document.getElementById('modal-event-target').textContent = event.target ?? '-';
-            document.getElementById('modal-event-jp-module').textContent = event.jp_module ?? '-';
-            document.getElementById('modal-event-jp-facilitator').textContent = event.jp_facilitator ?? '-';
-            document.getElementById('modal-event-model').textContent = stModel[event.learning_model] ?? '-';
-            document.getElementById('event-modal').classList.add('active');
+        function showEventModal(id) {
+            document.getElementById('event-modal-' + id).classList.add('active');
         }
-        function hideEventModal(e) {
+        function hideEventModal(e, id) {
             e.stopPropagation();
-            document.getElementById('event-modal').classList.remove('active');
+            document.getElementById('event-modal-' + id).classList.remove('active');
         }
+        // Optional: close modal on ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                document.getElementById('event-modal').classList.remove('active');
+                document.querySelectorAll('.modal-bg.active').forEach(function(modal) {
+                    modal.classList.remove('active');
+                });
             }
         });
     </script>
