@@ -145,7 +145,7 @@
                                 'CKPS' => 'bg-orange-400',
                                 'BM' => 'bg-green-400',
                                 'PIW' => 'bg-pink-400',
-                                'Manajemenfi' => 'bg-purple-400',
+                                'Manajemen' => 'bg-purple-400',
                                 null => 'bg-gray-300',
                                 '' => 'bg-gray-300',
                             ];
