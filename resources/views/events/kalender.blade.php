@@ -93,7 +93,7 @@
         <span id="legend-status" style="display:none">
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-gray-400 border border-gray-400 inline-block"></span> Tentative</span>
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-300 border border-gray-400 inline-block"></span> Belum Dimulai</span>
-            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-yellow-400 border border-gray-400 inline-block"></span> Persiapan</span>
+            <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-orange-400 border border-gray-400 inline-block"></span> Persiapan</span>
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-blue-500 border border-gray-400 inline-block"></span> Pelaksanaan</span>
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-purple-400 border border-gray-400 inline-block"></span> Pelaporan</span>
             <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-red-400 border border-gray-400 inline-block"></span> Dibatalkan</span>
