@@ -106,7 +106,8 @@
                             ];
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
-                        @for($i = 0; $i < count($allMonths); $i++)
+                        @php $i = 0; @endphp
+                        @while($i < count($allMonths))
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
@@ -148,16 +149,18 @@
                                             @endif
                                             <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
                                             <div class="mb-1 text-sm">Total JP: <b>{{ $event->jp_module ?? '-' }}</b></div>
-                                            
+                                        
                                             <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
                                         </div>
                                     </div>
                                 </td>
-                                @php $i = $endIdx; @endphp
+                                @php $i = $endIdx + 1; @endphp
+                                @continue
                             @else
                                 <td class="border px-0 py-1 month-col"></td>
+                                @php $i++; @endphp
                             @endif
-                        @endfor
+                        @endwhile
                     </tr>
                 @empty
                     <tr>
