@@ -24,12 +24,16 @@
             padding: 0 4px;
             cursor: pointer;
             position: relative;
-            max-width: 180px;
+            width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            margin: 0 auto;
+            /* Remove margin and max-width to fill cell */
             transition: box-shadow 0.2s;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .event-bar:active, .event-bar:focus {
             box-shadow: 0 0 0 2px #2563eb;
