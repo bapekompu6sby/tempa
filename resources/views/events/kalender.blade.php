@@ -92,9 +92,8 @@
                 @forelse($events as $event)
                     <tr>
                         @php
-                            $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
-                            $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
-                            // Color by learning model
+                            $startIdx = ($event->start_date instanceof \Carbon\Carbon ? $event->start_date : \Carbon\Carbon::parse($event->start_date))->format('Y') == $year ? ($event->start_date instanceof \Carbon\Carbon ? $event->start_date : \Carbon\Carbon::parse($event->start_date))->format('n') - 1 : 0;
+                            $endIdx = ($event->end_date instanceof \Carbon\Carbon ? $event->end_date : \Carbon\Carbon::parse($event->end_date))->format('Y') == $year ? ($event->end_date instanceof \Carbon\Carbon ? $event->end_date : \Carbon\Carbon::parse($event->end_date))->format('n') - 1 : count($allMonths) - 1;
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
                                 'distance_learning' => 'bg-yellow-300',
@@ -112,53 +111,9 @@
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
                                          style="width: 100%; max-width: 100%;"
                                          tabindex="0"
-                                         onclick="showEventModal({{ $event->id }})">
+                                         data-event='@json($event)'
+                                         onclick="showEventModal(this)">
                                         <span class="event-title">{{ \Illuminate\Support\Str::limit($event->name, 18) }}</span>
-                                    </div>
-                                    <div id="event-modal-{{ $event->id }}" class="modal-bg" onclick="hideEventModal(event, {{ $event->id }})">
-                                        <div class="modal-content" onclick="event.stopPropagation()">
-                                            <span class="modal-close" onclick="hideEventModal(event, {{ $event->id }})">&times;</span>
-                                            <h2 class="text-lg font-bold mb-2">{{ $event->name }}</h2>
-                                            @php
-                                                $statusLabels = [
-                                                    'tentative' => 'Tentative',
-                                                    'belum_dimulai' => 'Belum Dimulai',
-                                                    'persiapan' => 'Persiapan',
-                                                    'pelaksanaan' => 'Pelaksanaan',
-                                                    'pelaporan' => 'Pelaporan',
-                                                    'dibatalkan' => 'Dibatalkan',
-                                                    'selesai' => 'Selesai',
-                                                ];
-                                                $statusClasses = [
-                                                    'tentative' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold',
-                                                    'belum_dimulai' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold',
-                                                    'persiapan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold',
-                                                    'pelaksanaan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold',
-                                                    'pelaporan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold',
-                                                    'dibatalkan' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-semibold',
-                                                    'selesai' => 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold',
-                                                ];
-                                                $stLabel = $statusLabels[$event->status ?? ''] ?? ($event->status ?? '-');
-                                                $stClass = $statusClasses[$event->status ?? ''] ?? 'inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold';
-                                                $stModel = [
-                                                    'full_elearning' => 'E-Learning',
-                                                    'distance_learning' => 'Distance',
-                                                    'blended_learning' => 'Blended',
-                                                    'classical' => 'Klasikal',
-                                                    null => '-',
-                                                    '' => '-'
-                                                ];
-                                            @endphp
-                                            <div class="mb-1 text-sm">Status: <span class="{{ $stClass }}">{{ $stLabel }}</span></div>
-                                            <div class="mb-1 text-sm">Tanggal: <b>{{ \Carbon\Carbon::parse($event->start_date)->translatedFormat('d F Y') }}</b> - <b>{{ \Carbon\Carbon::parse($event->end_date)->translatedFormat('d F Y') }}</b></div>
-                                            @if(!empty($event->note))
-                                            <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
-                                            @endif
-                                            <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">Model: <b>{{ $stModel[$event->learning_model] ?? '-' }}</b></div>
-                                        </div>
                                     </div>
                                 </td>
                                 @php $i = $endIdx + 1; @endphp
@@ -176,20 +131,87 @@
             </tbody>
         </table>
     </div>
+    <!-- Single modal for all events -->
+    <div id="event-modal" class="modal-bg" onclick="hideEventModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="hideEventModal(event)">&times;</span>
+            <h2 id="modal-event-name" class="text-lg font-bold mb-2"></h2>
+            <div class="mb-1 text-sm">Status: <span id="modal-event-status" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"></span></div>
+            <div class="mb-1 text-sm">Tanggal: <b id="modal-event-date"></b></div>
+            <div class="mb-1 text-sm" id="modal-event-note"></div>
+            <div class="mb-1 text-sm">Target: <b id="modal-event-target"></b></div>
+            <div class="mb-1 text-sm">JP Kurmod: <b id="modal-event-jp-module"></b></div>
+            <div class="mb-1 text-sm">JP Pengajar: <b id="modal-event-jp-facilitator"></b></div>
+            <div class="mb-1 text-sm">Model: <b id="modal-event-model"></b></div>
+        </div>
+    </div>
     <script>
-        function showEventModal(id) {
-            document.getElementById('event-modal-' + id).classList.add('active');
+        const statusLabels = {
+            'tentative': 'Tentative',
+            'belum_dimulai': 'Belum Dimulai',
+            'persiapan': 'Persiapan',
+            'pelaksanaan': 'Pelaksanaan',
+            'pelaporan': 'Pelaporan',
+            'dibatalkan': 'Dibatalkan',
+            'selesai': 'Selesai',
+        };
+        const statusClasses = {
+            'tentative': 'inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold',
+            'belum_dimulai': 'inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold',
+            'persiapan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold',
+            'pelaksanaan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold',
+            'pelaporan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold',
+            'dibatalkan': 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-semibold',
+            'selesai': 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold',
+        };
+        const stModel = {
+            'full_elearning': 'E-Learning',
+            'distance_learning': 'Distance',
+            'blended_learning': 'Blended',
+            'classical': 'Klasikal',
+            null: '-',
+            '': '-'
+        };
+        function showEventModal(el) {
+            const event = JSON.parse(el.getAttribute('data-event'));
+            document.getElementById('modal-event-name').textContent = event.name || '-';
+            // Status
+            const stLabel = statusLabels[event.status] || event.status || '-';
+            const stClass = statusClasses[event.status] || 'inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold';
+            const statusSpan = document.getElementById('modal-event-status');
+            statusSpan.textContent = stLabel;
+            statusSpan.className = stClass;
+            // Date
+            let start = event.start_date ? new Date(event.start_date) : null;
+            let end = event.end_date ? new Date(event.end_date) : null;
+            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            function formatDate(d) {
+                if (!d) return '-';
+                return d.getDate().toString().padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+            }
+            document.getElementById('modal-event-date').textContent = `${formatDate(start)} - ${formatDate(end)}`;
+            // Note
+            const noteDiv = document.getElementById('modal-event-note');
+            if (event.note) {
+                noteDiv.innerHTML = `<b>Catatan:</b> ${event.note}`;
+                noteDiv.style.display = '';
+            } else {
+                noteDiv.innerHTML = '';
+                noteDiv.style.display = 'none';
+            }
+            document.getElementById('modal-event-target').textContent = event.target ?? '-';
+            document.getElementById('modal-event-jp-module').textContent = event.jp_module ?? '-';
+            document.getElementById('modal-event-jp-facilitator').textContent = event.jp_facilitator ?? '-';
+            document.getElementById('modal-event-model').textContent = stModel[event.learning_model] ?? '-';
+            document.getElementById('event-modal').classList.add('active');
         }
-        function hideEventModal(e, id) {
+        function hideEventModal(e) {
             e.stopPropagation();
-            document.getElementById('event-modal-' + id).classList.remove('active');
+            document.getElementById('event-modal').classList.remove('active');
         }
-        // Optional: close modal on ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-bg.active').forEach(function(modal) {
-                    modal.classList.remove('active');
-                });
+                document.getElementById('event-modal').classList.remove('active');
             }
         });
     </script>

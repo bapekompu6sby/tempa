@@ -211,13 +211,11 @@ class EventController extends Controller
         $year = $request->input('year', now()->year);
         $events = Event::whereYear('start_date', $year)
             ->orderBy('start_date', 'asc')
+            ->select(['id', 'name', 'start_date', 'end_date', 'learning_model', 'status', 'note', 'target', 'jp_module', 'jp_facilitator'])
             ->get();
 
         $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-        $allMonths = [];
-        foreach ($monthNames as $i => $name) {
-            $allMonths[] = $name;
-        }
+        $allMonths = $monthNames;
 
         return view('events.kalender', compact('events', 'allMonths', 'year', 'years'));
     }
