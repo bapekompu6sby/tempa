@@ -213,7 +213,7 @@ class EventController extends Controller
             ->orderBy('start_date', 'asc')
             ->get();
 
-        $monthNames = ['Januari', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
         $allMonths = [];
         foreach ($monthNames as $i => $name) {
             $allMonths[] = $name;

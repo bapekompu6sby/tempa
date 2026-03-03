@@ -155,7 +155,6 @@
                                     </div>
                                 </td>
                                 @php $i = $endIdx + 1; @endphp
-                                @continue
                             @else
                                 <td class="border px-0 py-1 month-col"></td>
                                 @php $i++; @endphp
