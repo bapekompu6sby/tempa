@@ -83,7 +83,7 @@
         <table class="min-w-full bg-white border border-gray-200">
             <thead>
                 <tr>
-                    @foreach($monthNames as $month)
+                    @foreach($allMonths as $month)
                         <th class="border px-1 py-1 bg-gray-100 text-center month-col">{{ $month }}</th>
                     @endforeach
                 </tr>
