@@ -136,7 +136,7 @@
                             $statusColors = [
                                 'tentative' => 'bg-gray-400',
                                 'belum_dimulai' => 'bg-blue-300',
-                                'persiapan' => 'bg-yellow-400',
+                                'persiapan' => 'bg-orange-400',
                                 'pelaksanaan' => 'bg-blue-500',
                                 'pelaporan' => 'bg-purple-400',
                                 'dibatalkan' => 'bg-red-400',
