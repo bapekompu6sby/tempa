@@ -89,16 +89,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($events as $event)
+                @forelse($events as $event)
                     <tr>
                         @php
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-                            $startMonthName = $event->start_date->format('M');
-                            $endMonthName = $event->end_date->format('M');
-                            $startIdx = ($event->start_date->format('Y') == $year) ? array_search($startMonthName, $monthNames) : 0;
-                            $endIdx = ($event->end_date->format('Y') == $year) ? array_search($endMonthName, $monthNames) : count($monthNames) - 1;
-                            if ($startIdx === false) $startIdx = 0;
-                            if ($endIdx === false) $endIdx = count($monthNames) - 1;
+                            $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
+                            $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
                             // Color by learning model
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
@@ -110,19 +106,7 @@
                             ];
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
-                        @php $i = 0; @endphp
-                        <script>
-                            console.log(@json($allMonths));
-                            console.log(@json($startIdx));
-                            console.log(@json($endIdx));
-                            
-                        </script>
-                        @while($i < count($allMonths))
-                            <script>
-                                console.log(@json($i));
-                                console.log(@json($startIdx));
-                                console.log(@json($endIdx));                
-                              </script>
+                        @for($i = 0; $i < count($allMonths); $i++)
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
@@ -169,16 +153,15 @@
                                         </div>
                                     </div>
                                 </td>
-                                @php $i = $endIdx + 1; @endphp
+                                @php $i = $endIdx; @endphp
                             @else
                                 <td class="border px-0 py-1 month-col"></td>
-                                @php $i++; @endphp
                             @endif
-                        @endwhile
+                        @endfor
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($monthNames) }}" class="border px-4 py-2 text-center text-gray-500">Tidak ada pelatihan.</td>
+                        <td colspan="{{ count($allMonths) }}" class="border px-4 py-2 text-center text-gray-500">Tidak ada pelatihan.</td>
                     </tr>
                 @endforelse
             </tbody>
