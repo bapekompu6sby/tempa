@@ -83,7 +83,7 @@
         <table class="min-w-full bg-white border border-gray-200">
             <thead>
                 <tr>
-                    @foreach($allMonths as $month)
+                    @foreach($monthNames as $month)
                         <th class="border px-1 py-1 bg-gray-100 text-center month-col">{{ $month }}</th>
                     @endforeach
                 </tr>
@@ -95,10 +95,10 @@
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startMonthName = $event->start_date->format('M');
                             $endMonthName = $event->end_date->format('M');
-                            $startIdx = ($event->start_date->format('Y') == $year) ? array_search($startMonthName, $allMonths) : 0;
-                            $endIdx = ($event->end_date->format('Y') == $year) ? array_search($endMonthName, $allMonths) : count($allMonths) - 1;
+                            $startIdx = ($event->start_date->format('Y') == $year) ? array_search($startMonthName, $monthNames) : 0;
+                            $endIdx = ($event->end_date->format('Y') == $year) ? array_search($endMonthName, $monthNames) : count($monthNames) - 1;
                             if ($startIdx === false) $startIdx = 0;
-                            if ($endIdx === false) $endIdx = count($allMonths) - 1;
+                            if ($endIdx === false) $endIdx = count($monthNames) - 1;
                             // Color by learning model
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
@@ -111,7 +111,7 @@
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
                         @php $i = 0; @endphp
-                        @while($i < count($allMonths))
+                        @while($i < count($monthNames))
                             @if($i == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
@@ -167,7 +167,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($allMonths) }}" class="border px-4 py-2 text-center text-gray-500">Tidak ada pelatihan.</td>
+                        <td colspan="{{ count($monthNames) }}" class="border px-4 py-2 text-center text-gray-500">Tidak ada pelatihan.</td>
                     </tr>
                 @endforelse
             </tbody>
