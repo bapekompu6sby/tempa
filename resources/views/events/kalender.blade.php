@@ -95,7 +95,6 @@
                             $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                             $startIdx = ($event->start_date->format('Y') == $year) ? $event->start_date->format('n') - 1 : 0;
                             $endIdx = ($event->end_date->format('Y') == $year) ? $event->end_date->format('n') - 1 : count($allMonths) - 1;
-                            // Color by learning model
                             $modelColors = [
                                 'full_elearning' => 'bg-blue-400',
                                 'distance_learning' => 'bg-yellow-300',
@@ -106,8 +105,8 @@
                             ];
                             $color = $modelColors[$event->learning_model ?? ''] ?? 'bg-gray-300';
                         @endphp
-                        @for($i = 0; $i < count($allMonths); $i++)
-                            @if($i == $startIdx)
+                        @foreach($allMonths as $idx => $month)
+                            @if($idx == $startIdx)
                                 <td colspan="{{ $endIdx - $startIdx + 1 }}" class="border px-0 py-1 text-center align-middle">
                                     <div class="event-bar {{ $color }} text-black font-semibold flex items-center justify-center rounded shadow mx-auto relative"
                                          style="width: 100%; max-width: 100%;"
@@ -130,11 +129,11 @@
                                         </div>
                                     </div>
                                 </td>
-                                @php $i = $endIdx; @endphp
-                            @else
+                                @php $idx = $endIdx; @endphp
+                            @elseif($idx < $startIdx || $idx > $endIdx)
                                 <td class="border px-0 py-1 month-col"></td>
                             @endif
-                        @endfor
+                        @endforeach
                     </tr>
                 @empty
                     <tr>
