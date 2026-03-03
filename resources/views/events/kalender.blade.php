@@ -147,8 +147,8 @@
                                             <div class="mb-1 text-sm"><b>Catatan:</b> {{ $event->note }}</div>
                                             @endif
                                             <div class="mb-1 text-sm">Target: <b>{{ $event->target ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">JP Kurmod: <b>{{ $event->jp_module ?? '-' }}</b></div>
-                                            <div class="mb-1 text-sm">JP Pengajar: <b>{{ $event->jp_facilitator ?? '-' }}</b></div>
+                                            <div class="mb-1 text-sm">Total JP: <b>{{ $event->jp_module ?? '-' }}</b></div>
+                                            
                                             <div class="mb-1 text-sm">Model: <b>{{ $event->learning_model ? \Illuminate\Support\Str::title(str_replace('_', ' ', $event->learning_model)) : '-' }}</b></div>
                                         </div>
                                     </div>
