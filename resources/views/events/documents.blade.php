@@ -13,26 +13,37 @@
             </div>
         </div>
 
-        @if(!empty($event->document_drive_url))
-            <div class="p-8 text-center">
-                <div class="text-lg font-semibold mb-2">Dokumen pelatihan tersedia di:</div>
-                <a href="{{ $event->document_drive_url }}" target="_blank" class="text-blue-600 underline text-xl break-all">Dokumen {{ $event->name }}</a>
-            </div>
-        @else
-            <div class="overflow-hidden shadow rounded bg-white">
-                <table class="min-w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama Dokumen</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Lampiran / Link</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Catatan</th>
-                            <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <div class="mb-6">
+            @if(!empty($event->document_drive_url))
+                <div class="p-4 bg-green-100 text-center rounded">
+                    <span class="font-semibold">Dokumen pelatihan tersedia di:</span>
+                    <a href="{{ $event->document_drive_url }}" target="_blank" class="text-blue-600 underline text-xl break-all">Dokumen {{ $event->name }}</a>
+                </div>
+            @else
+                <div class="p-4 bg-red-100 text-center rounded text-red-700">
+                    Tidak ada link drive untuk dokumen pelatihan.
+                </div>
+            @endif
+        </div>
+
+        <div class="overflow-hidden shadow rounded bg-white">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">✔</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Nama Dokumen</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Lampiran / Link</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Catatan</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
                         @forelse($documents as $doc)
-                            @php $hasAttachment = !empty($doc->link) || (!empty($doc->file_path) || (isset($doc->files) && $doc->files->count() > 0)); @endphp
+                            @php $hasAttachment = !empty($doc->link) || (!empty($doc->file_path) || (isset($doc->files) && $doc->files->count() > 0)) || $doc->checked; @endphp
                             <tr class="border-t align-top {{ $hasAttachment ? 'bg-green-50' : '' }}" id="ed-row-{{ $doc->id }}">
+                                <td class="py-2 px-4 align-top">
+                                    <input type="checkbox" class="doc-checked" data-id="{{ $doc->id }}" {{ $doc->checked ? 'checked' : '' }} />
+                                </td>
                                 <td class="py-2 px-4 align-top">{{ $doc->name }}</td>
                                 <td class="py-2 px-4 align-top">
                                     <div class="flex flex-col gap-1">
@@ -63,8 +74,12 @@
                                 </td>
                             </tr>
                             <tr id="ed-view-row-{{ $doc->id }}" class="hidden bg-white">
-                                <td class="py-3 px-4" colspan="4">
+                                <td class="py-3 px-4" colspan="5">
                                     <div class="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Ditandai</label>
+                                            <div class="mt-1 text-gray-700">{{ $doc->checked ? 'Ya' : 'Tidak' }}</div>
+                                        </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
                                             @if(!empty($doc->link))
@@ -96,8 +111,12 @@
                             </tr>
 
                             <tr id="ed-edit-row-{{ $doc->id }}" class="hidden bg-gray-50">
-                                <td class="py-3 px-4" colspan="4">
+                                <td class="py-3 px-4" colspan="5">
                                     <div class="grid grid-cols-1 gap-3">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="checkbox" class="ed-checked-input" {{ $doc->checked ? 'checked' : '' }} />
+                                            <label class="text-sm font-medium text-gray-700">Ditandai</label>
+                                        </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Link Dokumen</label>
                                             <input type="text" name="link" value="{{ $doc->link }}" class="ed-link-input mt-1 block w-full border rounded px-3 py-2" placeholder="https://..." />
@@ -147,13 +166,12 @@
                             {{-- attachments list previously rendered in a separate row removed (now inline in edit row) --}}
                         @empty
                             <tr>
-                                <td class="py-4 px-4 text-center text-gray-500" colspan="4">Tidak ada dokumen untuk pelatihan ini.</td>
+                                <td class="py-4 px-4 text-center text-gray-500" colspan="5">Tidak ada dokumen untuk pelatihan ini.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-        @endif
     </div>
 </div>
 @endsection
@@ -243,6 +261,7 @@
                         const id = this.getAttribute('data-id');
                         const linkInput = document.querySelector('#ed-edit-row-' + id + ' .ed-link-input');
                         const notesInput = document.querySelector('#ed-edit-row-' + id + ' .ed-notes-input');
+                        const checkedInput = document.querySelector('#ed-edit-row-' + id + ' .ed-checked-input');
                         const fileInput = document.querySelector('#ed-edit-row-' + id + ' .ed-file-input');
                         const fileNameSpan = document.getElementById('ed-file-name-' + id);
                             const saveBtn = this;
@@ -258,8 +277,12 @@
                                     uploadResult = await uploadFilesForDoc(id, filesToUpload);
                                 }
 
-                            // then save link & notes via PATCH
-                            const payload = { link: linkInput ? linkInput.value.trim() : '', notes: notesInput ? notesInput.value.trim() : '' };
+                            // then save link, notes, and checked flag via PATCH
+                            const payload = {
+                                link: linkInput ? linkInput.value.trim() : '',
+                                notes: notesInput ? notesInput.value.trim() : '',
+                                checked: checkedInput ? checkedInput.checked : false
+                            };
                             const res = await fetch(`/documents/${id}`, {
                                 method: 'PATCH',
                                 headers: {
@@ -274,9 +297,14 @@
 
                             // update attachment cell: we now render file list separately; update row bg
                             const row = document.getElementById('ed-row-' + id);
-                            const hasAttachment = (data.eventDocument && (data.eventDocument.link || data.eventDocument.file_path)) || (uploadResult && uploadResult.files && uploadResult.files.length > 0);
+                            const hasAttachment = (data.eventDocument && (data.eventDocument.link || data.eventDocument.file_path || data.eventDocument.checked)) || (uploadResult && uploadResult.files && uploadResult.files.length > 0);
                             if (row) {
                                 if (hasAttachment) row.classList.add('bg-green-50'); else row.classList.remove('bg-green-50');
+                            }
+                            // sync checkbox in main row
+                            if (data.eventDocument) {
+                                const mainCheckbox = document.querySelector('#ed-row-' + id + ' .doc-checked');
+                                if (mainCheckbox) mainCheckbox.checked = !!data.eventDocument.checked;
                             }
 
                             // Update displayed link in the main list and in the files view if returned by the server
@@ -371,6 +399,32 @@
                             saveBtn.disabled = false;
                         }
                     });
+            });
+
+            // listen for top‑level checkbox changes and persist immediately
+            document.querySelectorAll('.doc-checked').forEach(function(cb){
+                cb.addEventListener('change', async function(){
+                    const id = this.dataset.id;
+                    const checkedVal = this.checked;
+                    try {
+                        const res = await fetch(`/documents/${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type':'application/json','X-CSRF-TOKEN': token,'Accept':'application/json' },
+                            body: JSON.stringify({checked: checkedVal})
+                        });
+                        if (!res.ok) throw new Error('Network error');
+                        const data = await res.json();
+                        const row = document.getElementById('ed-row-' + id);
+                        const hasAttachment = (data.eventDocument && (data.eventDocument.link || data.eventDocument.file_path || data.eventDocument.checked));
+                        if (row) {
+                            if (hasAttachment) row.classList.add('bg-green-50'); else row.classList.remove('bg-green-50');
+                        }
+                    } catch(err) {
+                        console.error(err);
+                        alert('Gagal menyimpan ceklis.');
+                        this.checked = !checkedVal;
+                    }
+                });
             });
 
             // handle file selection UI (show selected filename) and support immediate single-file uploads when user clicked 'Tambah Lampiran'

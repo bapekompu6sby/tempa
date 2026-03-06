@@ -172,6 +172,7 @@ class EventController extends Controller
             'jp_module' => 'nullable|integer',
             'jp_facilitator' => 'nullable|integer',
             'field' => 'nullable|string|max:255',
+            'status' => 'nullable|in:tentative,belum_dimulai,persiapan,pelaksanaan,pelaporan,dibatalkan,selesai',
         ]);
 
         // Handle file upload if present
@@ -211,13 +212,11 @@ class EventController extends Controller
         $year = $request->input('year', now()->year);
         $events = Event::whereYear('start_date', $year)
             ->orderBy('start_date', 'asc')
+            ->select(['id', 'name', 'start_date', 'end_date', 'learning_model', 'status', 'note', 'target', 'jp_module', 'jp_facilitator', 'field'])
             ->get();
 
-        $monthNames = ['Januari', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-        $allMonths = [];
-        foreach ($monthNames as $i => $name) {
-            $allMonths[] = $name;
-        }
+        $monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        $allMonths = $monthNames;
 
         return view('events.kalender', compact('events', 'allMonths', 'year', 'years'));
     }

@@ -174,6 +174,7 @@ class Event extends Model
                     'distance_learning' => $tpl->distance_learning,
                     'blended_learning' => $tpl->blended_learning,
                     'classical' => $tpl->classical,
+                    'checked' => false,
                 ]);
             }
         });

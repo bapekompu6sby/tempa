@@ -10,8 +10,8 @@
 	@if(session('access_granted'))
 		<div class="w-full max-w-3xl">
 			<div class="flex gap-6 mb-6">
-				<a href="{{ route('instructions.index') }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold shadow hover:bg-blue-700 transition">Referensi Instruksi</a>
-				<a href="{{ route('events.kalender') }}" class="px-6 py-3 bg-green-600 text-white rounded-lg text-lg font-semibold shadow hover:bg-green-700 transition">Kalender Pelatihan</a>
+				   <a href="{{ route('instructions.index') }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg text-lg font-semibold shadow hover:bg-blue-700 transition">Referensi Instruksi</a>
+				   <a href="{{ route('events.kalender') }}" class="px-6 py-3 bg-green-600 text-white rounded-lg text-lg font-semibold shadow hover:bg-green-700 transition">Kalender Pelatihan</a>
 			</div>
 
 			{{-- Events list --}}
@@ -36,7 +36,10 @@
 						<div class="p-2 bg-gray-50 rounded">
 							<div class="flex items-center justify-between">
 								<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
-								<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition ml-2">Lihat lebih detail</a>
+								<div class="flex gap-2">
+									<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition">Lihat lebih detail</a>
+									<a href="{{ route('events.kalender') }}" class="text-xs px-3 py-1 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 transition">Lihat Kalender</a>
+								</div>
 							</div>
 							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
 								<div class="flex items-center justify-between gap-2">
@@ -195,22 +198,22 @@
 			</div>
 		</div>
 	@else
-		<div class="w-full max-w-md bg-white rounded shadow px-4 py-2">
-			@if($errors->any())
-				<div class="mb-4 text-red-600">{{ $errors->first() }}</div>
-			@endif
+		   <div class="w-full max-w-md bg-white rounded shadow px-4 py-2">
+			   @if($errors->any())
+				   <div class="mb-4 text-red-600">{{ $errors->first() }}</div>
+			   @endif
 
-			<form method="POST" action="{{ url('/unlock') }}" class="mt-2">
-				@csrf
-				<div class="mb-0">
-					<label class="block text-sm font-medium text-gray-700">Masukkan Password untuk panitia</label>
-					<div class="flex">
-						<input name="password" type="password" class="flex-1 border rounded-l px-2 py-2" required autofocus aria-label="Password">
-						<button type="submit" class="ml-2 bg-blue-600 text-white px-3 py-2 rounded-r">Masuk Panitia</button>
-					</div>
-				</div>
-			</form>
-		</div>
+			   <form method="POST" action="{{ url('/unlock') }}" class="mt-2">
+				   @csrf
+				   <div class="mb-0">
+					   <label class="block text-sm font-medium text-gray-700">Masukkan Password untuk panitia</label>
+					   <div class="flex">
+						   <input name="password" type="password" class="flex-1 border rounded-l px-2 py-2" required autofocus aria-label="Password">
+						   <button type="submit" class="ml-2 bg-blue-600 text-white px-3 py-2 rounded-r">Masuk Panitia</button>
+					   </div>
+				   </div>
+			   </form>
+		   </div>
 
 		{{-- Always show read-only events list below the password form when not unlocked --}}
 		<div class="w-full max-w-3xl mt-6">
@@ -234,7 +237,10 @@
 						<div class="p-2 bg-gray-50 rounded">
 								<div class="flex items-center justify-between">
 									<div class="text-xs text-gray-700 font-semibold">{{ $monthName }}</div>
-									<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition ml-2">Lihat lebih detail</a>
+									<div class="flex gap-2">
+										<a href="{{ url('public/events') }}" class="text-xs px-3 py-1 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 transition">Lihat lebih detail</a>
+										<a href="{{ route('events.kalender') }}" class="text-xs px-3 py-1 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 transition">Lihat Kalender</a>
+									</div>
 								</div>
 							<div class="mt-1 grid grid-cols-3 gap-1 text-xs text-gray-700">
 								<div class="flex items-center justify-between gap-2">

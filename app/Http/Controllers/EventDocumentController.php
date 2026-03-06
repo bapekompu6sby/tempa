@@ -59,11 +59,17 @@ class EventDocumentController extends Controller
         $data = $request->validate([
             'link' => 'nullable|string',
             'notes' => 'nullable|string',
+            'checked' => 'nullable|boolean',
         ]);
 
         // normalize link to include scheme if missing
         if (!empty($data['link']) && !preg_match('/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//', $data['link'])) {
             $data['link'] = 'https://' . ltrim($data['link'], '/');
+        }
+
+        // ensure checked flag is boolean when provided
+        if (array_key_exists('checked', $data)) {
+            $data['checked'] = (bool) $data['checked'];
         }
 
         $eventDocument->fill($data);
