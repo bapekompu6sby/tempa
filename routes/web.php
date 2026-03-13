@@ -99,6 +99,8 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     // Kalender Pelatihan yearly calendar
     Route::resource('instructions', App\Http\Controllers\InstructionController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
+    // EventLesson nested resource
+    Route::resource('events.lessons', App\Http\Controllers\EventLessonController::class);
     Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');
     Route::get('events/{event}/download-report', [App\Http\Controllers\EventController::class, 'downloadReport'])->name('events.downloadReport');
     // view event documents

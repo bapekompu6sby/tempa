@@ -47,6 +47,12 @@ class Event extends Model
         'report_date' => 'date',
     ];
 
+    public function eventLessons()
+    {
+        return $this->hasMany(EventLesson::class);
+    }
+
+
     /**
      * Boot the model and register created event listener.
      */
