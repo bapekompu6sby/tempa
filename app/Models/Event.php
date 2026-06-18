@@ -329,4 +329,14 @@ class Event extends Model
             return 0;
         }
     }
+
+    /**
+     * Get the ASN participants for this Event.
+     */
+    public function asns()
+    {
+        return $this->belongsToMany(Asn::class)
+                    ->withPivot(['passing_status', 'participant_type', 'participant_status'])
+                    ->withTimestamps();
+    }
 }
