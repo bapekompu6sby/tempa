@@ -96,6 +96,12 @@ Route::get('public/events', function (\Illuminate\Http\Request $request) {
 Route::get('events/kalender', [App\Http\Controllers\EventController::class, 'kalender'])->name('events.kalender');
 // Protect application routes behind the simple password middleware (welcome page stays public)
 Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function () {
+    // ASN Routes
+    Route::get('asn', [App\Http\Controllers\AsnController::class, 'index'])->name('asn.index');
+    Route::get('asn/import', [App\Http\Controllers\AsnImportController::class, 'showImportForm'])->name('asn.import');
+    Route::post('asn/import', [App\Http\Controllers\AsnImportController::class, 'import'])->name('asn.import.process');
+    Route::get('asn/import/template', [App\Http\Controllers\AsnImportController::class, 'downloadTemplate'])->name('asn.import.template');
+
     // Kalender Pelatihan yearly calendar
     Route::resource('instructions', App\Http\Controllers\InstructionController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
