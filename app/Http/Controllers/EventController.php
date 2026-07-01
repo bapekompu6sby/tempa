@@ -136,6 +136,15 @@ class EventController extends Controller
     }
 
     /**
+     * Display participants for the specified event.
+     */
+    public function participants(Event $event)
+    {
+        $participants = $event->asns()->paginate(20);
+        return view('events.participants', compact('event', 'participants'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Event $event)

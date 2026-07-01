@@ -97,7 +97,7 @@ Route::get('events/kalender', [App\Http\Controllers\EventController::class, 'kal
 // Protect application routes behind the simple password middleware (welcome page stays public)
 Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function () {
     // ASN Routes
-    Route::get('asn', [App\Http\Controllers\AsnController::class, 'index'])->name('asn.index');
+    Route::resource('asn', App\Http\Controllers\AsnController::class);
     Route::get('asn/import', [App\Http\Controllers\AsnImportController::class, 'showImportForm'])->name('asn.import');
     Route::post('asn/import', [App\Http\Controllers\AsnImportController::class, 'import'])->name('asn.import.process');
     Route::get('asn/import/template', [App\Http\Controllers\AsnImportController::class, 'downloadTemplate'])->name('asn.import.template');
@@ -106,6 +106,8 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     Route::resource('instructions', App\Http\Controllers\InstructionController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
     Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');
+    Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');
+    Route::post('events/{event}/import-asn', [App\Http\Controllers\AsnImportController::class, 'importForEvent'])->name('events.importAsn');
     Route::get('events/{event}/download-report', [App\Http\Controllers\EventController::class, 'downloadReport'])->name('events.downloadReport');
     // view event documents
     Route::get('events/{event}/documents', [App\Http\Controllers\EventController::class, 'documents'])->name('events.documents');

@@ -3,17 +3,27 @@
 namespace App\Imports;
 
 use App\Models\Asn;
+use App\Models\Event;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
-class AsnImport implements ToCollection, WithHeadingRow
+class EventAsnImport implements ToCollection, WithHeadingRow
 {
+    protected $eventId;
+
+    public function __construct($eventId)
+    {
+        $this->eventId = $eventId;
+    }
+
     public function collection(Collection $rows)
     {
+        $event = Event::find($this->eventId);
+        if (!$event) return;
+
         foreach ($rows as $row) {
-            // Skip empty rows where name is not present
             if (empty($row['name'])) {
                 continue;
             }
@@ -69,13 +79,15 @@ class AsnImport implements ToCollection, WithHeadingRow
             ];
 
             if ($nip) {
-                Asn::updateOrCreate(
+                $asn = Asn::updateOrCreate(
                     ['nip' => $nip],
                     $asnData
                 );
             } else {
-                Asn::create($asnData);
+                $asn = Asn::create($asnData);
             }
+
+            $event->asns()->syncWithoutDetaching([$asn->id]);
         }
     }
 }

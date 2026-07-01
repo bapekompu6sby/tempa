@@ -6,6 +6,7 @@
     <div class="bg-white p-6 rounded shadow max-w-5xl mx-auto relative border-t-4 border-gray-200">
         {{-- Top-right action buttons --}}
         <div class="absolute top-4 right-4 flex space-x-2">
+            <a href="{{ route('events.participants', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm cursor-pointer hover:bg-blue-700">Peserta</a>
             <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 text-white rounded text-sm">Edit</a>
             <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Dokumen</a>
             <form method="POST" action="{{ route('events.finish', $event) }}" class="inline">

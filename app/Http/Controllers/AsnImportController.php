@@ -11,6 +11,19 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AsnImportController extends Controller
 {
+    public function importForEvent(Request $request, \App\Models\Event $event)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240' // max 10MB
+        ]);
+
+        try {
+            Excel::import(new \App\Imports\EventAsnImport($event->id), $request->file('file'));
+            return back()->with('success', 'Data ASN berhasil diimport dan ditambahkan ke pelatihan!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
+    }
     public function showImportForm()
     {
         return view('asn.import');
