@@ -96,6 +96,9 @@
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Status
                         </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Status Kelulusan
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -137,10 +140,19 @@
                                 {{ $displayStatus }}
                             </span>
                         </td>
+                        <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm">
+                            @if($event->pivot->passing_status === 'lulus')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Lulus</span>
+                            @elseif($event->pivot->passing_status === 'tidak_lulus')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Tidak Lulus</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">-</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                        <td colspan="5" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
                             ASN ini belum mengikuti pelatihan apapun.
                         </td>
                     </tr>
