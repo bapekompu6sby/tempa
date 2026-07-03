@@ -339,4 +339,12 @@ class Event extends Model
                     ->withPivot(['passing_status', 'participant_type', 'participant_status'])
                     ->withTimestamps();
     }
+
+    /**
+     * Get the event subjects for this Event.
+     */
+    public function eventSubjects()
+    {
+        return $this->hasMany(EventSubject::class);
+    }
 }
