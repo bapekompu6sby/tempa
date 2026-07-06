@@ -16,4 +16,12 @@ class EventSubject extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    /**
+     * Get all of the subject's monitoring items.
+     */
+    public function monitoringItems()
+    {
+        return $this->morphMany(MonitoringItem::class, 'monitorable');
+    }
 }

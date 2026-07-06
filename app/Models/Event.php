@@ -347,4 +347,12 @@ class Event extends Model
     {
         return $this->hasMany(EventSubject::class);
     }
+
+    /**
+     * Get all of the event's monitoring items.
+     */
+    public function monitoringItems()
+    {
+        return $this->morphMany(MonitoringItem::class, 'monitorable');
+    }
 }
