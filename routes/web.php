@@ -104,6 +104,7 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
 
     // Kalender Pelatihan yearly calendar
     Route::resource('instructions', App\Http\Controllers\InstructionController::class);
+    Route::resource('monitoring-templates', App\Http\Controllers\MonitoringTemplateController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
     Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');

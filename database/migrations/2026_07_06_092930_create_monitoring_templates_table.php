@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('monitoring_templates', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->enum('category', ['sikap', 'sarpras', 'administrasi', 'administrasi_peserta']);
+            $table->string('sub_category')->nullable();
+            $table->enum('ownership', ['event', 'event_subject']);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('monitoring_templates');
+    }
+};
