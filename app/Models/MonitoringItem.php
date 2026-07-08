@@ -13,6 +13,7 @@ class MonitoringItem extends Model
         'sub_category',
         'monitorable_id',
         'monitorable_type',
+        'order',
     ];
 
     /**

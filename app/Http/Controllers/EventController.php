@@ -70,57 +70,73 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-    // Prepare tabbed instruction lists scoped to this event, with optional search
-    $tab = request('tab', 'semua');
-    $q = request('q');
-    // phase filter: 'all' means no filtering
-    $phase = request('phase', 'all');
+        // Get main tab: instruksi, peserta, mata_pelatihan
+        $main_tab = request('main_tab', 'instruksi');
 
-    // load related instructions
-    $event->load('eventInstructions.instruction');
+        // Prepare tabbed instruction lists scoped to this event, with optional search
+        $tab = request('tab', 'semua');
+        $q = request('q');
+        // phase filter: 'all' means no filtering
+        $phase = request('phase', 'all');
 
-    $build = function ($role = null) use ($event, $q, $phase) {
-        $query = EventInstruction::with('instruction')->where('event_id', $event->id);
-        if ($role) {
-            $query->whereHas('instruction', function ($qi) use ($role) {
-                $qi->where('role', $role);
-            });
+        $all = collect();
+        $pic = collect();
+        $host = collect();
+        $pengamat = collect();
+        $participants = null;
+        $subjects = null;
+
+        if ($main_tab === 'instruksi') {
+            // load related instructions
+            $event->load('eventInstructions.instruction');
+
+            $build = function ($role = null) use ($event, $q, $phase) {
+                $query = EventInstruction::with('instruction')->where('event_id', $event->id);
+                if ($role) {
+                    $query->whereHas('instruction', function ($qi) use ($role) {
+                        $qi->where('role', $role);
+                    });
+                }
+                // apply phase filter when a specific phase is selected
+                if (!empty($phase) && $phase !== 'all') {
+                    $query->whereHas('instruction', function ($qi) use ($phase) {
+                        $qi->where('phase', $phase);
+                    });
+                }
+                if ($q) {
+                    $query->whereHas('instruction', function ($qi) use ($q) {
+                        $qi->where('name', 'like', "%{$q}%")
+                            ->orWhere('detail', 'like', "%{$q}%");
+                    });
+                }
+
+                // enforce specific phase ordering: persiapan -> pembukaan_pelatihan -> pelaksanaan -> penutupan_pelatihan -> evaluasi_pelatihan -> pasca_pelatihan
+                $orderSql = "CASE phase
+                    WHEN 'persiapan' THEN 1
+                    WHEN 'pembukaan_pelatihan' THEN 2
+                    WHEN 'pelaksanaan' THEN 3
+                    WHEN 'penutupan_pelatihan' THEN 4
+                    WHEN 'evaluasi_pelatihan' THEN 5
+                    WHEN 'pasca_pelatihan' THEN 6
+                    ELSE 7 END";
+
+                $query->orderByRaw($orderSql)->orderBy('id');
+
+                // paginate results to 20 per page
+                return $query->paginate(20)->appends(request()->except('page'));
+            };
+
+            $all = $build();
+            $pic = $build('pic');
+            $host = $build('host');
+            $pengamat = $build('petugas_kelas');
+        } elseif ($main_tab === 'peserta') {
+            $participants = $event->asns()->paginate(20)->appends(request()->except('page'));
+        } elseif ($main_tab === 'mata_pelatihan') {
+            $subjects = $event->eventSubjects()->get();
         }
-        // apply phase filter when a specific phase is selected
-        if (!empty($phase) && $phase !== 'all') {
-            $query->whereHas('instruction', function ($qi) use ($phase) {
-                $qi->where('phase', $phase);
-            });
-        }
-        if ($q) {
-            $query->whereHas('instruction', function ($qi) use ($q) {
-                $qi->where('name', 'like', "%{$q}%")
-                    ->orWhere('detail', 'like', "%{$q}%");
-            });
-        }
 
-        // enforce specific phase ordering: persiapan -> pembukaan_pelatihan -> pelaksanaan -> penutupan_pelatihan -> evaluasi_pelatihan -> pasca_pelatihan
-        $orderSql = "CASE phase
-            WHEN 'persiapan' THEN 1
-            WHEN 'pembukaan_pelatihan' THEN 2
-            WHEN 'pelaksanaan' THEN 3
-            WHEN 'penutupan_pelatihan' THEN 4
-            WHEN 'evaluasi_pelatihan' THEN 5
-            WHEN 'pasca_pelatihan' THEN 6
-            ELSE 7 END";
-
-        $query->orderByRaw($orderSql)->orderBy('id');
-
-        // paginate results to 20 per page
-        return $query->paginate(20);
-    };
-
-    $all = $build();
-    $pic = $build('pic');
-    $host = $build('host');
-    $pengamat = $build('petugas_kelas');
-
-    return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q', 'phase'));
+        return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q', 'phase', 'main_tab', 'participants', 'subjects'));
     }
 
     /**
@@ -202,6 +218,24 @@ class EventController extends Controller
     {
         $event->update(['status' => 'selesai']);
         return redirect()->route('events.show', $event)->with('success', 'Pelatihan telah ditandai sebagai selesai.');
+    }
+
+    /**
+     * Generate asn_event_subject records for the event.
+     */
+    public function generateAsnEventSubjects(Event $event)
+    {
+        $event->generateAsnEventSubjects();
+        return back()->with('success', 'ASN Event Subjects berhasil digenerate.');
+    }
+
+    /**
+     * Generate monitoring items for the event.
+     */
+    public function generateMonitoringItems(Event $event)
+    {
+        $event->generateMonitoringItems();
+        return back()->with('success', 'Monitoring Items berhasil digenerate.');
     }
 
     /**

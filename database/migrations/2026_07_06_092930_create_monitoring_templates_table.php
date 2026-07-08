@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('category', ['sikap', 'sarpras', 'administrasi', 'administrasi_peserta']);
             $table->string('sub_category')->nullable();
-            $table->enum('ownership', ['event', 'event_subject']);
+            $table->enum('ownership', ['event', 'asn_event', 'asn_event_subject']);
             $table->timestamps();
         });
     }

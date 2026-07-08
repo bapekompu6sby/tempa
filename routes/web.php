@@ -109,6 +109,8 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');
     Route::post('events/{event}/import-asn', [App\Http\Controllers\AsnImportController::class, 'importForEvent'])->name('events.importAsn');
+    Route::post('events/{event}/generate-asn-event-subjects', [App\Http\Controllers\EventController::class, 'generateAsnEventSubjects'])->name('events.generateAsnEventSubjects');
+    Route::post('events/{event}/generate-monitoring-items', [App\Http\Controllers\EventController::class, 'generateMonitoringItems'])->name('events.generateMonitoringItems');
     Route::get('events/{event}/download-report', [App\Http\Controllers\EventController::class, 'downloadReport'])->name('events.downloadReport');
     // view event documents
     Route::get('events/{event}/documents', [App\Http\Controllers\EventController::class, 'documents'])->name('events.documents');

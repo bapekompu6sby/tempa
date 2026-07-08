@@ -11,5 +11,6 @@ class MonitoringTemplate extends Model
         'category',
         'sub_category',
         'ownership',
+        'order',
     ];
 }

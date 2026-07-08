@@ -348,11 +348,132 @@ class Event extends Model
         return $this->hasMany(EventSubject::class);
     }
 
-    /**
-     * Get all of the event's monitoring items.
-     */
     public function monitoringItems()
     {
         return $this->morphMany(MonitoringItem::class, 'monitorable');
+    }
+
+    /**
+     * Generate asn_event_subject entries for this event.
+     * Connects every asn_event to every event_subject for this event,
+     * but only if both have at least one record.
+     */
+    public function generateAsnEventSubjects(): void
+    {
+        $asnEvents = DB::table('asn_event')->where('event_id', $this->id)->get();
+        $eventSubjects = $this->eventSubjects()->get();
+
+        if ($asnEvents->isEmpty() || $eventSubjects->isEmpty()) {
+            return;
+        }
+
+        $existing = DB::table('asn_event_subject')
+            ->whereIn('asn_event_id', $asnEvents->pluck('id'))
+            ->get()
+            ->groupBy('asn_event_id');
+
+        $inserts = [];
+        $now = now();
+        
+        foreach ($asnEvents as $asnEvent) {
+            $existingSubjectIds = isset($existing[$asnEvent->id]) 
+                ? $existing[$asnEvent->id]->pluck('event_subject_id')->toArray() 
+                : [];
+
+            foreach ($eventSubjects as $subject) {
+                if (!in_array($subject->id, $existingSubjectIds)) {
+                    $inserts[] = [
+                        'asn_event_id' => $asnEvent->id,
+                        'event_subject_id' => $subject->id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+        }
+
+        if (!empty($inserts)) {
+            // Chunk inserts if it's too large, but for typical events it should be fine.
+            foreach (array_chunk($inserts, 500) as $chunk) {
+                DB::table('asn_event_subject')->insert($chunk);
+            }
+        }
+    }
+
+    /**
+     * Generate monitoring items for this event.
+     */
+    public function generateMonitoringItems(): void
+    {
+        $templates = \App\Models\MonitoringTemplate::all();
+        $isElearning = in_array($this->learning_model, ['full_elearning', 'distance_learning']);
+        
+        $asnEvents = DB::table('asn_event')->where('event_id', $this->id)->get();
+        
+        $asnEventIds = $asnEvents->pluck('id');
+        $asnEventSubjects = collect();
+        if ($asnEventIds->isNotEmpty()) {
+            $asnEventSubjects = DB::table('asn_event_subject')
+                ->whereIn('asn_event_id', $asnEventIds)
+                ->get();
+        }
+
+        $inserts = [];
+        $now = now();
+
+        foreach ($templates as $template) {
+            // If the event is e-learning, skip the sikap part.
+            if ($isElearning && $template->category === 'sikap') {
+                continue;
+            }
+
+            if ($template->category === 'sikap') {
+                // Attached to asn_event_subject
+                foreach ($asnEventSubjects as $aes) {
+                    $inserts[] = [
+                        'name' => $template->name,
+                        'category' => $template->category,
+                        'sub_category' => $template->sub_category,
+                        'monitorable_id' => $aes->id,
+                        'monitorable_type' => 'asn_event_subject',
+                        'order' => $template->order ?? 0,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            } elseif ($template->category === 'administrasi_peserta') {
+                // Attached to asn_event
+                foreach ($asnEvents as $ae) {
+                    $inserts[] = [
+                        'name' => $template->name,
+                        'category' => $template->category,
+                        'sub_category' => $template->sub_category,
+                        'monitorable_id' => $ae->id,
+                        'monitorable_type' => 'asn_event',
+                        'order' => $template->order ?? 0,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            } elseif (in_array($template->category, ['administrasi', 'sarpras'])) {
+                // Attached to the event itself
+                $inserts[] = [
+                    'name' => $template->name,
+                    'category' => $template->category,
+                    'sub_category' => $template->sub_category,
+                    'monitorable_id' => $this->id,
+                    'monitorable_type' => self::class,
+                    'order' => $template->order ?? 0,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        if (!empty($inserts)) {
+            foreach (array_chunk($inserts, 500) as $chunk) {
+                DB::table('monitoring_items')->insert($chunk);
+            }
+        }
     }
 }

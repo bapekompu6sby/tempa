@@ -6,7 +6,6 @@
     <div class="bg-white p-6 rounded shadow max-w-5xl mx-auto relative border-t-4 border-gray-200">
         {{-- Top-right action buttons --}}
         <div class="absolute top-4 right-4 flex space-x-2">
-            <a href="{{ route('events.participants', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm cursor-pointer hover:bg-blue-700">Peserta</a>
             <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 text-white rounded text-sm">Edit</a>
             <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Dokumen</a>
             <form method="POST" action="{{ route('events.finish', $event) }}" class="inline">
@@ -111,6 +110,20 @@
             <div class="mt-2 whitespace-pre-wrap bg-gray-50 p-3 rounded">{{ $event->note }}</div>
         </div>
         @endif
+        
+        {{-- Main Tabs --}}
+        @php
+            $main_tab = request('main_tab', 'instruksi');
+        @endphp
+        <div class="mb-6 border-b">
+            <nav class="flex space-x-4">
+                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'instruksi' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Instruksi</a>
+                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'peserta']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'peserta' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Peserta</a>
+                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'mata_pelatihan']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'mata_pelatihan' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Mata Pelatihan</a>
+            </nav>
+        </div>
+
+        @if($main_tab === 'instruksi')
         {{-- Event Instructions list (tabs + search like instructions index) --}}
         <div class="mb-4">
             <h3 class="text-lg font-semibold mb-2">Instruksi untuk Pelatihan</h3>
@@ -282,6 +295,121 @@
                 });
             </script>
         </div>
+        @elseif($main_tab === 'peserta')
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-4">Peserta Pelatihan</h3>
+
+            @if (session('success'))
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                    <span class="block sm:inline">{!! session('success') !!}</span>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                    <span class="block sm:inline">{!! session('error') !!}</span>
+                </div>
+            @endif
+
+            <div class="bg-gray-50 p-6 rounded shadow mb-6 border-t-4 border-blue-500">
+                <h3 class="text-md font-bold mb-4">Import ASN ke Pelatihan</h3>
+                <form method="POST" action="{{ route('events.importAsn', $event) }}" enctype="multipart/form-data" class="flex items-end space-x-4">
+                    @csrf
+                    <div class="flex-grow">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">File Excel/CSV</label>
+                        <input type="file" name="file" required class="w-full border p-2 rounded bg-white">
+                        <p class="text-xs text-gray-500 mt-1">Gunakan template yang sama dengan Import ASN di menu ASN.</p>
+                    </div>
+                    <div>
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">Import Data</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-lg shadow">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">NIP</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jabatan</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Instansi</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status Kelulusan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($participants as $asn)
+                        <tr>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap">{{ $asn->nip ?? '-' }}</p>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap font-semibold">{{ $asn->name }}</p>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap">{{ $asn->job_title ?? '-' }}</p>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap">{{ strtoupper($asn->asn_source ?? '-') }}</p>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                @if($asn->pivot->passing_status === 'lulus')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Lulus</span>
+                                @elseif($asn->pivot->passing_status === 'tidak_lulus')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Tidak Lulus</span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                Belum ada peserta pelatihan ini. Silakan import data.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                <div class="p-3">
+                    @if(method_exists($participants, 'links'))
+                        {{ $participants->links('vendor.pagination.light') }}
+                    @endif
+                </div>
+            </div>
+        </div>
+        @elseif($main_tab === 'mata_pelatihan')
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-4">Mata Pelatihan</h3>
+            <div class="overflow-x-auto bg-white rounded-lg shadow">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Mata Pelatihan</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32 text-center">JP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($subjects as $subject)
+                        <tr>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-semibold">
+                                {{ $subject->name }}
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                {{ $subject->jp }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="2" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                                Belum ada mata pelatihan untuk event ini.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
         
     </div>
 </div>
