@@ -239,6 +239,45 @@ class EventController extends Controller
     }
 
     /**
+     * View subject monitoring for the event subject.
+     */
+    public function subjectMonitoring(Event $event, \App\Models\EventSubject $subject)
+    {
+        $asnEventSubjects = \Illuminate\Support\Facades\DB::table('asn_event_subject')
+            ->join('asn_event', 'asn_event_subject.asn_event_id', '=', 'asn_event.id')
+            ->join('asns', 'asn_event.asn_id', '=', 'asns.id')
+            ->where('asn_event.event_id', $event->id)
+            ->where('asn_event_subject.event_subject_id', $subject->id)
+            ->select('asn_event_subject.id as aes_id', 'asns.name', 'asns.nip')
+            ->get();
+
+        $monitoringItems = \App\Models\MonitoringItem::with('template')
+            ->where('monitorable_type', 'asn_event_subject')
+            ->whereIn('monitorable_id', $asnEventSubjects->pluck('aes_id'))
+            ->orderBy('id')
+            ->get()
+            ->groupBy('monitorable_id');
+
+        return view('events.subject_monitoring', compact('event', 'subject', 'asnEventSubjects', 'monitoringItems'));
+    }
+
+    /**
+     * Save subject monitoring progress.
+     */
+    public function saveSubjectMonitoring(Request $request, Event $event, \App\Models\EventSubject $subject)
+    {
+        $allItems = $request->input('all_item_ids', []);
+        $checkedItems = $request->input('items', []);
+
+        foreach ($allItems as $id) {
+            $val = isset($checkedItems[$id]) ? 1 : 0;
+            \App\Models\MonitoringItem::where('id', $id)->update(['value' => $val]);
+        }
+
+        return back()->with('success', 'Progress monitoring sikap berhasil disimpan.');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Event $event)

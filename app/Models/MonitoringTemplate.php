@@ -10,7 +10,16 @@ class MonitoringTemplate extends Model
         'name',
         'category',
         'sub_category',
+        'is_active',
         'ownership',
         'order',
     ];
+
+    /**
+     * Get the items that were generated from this template.
+     */
+    public function items()
+    {
+        return $this->hasMany(MonitoringItem::class, 'monitoring_template_id');
+    }
 }

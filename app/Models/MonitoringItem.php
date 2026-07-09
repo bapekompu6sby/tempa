@@ -13,14 +13,24 @@ class MonitoringItem extends Model
         'sub_category',
         'monitorable_id',
         'monitorable_type',
+        'monitoring_template_id',
         'order',
+        'value',
     ];
 
     /**
-     * Get the parent monitorable model (Event or EventSubject).
+     * Get the parent monitorable model (Event, AsnEvent, or AsnEventSubject).
      */
     public function monitorable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Get the associated monitoring template.
+     */
+    public function template()
+    {
+        return $this->belongsTo(MonitoringTemplate::class, 'monitoring_template_id');
     }
 }

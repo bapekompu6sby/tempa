@@ -418,9 +418,6 @@ class Event extends Model
                 ->get();
         }
 
-        $inserts = [];
-        $now = now();
-
         foreach ($templates as $template) {
             // If the event is e-learning, skip the sikap part.
             if ($isElearning && $template->category === 'sikap') {
@@ -430,49 +427,43 @@ class Event extends Model
             if ($template->category === 'sikap') {
                 // Attached to asn_event_subject
                 foreach ($asnEventSubjects as $aes) {
-                    $inserts[] = [
+                    \App\Models\MonitoringItem::firstOrCreate([
+                        'monitoring_template_id' => $template->id,
+                        'monitorable_id' => $aes->id,
+                        'monitorable_type' => 'asn_event_subject',
+                    ], [
                         'name' => $template->name,
                         'category' => $template->category,
                         'sub_category' => $template->sub_category,
-                        'monitorable_id' => $aes->id,
-                        'monitorable_type' => 'asn_event_subject',
                         'order' => $template->order ?? 0,
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ];
+                    ]);
                 }
             } elseif ($template->category === 'administrasi_peserta') {
                 // Attached to asn_event
                 foreach ($asnEvents as $ae) {
-                    $inserts[] = [
+                    \App\Models\MonitoringItem::firstOrCreate([
+                        'monitoring_template_id' => $template->id,
+                        'monitorable_id' => $ae->id,
+                        'monitorable_type' => 'asn_event',
+                    ], [
                         'name' => $template->name,
                         'category' => $template->category,
                         'sub_category' => $template->sub_category,
-                        'monitorable_id' => $ae->id,
-                        'monitorable_type' => 'asn_event',
                         'order' => $template->order ?? 0,
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ];
+                    ]);
                 }
             } elseif (in_array($template->category, ['administrasi', 'sarpras'])) {
                 // Attached to the event itself
-                $inserts[] = [
+                \App\Models\MonitoringItem::firstOrCreate([
+                    'monitoring_template_id' => $template->id,
+                    'monitorable_id' => $this->id,
+                    'monitorable_type' => self::class,
+                ], [
                     'name' => $template->name,
                     'category' => $template->category,
                     'sub_category' => $template->sub_category,
-                    'monitorable_id' => $this->id,
-                    'monitorable_type' => self::class,
                     'order' => $template->order ?? 0,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
-        }
-
-        if (!empty($inserts)) {
-            foreach (array_chunk($inserts, 500) as $chunk) {
-                DB::table('monitoring_items')->insert($chunk);
+                ]);
             }
         }
     }

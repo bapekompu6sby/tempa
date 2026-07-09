@@ -6,6 +6,17 @@
     <div class="bg-white p-6 rounded shadow max-w-5xl mx-auto relative border-t-4 border-gray-200">
         {{-- Top-right action buttons --}}
         <div class="absolute top-4 right-4 flex space-x-2">
+            @php
+                $hasParticipants = $event->asns()->exists();
+                $hasAsnEventSubject = \Illuminate\Support\Facades\DB::table('asn_event_subject')
+                    ->whereIn('asn_event_id', \Illuminate\Support\Facades\DB::table('asn_event')->where('event_id', $event->id)->pluck('id'))
+                    ->exists();
+                $canGenerateMonitoring = $hasParticipants && $hasAsnEventSubject;
+            @endphp
+            <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
+                @csrf
+                <button type="submit" class="px-3 py-1.5 rounded text-sm {{ $canGenerateMonitoring ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}" {{ $canGenerateMonitoring ? '' : 'disabled' }} title="{{ $canGenerateMonitoring ? 'Generate semua form monitoring untuk peserta' : 'Event harus memiliki peserta dan sudah di-inisiasi nilainya' }}">Generate Monitoring Items</button>
+            </form>
             <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 text-white rounded text-sm">Edit</a>
             <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Dokumen</a>
             <form method="POST" action="{{ route('events.finish', $event) }}" class="inline">
@@ -379,7 +390,13 @@
         </div>
         @elseif($main_tab === 'mata_pelatihan')
         <div class="mb-4">
-            <h3 class="text-lg font-semibold mb-4">Mata Pelatihan</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Mata Pelatihan</h3>
+                <form method="POST" action="{{ route('events.generateAsnEventSubjects', $event) }}">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700" onclick="return confirm('Inisiasi nilai akan mendaftarkan semua peserta ke setiap mata pelatihan. Lanjutkan?')">Inisiasi Nilai Peserta</button>
+                </form>
+            </div>
             <div class="overflow-x-auto bg-white rounded-lg shadow">
                 <table class="min-w-full leading-normal">
                     <thead>
@@ -392,7 +409,9 @@
                         @forelse($subjects as $subject)
                         <tr>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-semibold">
-                                {{ $subject->name }}
+                                <a href="{{ route('events.subjectMonitoring', ['event' => $event, 'subject' => $subject]) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ $subject->name }}
+                                </a>
                             </td>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                                 {{ $subject->jp }}
