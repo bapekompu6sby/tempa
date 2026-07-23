@@ -28,20 +28,34 @@
                 $firstAes = $asnEventSubjects->first();
                 $headerItems = $firstAes ? $monitoringItems->get($firstAes->aes_id, collect()) : collect();
             @endphp
+            
+            <style>
+                .sticky-col {
+                    position: -webkit-sticky !important;
+                    position: sticky !important;
+                    left: 0 !important;
+                    z-index: 20 !important;
+                    background-color: #f0f9ff !important; /* sky-50 */
+                    box-shadow: 6px 0 6px -2px rgba(0, 0, 0, 0.08) !important;
+                }
+                .sticky-col-header {
+                    position: -webkit-sticky !important;
+                    position: sticky !important;
+                    left: 0 !important;
+                    z-index: 30 !important;
+                    background-color: #e0f2fe !important; /* sky-100 */
+                    box-shadow: 6px 0 6px -2px rgba(0, 0, 0, 0.08) !important;
+                }
+            </style>
 
-            <div class="overflow-x-auto max-h-[75vh] border rounded-lg shadow-sm">
-                <table class="min-w-full leading-normal relative">
-                    <thead class="sticky top-0 z-30 bg-gray-100 border-b-2 border-gray-200 shadow-sm">
+            <div class="w-full overflow-x-auto border rounded-lg shadow-sm">
+                <table class="min-w-full leading-normal border-separate border-spacing-0">
+                    <thead class="bg-gray-100 shadow-sm">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12 align-bottom">No</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 bg-gray-100 z-40 border-r border-gray-200 align-bottom">Peserta</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b-2 border-r border-gray-200 align-bottom min-w-[250px] sticky-col-header">Peserta</th>
                             @foreach($headerItems as $index => $item)
-                                <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-l border-gray-200 min-w-[160px] max-w-[200px] align-bottom" title="{{ $item->name }}">
-                                    <div class="line-clamp-4 leading-tight normal-case font-medium mb-2">{{ $item->name }}</div>
-                                    <label class="flex items-center justify-center space-x-1 cursor-pointer text-[10px] text-gray-500 hover:text-blue-600">
-                                        <input type="checkbox" class="check-all-col w-3 h-3 cursor-pointer" data-col="{{ $index }}">
-                                        <span class="normal-case">OK Semua</span>
-                                    </label>
+                                <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-l border-b-2 border-gray-200 min-w-[160px] max-w-[200px] align-bottom" title="{{ $item->name }}">
+                                    <div class="line-clamp-4 leading-tight normal-case font-medium">{{ $item->name }}</div>
                                 </th>
                             @endforeach
                         </tr>
@@ -52,19 +66,19 @@
                                 $items = $monitoringItems->get($aes->aes_id, collect());
                             @endphp
                             <tr class="group border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-2 text-sm font-semibold text-gray-700 align-middle">
-                                    {{ $loop->iteration }}
-                                </td>
-                                <td class="px-4 py-2 text-sm align-middle sticky left-0 bg-white group-hover:bg-gray-50 border-r border-gray-200 z-20 whitespace-nowrap transition-colors">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <div class="font-bold text-gray-900 text-sm">{{ $aes->name }}</div>
-                                            <div class="text-xs text-gray-500 mt-0.5">NIP: {{ $aes->nip ?? '-' }}</div>
+                                <td class="px-4 py-2 text-sm align-middle group-hover:bg-gray-50 border-r border-gray-200 whitespace-nowrap transition-colors sticky-col">
+                                    <div class="flex items-start">
+                                        <div class="font-semibold text-gray-700 mr-3 w-5 mt-0.5 text-right">{{ $loop->iteration }}.</div>
+                                        <div class="flex-grow flex justify-between items-center">
+                                            <div>
+                                                <div class="font-bold text-gray-900 text-sm">{{ $aes->name }}</div>
+                                                <div class="text-xs text-gray-500 mt-0.5">NIP: {{ $aes->nip ?? '-' }}</div>
+                                            </div>
+                                            <label class="flex flex-col items-center justify-center cursor-pointer ml-3 text-[10px] text-gray-500 hover:text-blue-600">
+                                                <input type="checkbox" class="check-all-row w-3 h-3 cursor-pointer mb-1" data-row="{{ $aes->aes_id }}">
+                                                <span>OK Semua</span>
+                                            </label>
                                         </div>
-                                        <label class="flex flex-col items-center justify-center cursor-pointer ml-3 text-[10px] text-gray-500 hover:text-blue-600">
-                                            <input type="checkbox" class="check-all-row w-3 h-3 cursor-pointer mb-1" data-row="{{ $aes->aes_id }}">
-                                            <span>OK Semua</span>
-                                        </label>
                                     </div>
                                 </td>
                                 @if($items->isEmpty())
@@ -105,20 +119,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const colCheckboxes = document.querySelectorAll('.check-all-col');
     const rowCheckboxes = document.querySelectorAll('.check-all-row');
     const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-
-    colCheckboxes.forEach(cb => {
-        cb.addEventListener('change', function() {
-            const colIndex = this.getAttribute('data-col');
-            const isChecked = this.checked;
-            document.querySelectorAll(`.item-checkbox[data-col="${colIndex}"]`).forEach(item => {
-                item.checked = isChecked;
-            });
-            updateRowCheckAllState();
-        });
-    });
 
     rowCheckboxes.forEach(cb => {
         cb.addEventListener('change', function() {
@@ -127,29 +129,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll(`.item-checkbox[data-row="${rowId}"]`).forEach(item => {
                 item.checked = isChecked;
             });
-            updateColCheckAllState();
         });
     });
 
     itemCheckboxes.forEach(cb => {
         cb.addEventListener('change', function() {
-            updateColCheckAllState();
             updateRowCheckAllState();
         });
     });
-
-    function updateColCheckAllState() {
-        colCheckboxes.forEach(cb => {
-            const colIndex = cb.getAttribute('data-col');
-            const items = document.querySelectorAll(`.item-checkbox[data-col="${colIndex}"]`);
-            if(items.length > 0) {
-                const allChecked = Array.from(items).every(item => item.checked);
-                const someChecked = Array.from(items).some(item => item.checked);
-                cb.checked = allChecked;
-                cb.indeterminate = !allChecked && someChecked;
-            }
-        });
-    }
 
     function updateRowCheckAllState() {
         rowCheckboxes.forEach(cb => {
@@ -165,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize state
-    updateColCheckAllState();
     updateRowCheckAllState();
 });
 </script>
