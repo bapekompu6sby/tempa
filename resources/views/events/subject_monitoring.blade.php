@@ -24,56 +24,74 @@
                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 shadow-md transition-colors">Simpan Progress</button>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full leading-normal border rounded-lg">
-                    <thead>
-                        <tr class="bg-gray-100 border-b-2 border-gray-200">
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">No</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Peserta</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[300px]">Item Monitoring Sikap</th>
+            @php
+                $firstAes = $asnEventSubjects->first();
+                $headerItems = $firstAes ? $monitoringItems->get($firstAes->aes_id, collect()) : collect();
+            @endphp
+
+            @if($headerItems->isNotEmpty())
+            <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                <div class="font-semibold text-blue-800 mb-2">Keterangan Item Monitoring:</div>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-gray-700">
+                    @foreach($headerItems as $index => $item)
+                        <li class="flex items-start">
+                            <strong class="text-blue-900 mr-2">{{ $index + 1 }}.</strong> 
+                            <div>
+                                {{ $item->name }}
+                                @if($item->template && $item->template->sub_category)
+                                    <span class="text-xs text-gray-500 italic block mt-0.5">({{ $item->template->sub_category }})</span>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <div class="overflow-x-auto max-h-[65vh] border rounded-lg shadow-sm">
+                <table class="min-w-full leading-normal relative">
+                    <thead class="sticky top-0 z-30 bg-gray-100 border-b-2 border-gray-200 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12">No</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 bg-gray-100 z-40 border-r border-gray-200">Peserta</th>
+                            @foreach($headerItems as $index => $item)
+                                <th class="px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-help border-l border-gray-200" title="{{ $item->name }}">
+                                    {{ $index + 1 }}
+                                </th>
+                            @endforeach
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white">
                         @forelse($asnEventSubjects as $aes)
                             @php
                                 $items = $monitoringItems->get($aes->aes_id, collect());
                             @endphp
-                            <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                <td class="px-5 py-4 text-sm font-semibold text-gray-700 align-top">
+                            <tr class="group border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-2 text-sm font-semibold text-gray-700 align-middle">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="px-5 py-4 text-sm align-top">
-                                    <div class="font-bold text-gray-900 text-base mb-1">{{ $aes->name }}</div>
-                                    <div class="text-xs text-gray-500 bg-gray-100 inline-block px-2 py-1 rounded border">NIP: {{ $aes->nip ?? '-' }}</div>
+                                <td class="px-4 py-2 text-sm align-middle sticky left-0 bg-white group-hover:bg-gray-50 border-r border-gray-200 z-20 whitespace-nowrap transition-colors">
+                                    <div class="font-bold text-gray-900 text-sm">{{ $aes->name }}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">NIP: {{ $aes->nip ?? '-' }}</div>
                                 </td>
-                                <td class="px-5 py-4 text-sm align-top">
-                                    @if($items->isEmpty())
-                                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-xs italic">
-                                            Belum ada item monitoring sikap untuk peserta ini. Pastikan Anda telah klik "Generate Monitoring Items" di halaman sebelumnya.
+                                @if($items->isEmpty())
+                                    <td colspan="{{ $headerItems->count() ?: 1 }}" class="px-4 py-2 text-sm align-middle">
+                                        <div class="p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-xs italic">
+                                            Belum ada item monitoring sikap untuk peserta ini.
                                         </div>
-                                    @else
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            @foreach($items as $item)
-                                                <input type="hidden" name="all_item_ids[]" value="{{ $item->id }}">
-                                                <label class="flex items-start space-x-3 cursor-pointer p-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition border border-gray-200 hover:border-blue-300">
-                                                    <div class="flex items-center h-5 mt-0.5">
-                                                        <input type="checkbox" name="items[{{ $item->id }}]" value="1" {{ $item->value ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer shadow-sm">
-                                                    </div>
-                                                    <div class="flex flex-col flex-grow">
-                                                        <span class="text-sm font-semibold text-gray-800">{{ $item->name }}</span>
-                                                        @if($item->template && $item->template->sub_category)
-                                                            <span class="text-xs text-gray-500 mt-1">{{ $item->template->sub_category }}</span>
-                                                        @endif
-                                                    </div>
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </td>
+                                    </td>
+                                @else
+                                    @foreach($items as $index => $item)
+                                        <td class="px-2 py-2 text-center align-middle border-l border-gray-100 hover:bg-blue-100 transition-colors">
+                                            <input type="hidden" name="all_item_ids[]" value="{{ $item->id }}">
+                                            <input type="checkbox" name="items[{{ $item->id }}]" value="1" {{ $item->value ? 'checked' : '' }} class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer shadow-sm hover:scale-110 transition-transform" title="{{ $item->name }}">
+                                        </td>
+                                    @endforeach
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-5 py-8 text-center text-sm text-gray-500 bg-gray-50">
+                                <td colspan="{{ 2 + $headerItems->count() }}" class="px-5 py-8 text-center text-sm text-gray-500 bg-gray-50">
                                     Belum ada peserta yang terdaftar pada mata pelatihan ini.<br>
                                     <span class="text-xs text-gray-400">Silakan klik "Inisiasi Nilai Peserta" pada halaman Mata Pelatihan.</span>
                                 </td>
