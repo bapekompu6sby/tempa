@@ -29,34 +29,19 @@
                 $headerItems = $firstAes ? $monitoringItems->get($firstAes->aes_id, collect()) : collect();
             @endphp
 
-            @if($headerItems->isNotEmpty())
-            <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-                <div class="font-semibold text-blue-800 mb-2">Keterangan Item Monitoring:</div>
-                <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-gray-700">
-                    @foreach($headerItems as $index => $item)
-                        <li class="flex items-start">
-                            <strong class="text-blue-900 mr-2">{{ $index + 1 }}.</strong> 
-                            <div>
-                                {{ $item->name }}
-                                @if($item->template && $item->template->sub_category)
-                                    <span class="text-xs text-gray-500 italic block mt-0.5">({{ $item->template->sub_category }})</span>
-                                @endif
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-
-            <div class="overflow-x-auto max-h-[65vh] border rounded-lg shadow-sm">
+            <div class="overflow-x-auto max-h-[75vh] border rounded-lg shadow-sm">
                 <table class="min-w-full leading-normal relative">
                     <thead class="sticky top-0 z-30 bg-gray-100 border-b-2 border-gray-200 shadow-sm">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12">No</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 bg-gray-100 z-40 border-r border-gray-200">Peserta</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12 align-bottom">No</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 bg-gray-100 z-40 border-r border-gray-200 align-bottom">Peserta</th>
                             @foreach($headerItems as $index => $item)
-                                <th class="px-2 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-help border-l border-gray-200" title="{{ $item->name }}">
-                                    {{ $index + 1 }}
+                                <th class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-l border-gray-200 min-w-[160px] max-w-[200px] align-bottom" title="{{ $item->name }}">
+                                    <div class="line-clamp-4 leading-tight normal-case font-medium mb-2">{{ $item->name }}</div>
+                                    <label class="flex items-center justify-center space-x-1 cursor-pointer text-[10px] text-gray-500 hover:text-blue-600">
+                                        <input type="checkbox" class="check-all-col w-3 h-3 cursor-pointer" data-col="{{ $index }}">
+                                        <span class="normal-case">OK Semua</span>
+                                    </label>
                                 </th>
                             @endforeach
                         </tr>
@@ -71,8 +56,16 @@
                                     {{ $loop->iteration }}
                                 </td>
                                 <td class="px-4 py-2 text-sm align-middle sticky left-0 bg-white group-hover:bg-gray-50 border-r border-gray-200 z-20 whitespace-nowrap transition-colors">
-                                    <div class="font-bold text-gray-900 text-sm">{{ $aes->name }}</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">NIP: {{ $aes->nip ?? '-' }}</div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <div class="font-bold text-gray-900 text-sm">{{ $aes->name }}</div>
+                                            <div class="text-xs text-gray-500 mt-0.5">NIP: {{ $aes->nip ?? '-' }}</div>
+                                        </div>
+                                        <label class="flex flex-col items-center justify-center cursor-pointer ml-3 text-[10px] text-gray-500 hover:text-blue-600">
+                                            <input type="checkbox" class="check-all-row w-3 h-3 cursor-pointer mb-1" data-row="{{ $aes->aes_id }}">
+                                            <span>OK Semua</span>
+                                        </label>
+                                    </div>
                                 </td>
                                 @if($items->isEmpty())
                                     <td colspan="{{ $headerItems->count() ?: 1 }}" class="px-4 py-2 text-sm align-middle">
@@ -84,7 +77,7 @@
                                     @foreach($items as $index => $item)
                                         <td class="px-2 py-2 text-center align-middle border-l border-gray-100 hover:bg-blue-100 transition-colors">
                                             <input type="hidden" name="all_item_ids[]" value="{{ $item->id }}">
-                                            <input type="checkbox" name="items[{{ $item->id }}]" value="1" {{ $item->value ? 'checked' : '' }} class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer shadow-sm hover:scale-110 transition-transform" title="{{ $item->name }}">
+                                            <input type="checkbox" name="items[{{ $item->id }}]" value="1" {{ $item->value ? 'checked' : '' }} class="item-checkbox w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer shadow-sm hover:scale-110 transition-transform" title="{{ $item->name }}" data-col="{{ $index }}" data-row="{{ $aes->aes_id }}">
                                         </td>
                                     @endforeach
                                 @endif
@@ -109,4 +102,72 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colCheckboxes = document.querySelectorAll('.check-all-col');
+    const rowCheckboxes = document.querySelectorAll('.check-all-row');
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+
+    colCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const colIndex = this.getAttribute('data-col');
+            const isChecked = this.checked;
+            document.querySelectorAll(`.item-checkbox[data-col="${colIndex}"]`).forEach(item => {
+                item.checked = isChecked;
+            });
+            updateRowCheckAllState();
+        });
+    });
+
+    rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const rowId = this.getAttribute('data-row');
+            const isChecked = this.checked;
+            document.querySelectorAll(`.item-checkbox[data-row="${rowId}"]`).forEach(item => {
+                item.checked = isChecked;
+            });
+            updateColCheckAllState();
+        });
+    });
+
+    itemCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateColCheckAllState();
+            updateRowCheckAllState();
+        });
+    });
+
+    function updateColCheckAllState() {
+        colCheckboxes.forEach(cb => {
+            const colIndex = cb.getAttribute('data-col');
+            const items = document.querySelectorAll(`.item-checkbox[data-col="${colIndex}"]`);
+            if(items.length > 0) {
+                const allChecked = Array.from(items).every(item => item.checked);
+                const someChecked = Array.from(items).some(item => item.checked);
+                cb.checked = allChecked;
+                cb.indeterminate = !allChecked && someChecked;
+            }
+        });
+    }
+
+    function updateRowCheckAllState() {
+        rowCheckboxes.forEach(cb => {
+            const rowId = cb.getAttribute('data-row');
+            const items = document.querySelectorAll(`.item-checkbox[data-row="${rowId}"]`);
+            if(items.length > 0) {
+                const allChecked = Array.from(items).every(item => item.checked);
+                const someChecked = Array.from(items).some(item => item.checked);
+                cb.checked = allChecked;
+                cb.indeterminate = !allChecked && someChecked;
+            }
+        });
+    }
+
+    // Initialize state
+    updateColCheckAllState();
+    updateRowCheckAllState();
+});
+</script>
 @endsection
+
