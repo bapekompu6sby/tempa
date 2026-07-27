@@ -25,7 +25,7 @@ class Asn extends Model
     public function events()
     {
         return $this->belongsToMany(Event::class)
-                    ->withPivot(['passing_status', 'participant_type', 'participant_status'])
+                    ->withPivot(['passing_status', 'participant_type', 'participant_status', 'total_behavioral_score'])
                     ->withTimestamps();
     }
 }

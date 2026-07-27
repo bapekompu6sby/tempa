@@ -71,7 +71,7 @@ class EventController extends Controller
     public function show(Event $event)
     {
         // Get main tab: instruksi, peserta, mata_pelatihan
-        $main_tab = request('main_tab', 'instruksi');
+        $main_tab = request('main_tab', 'peserta');
 
         // Prepare tabbed instruction lists scoped to this event, with optional search
         $tab = request('tab', 'semua');

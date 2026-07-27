@@ -97,7 +97,7 @@
         <div class="mb-4">
             <strong>Tanggal Selesai:</strong> {{ optional($event->end_date)->format('d M Y') }}
         </div>
-        <div class="mb-4">
+        {{-- <div class="mb-4">
             <div class="grid grid-cols-3 gap-4">
                 @php
                     $phases = ['persiapan' => 'Persiapan', 'pelaksanaan' => 'Pelaksanaan', 'pelaporan' => 'Pelaporan'];
@@ -114,7 +114,7 @@
                     </div>
                 @endforeach
             </div>
-        </div>
+        </div> --}}
         @if(!empty($event->note))
         <div class="mb-4">
             <strong>Catatan:</strong>
@@ -124,11 +124,11 @@
         
         {{-- Main Tabs --}}
         @php
-            $main_tab = request('main_tab', 'instruksi');
+            $main_tab = request('main_tab', 'peserta');
         @endphp
         <div class="mb-6 border-b">
             <nav class="flex space-x-4">
-                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'instruksi' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Instruksi</a>
+                {{-- <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'instruksi' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Instruksi</a> --}}
                 <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'peserta']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'peserta' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Peserta</a>
                 <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'mata_pelatihan']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'mata_pelatihan' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Mata Pelatihan</a>
             </nav>
