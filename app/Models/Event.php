@@ -467,4 +467,45 @@ class Event extends Model
             }
         }
     }
+
+    /**
+     * Calculate behavioral score for asn_event_subject and total_behavioral_score for asn_event.
+     * Behavioral score of asn_event_subject = (sum of monitoring item values / number of monitoring items) * 100
+     * asn_event total behavioral score = average of its asn_event_subject behavioral scores
+     */
+    public function calculateBehavioralScores(): void
+    {
+        $asnEvents = DB::table('asn_event')->where('event_id', $this->id)->get();
+        
+        foreach ($asnEvents as $asnEvent) {
+            $asnEventSubjects = DB::table('asn_event_subject')->where('asn_event_id', $asnEvent->id)->get();
+            $totalScoreSum = 0;
+            $subjectCount = 0;
+
+            foreach ($asnEventSubjects as $aes) {
+                // Get monitoring items for this asn_event_subject
+                $monitoringItems = \App\Models\MonitoringItem::where('monitorable_type', 'asn_event_subject')
+                    ->where('monitorable_id', $aes->id)
+                    ->get();
+
+                $sum = $monitoringItems->sum('value');
+                $count = $monitoringItems->count();
+                $behavioralScore = $count > 0 ? ($sum / $count) * 100 : 0;
+
+                // Update asn_event_subject
+                DB::table('asn_event_subject')
+                    ->where('id', $aes->id)
+                    ->update(['behavioral_score' => $behavioralScore]);
+
+                $totalScoreSum += $behavioralScore;
+                $subjectCount++;
+            }
+
+            // Update asn_event
+            $totalBehavioralScore = $subjectCount > 0 ? $totalScoreSum / $subjectCount : 0;
+            DB::table('asn_event')
+                ->where('id', $asnEvent->id)
+                ->update(['total_behavioral_score' => $totalBehavioralScore]);
+        }
+    }
 }

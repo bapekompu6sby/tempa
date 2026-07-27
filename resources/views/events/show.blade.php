@@ -13,6 +13,10 @@
                     ->exists();
                 $canGenerateMonitoring = $hasParticipants && $hasAsnEventSubject;
             @endphp
+            <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
+                @csrf
+                <button type="submit" class="px-3 py-1.5 rounded text-sm bg-purple-600 text-white hover:bg-purple-700 cursor-pointer" title="Hitung skor sikap">Hitung Skor Sikap</button>
+            </form>
             <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
                 @csrf
                 <button type="submit" class="px-3 py-1.5 rounded text-sm {{ $canGenerateMonitoring ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}" {{ $canGenerateMonitoring ? '' : 'disabled' }} title="{{ $canGenerateMonitoring ? 'Generate semua form monitoring untuk peserta' : 'Event harus memiliki peserta dan sudah di-inisiasi nilainya' }}">Generate Monitoring Items</button>

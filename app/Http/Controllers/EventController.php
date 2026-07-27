@@ -239,6 +239,15 @@ class EventController extends Controller
     }
 
     /**
+     * Calculate behavioral scores for the event.
+     */
+    public function calculateBehavioralScores(Event $event)
+    {
+        $event->calculateBehavioralScores();
+        return back()->with('success', 'Behavioral scores berhasil dihitung.');
+    }
+
+    /**
      * View subject monitoring for the event subject.
      */
     public function subjectMonitoring(Event $event, \App\Models\EventSubject $subject)
