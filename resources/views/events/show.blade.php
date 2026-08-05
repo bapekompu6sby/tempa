@@ -13,10 +13,10 @@
                     ->exists();
                 $canGenerateMonitoring = $hasParticipants && $hasAsnEventSubject;
             @endphp
-            <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
+            <!-- <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
                 @csrf
-                <button type="submit" class="px-3 py-1.5 rounded text-sm bg-purple-600 text-white hover:bg-purple-700 cursor-pointer" title="Hitung skor sikap">Hitung Skor Sikap</button>
-            </form>
+                <button type="submit" class="px-3 py-1.5 rounded text-sm bg-purple-600 text-white hover:bg-purple-700 cursor-pointer" title="Calculate Behavioral Score">Calculate Behavioral Score</button>
+            </form> -->
             <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
                 @csrf
                 <button type="submit" class="px-3 py-1.5 rounded text-sm {{ $canGenerateMonitoring ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}" {{ $canGenerateMonitoring ? '' : 'disabled' }} title="{{ $canGenerateMonitoring ? 'Generate semua form monitoring untuk peserta' : 'Event harus memiliki peserta dan sudah di-inisiasi nilainya' }}">Generate Monitoring Items</button>
@@ -348,6 +348,7 @@
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jabatan</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Instansi</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Skor Sikap</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status Kelulusan</th>
                         </tr>
                     </thead>
@@ -366,6 +367,11 @@
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                 <p class="text-gray-900 whitespace-no-wrap">{{ strtoupper($asn->asn_source ?? '-') }}</p>
                             </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                <span class="font-semibold {{ $asn->pivot->total_behavioral_score >= 80 ? 'text-green-600' : ($asn->pivot->total_behavioral_score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
+                                    {{ number_format($asn->pivot->total_behavioral_score, 1) }}
+                                </span>
+                            </td>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                 @if($asn->pivot->passing_status === 'lulus')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Lulus</span>
@@ -378,7 +384,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                            <td colspan="6" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                                 Belum ada peserta pelatihan ini. Silakan import data.
                             </td>
                         </tr>
@@ -396,9 +402,19 @@
         <div class="mb-4">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">Mata Pelatihan</h3>
-                <form method="POST" action="{{ route('events.generateAsnEventSubjects', $event) }}">
+                <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
                     @csrf
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700" onclick="return confirm('Inisiasi nilai akan mendaftarkan semua peserta ke setiap mata pelatihan. Lanjutkan?')">Inisiasi Nilai Peserta</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700" onclick="return confirm('Hitung Nilai Sikap Perilaku?')">Kalkulasi Nilai Sikap Perilaku Peserta</button>
+                </form>
+            </div>
+            
+            <div class="mb-6 bg-gray-50 p-4 rounded border">
+                <h4 class="font-semibold mb-3">Tambah Mata Pelatihan</h4>
+                <form method="POST" action="{{ route('events.subjects.store', $event) }}" class="flex space-x-2">
+                    @csrf
+                    <input type="text" name="name" placeholder="Nama Mata Pelatihan" class="border p-2 rounded flex-1" required>
+                    <input type="number" name="jp" placeholder="JP" class="border p-2 rounded w-24" required min="1">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Simpan</button>
                 </form>
             </div>
             <div class="overflow-x-auto bg-white rounded-lg shadow">
@@ -407,6 +423,7 @@
                         <tr>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Mata Pelatihan</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32 text-center">JP</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -420,10 +437,30 @@
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                                 {{ $subject->jp }}
                             </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                <button type="button" onclick="document.getElementById('edit-subject-{{ $subject->id }}').classList.toggle('hidden')" class="text-blue-600 hover:underline">Edit</button>
+                                <form method="POST" action="{{ route('events.subjects.destroy', [$event, $subject]) }}" class="inline-block ml-2" onsubmit="return confirm('Hapus mata pelatihan ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:underline">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr id="edit-subject-{{ $subject->id }}" class="hidden bg-gray-50">
+                            <td colspan="3" class="px-5 py-3 border-b border-gray-200">
+                                <form method="POST" action="{{ route('events.subjects.update', [$event, $subject]) }}" class="flex space-x-2">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="name" value="{{ $subject->name }}" class="border p-2 rounded flex-1" required>
+                                    <input type="number" name="jp" value="{{ $subject->jp }}" class="border p-2 rounded w-24" required min="1">
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update</button>
+                                    <button type="button" onclick="document.getElementById('edit-subject-{{ $subject->id }}').classList.add('hidden')" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Batal</button>
+                                </form>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="2" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                            <td colspan="3" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
                                 Belum ada mata pelatihan untuk event ini.
                             </td>
                         </tr>

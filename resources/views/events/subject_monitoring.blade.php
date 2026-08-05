@@ -7,7 +7,13 @@
             <h2 class="text-2xl font-bold">Monitoring Sikap: {{ $subject->name }}</h2>
             <p class="text-gray-600">Pelatihan: {{ $event->name }}</p>
         </div>
-        <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'mata_pelatihan']) }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 font-medium">Kembali</a>
+        <div class="flex space-x-2">
+            <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}">
+                @csrf
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700" onclick="return confirm('Hitung Nilai Sikap Perilaku?')">Hitung Nilai Sikap</button>
+            </form>
+            <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'mata_pelatihan']) }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 font-medium">Kembali</a>
+        </div>
     </div>
 
     @if (session('success'))
@@ -72,7 +78,13 @@
                                         <div class="flex-grow flex justify-between items-center">
                                             <div>
                                                 <div class="font-bold text-gray-900 text-sm">{{ $aes->name }}</div>
-                                                <div class="text-xs text-gray-500 mt-0.5">NIP: {{ $aes->nip ?? '-' }}</div>
+                                                <div class="text-xs text-gray-500 mt-0.5">
+                                                    NIP: {{ $aes->nip ?? '-' }}
+                                                    <span class="mx-1">|</span>
+                                                    <span class="font-semibold {{ $aes->behavioral_score >= 80 ? 'text-green-600' : ($aes->behavioral_score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
+                                                        Nilai: {{ number_format($aes->behavioral_score, 1) }}
+                                                    </span>
+                                                </div>
                                             </div>
                                             <label class="flex flex-col items-center justify-center cursor-pointer ml-3 text-[10px] text-gray-500 hover:text-blue-600">
                                                 <input type="checkbox" class="check-all-row w-3 h-3 cursor-pointer mb-1" data-row="{{ $aes->aes_id }}">

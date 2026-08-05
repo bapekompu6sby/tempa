@@ -114,6 +114,7 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     Route::post('events/{event}/calculate-behavioral-scores', [App\Http\Controllers\EventController::class, 'calculateBehavioralScores'])->name('events.calculateBehavioralScores');
     Route::get('events/{event}/subjects/{subject}/monitoring', [App\Http\Controllers\EventController::class, 'subjectMonitoring'])->name('events.subjectMonitoring');
     Route::post('events/{event}/subjects/{subject}/monitoring', [App\Http\Controllers\EventController::class, 'saveSubjectMonitoring'])->name('events.saveSubjectMonitoring');
+    Route::resource('events.subjects', App\Http\Controllers\EventSubjectController::class)->only(['store', 'update', 'destroy']);
     Route::get('events/{event}/download-report', [App\Http\Controllers\EventController::class, 'downloadReport'])->name('events.downloadReport');
     // view event documents
     Route::get('events/{event}/documents', [App\Http\Controllers\EventController::class, 'documents'])->name('events.documents');

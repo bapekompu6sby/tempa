@@ -257,7 +257,7 @@ class EventController extends Controller
             ->join('asns', 'asn_event.asn_id', '=', 'asns.id')
             ->where('asn_event.event_id', $event->id)
             ->where('asn_event_subject.event_subject_id', $subject->id)
-            ->select('asn_event_subject.id as aes_id', 'asns.name', 'asns.nip')
+            ->select('asn_event_subject.id as aes_id', 'asns.name', 'asns.nip', 'asn_event_subject.behavioral_score')
             ->get();
 
         $monitoringItems = \App\Models\MonitoringItem::with('template')
