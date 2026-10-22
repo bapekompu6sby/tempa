@@ -312,7 +312,20 @@
         </div>
         @elseif($main_tab === 'peserta')
         <div class="mb-4">
-            <h3 class="text-lg font-semibold mb-4">Peserta Pelatihan</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Daftar Peserta Pelatihan</h3>
+                    <p class="text-sm text-gray-500">Daftar peserta yang terdaftar pada pelatihan ini</p>
+                </div>
+                <div>
+                    <a href="{{ route('events.participants', $event) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold shadow transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Manajemen Peserta
+                    </a>
+                </div>
+            </div>
 
             @if (session('success'))
                 <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
@@ -325,54 +338,43 @@
                 </div>
             @endif
 
-            <div class="bg-gray-50 p-6 rounded shadow mb-6 border-t-4 border-blue-500">
-                <h3 class="text-md font-bold mb-4">Import ASN ke Pelatihan</h3>
-                <form method="POST" action="{{ route('events.importAsn', $event) }}" enctype="multipart/form-data" class="flex items-end space-x-4">
-                    @csrf
-                    <div class="flex-grow">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">File Excel/CSV</label>
-                        <input type="file" name="file" required class="w-full border p-2 rounded bg-white">
-                        <p class="text-xs text-gray-500 mt-1">Gunakan template yang sama dengan Import ASN di menu ASN.</p>
-                    </div>
-                    <div>
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">Import Data</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="overflow-x-auto bg-white rounded-lg shadow">
+            <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
                 <table class="min-w-full leading-normal">
                     <thead>
                         <tr>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12 text-center">No</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">NIP</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jabatan</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Instansi</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Skor Sikap</th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status Kelulusan</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status Kelulusan</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($participants as $asn)
-                        <tr>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                <p class="text-gray-900 whitespace-no-wrap">{{ $asn->nip ?? '-' }}</p>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                                {{ method_exists($participants, 'firstItem') && $participants->firstItem() ? ($participants->firstItem() + $loop->index) : $loop->iteration }}
                             </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap font-mono text-xs">{{ $asn->nip ?? '-' }}</p>
+                            </td>
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm">
                                 <p class="text-gray-900 whitespace-no-wrap font-semibold">{{ $asn->name }}</p>
                             </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                <p class="text-gray-900 whitespace-no-wrap">{{ $asn->job_title ?? '-' }}</p>
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-700 whitespace-no-wrap">{{ $asn->job_title ?? '-' }}</p>
                             </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                <p class="text-gray-900 whitespace-no-wrap">{{ strtoupper($asn->asn_source ?? '-') }}</p>
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-700 whitespace-no-wrap">{{ strtoupper($asn->asn_source ?? '-') }}</p>
                             </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                <span class="font-semibold {{ $asn->pivot->total_behavioral_score >= 80 ? 'text-green-600' : ($asn->pivot->total_behavioral_score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
-                                    {{ number_format($asn->pivot->total_behavioral_score, 1) }}
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm text-center">
+                                <span class="font-semibold {{ ($asn->pivot->total_behavioral_score ?? 0) >= 80 ? 'text-green-600' : (($asn->pivot->total_behavioral_score ?? 0) >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
+                                    {{ number_format($asn->pivot->total_behavioral_score ?? 0, 1) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm text-center">
                                 @if($asn->pivot->passing_status === 'lulus')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Lulus</span>
                                 @elseif($asn->pivot->passing_status === 'tidak_lulus')
@@ -384,8 +386,11 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                Belum ada peserta pelatihan ini. Silakan import data.
+                            <td colspan="7" class="px-5 py-8 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                                <p class="mb-2">Belum ada peserta pelatihan ini.</p>
+                                <a href="{{ route('events.participants', $event) }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold hover:underline">
+                                    Ke Manajemen Peserta &rarr;
+                                </a>
                             </td>
                         </tr>
                         @endforelse
@@ -400,68 +405,67 @@
         </div>
         @elseif($main_tab === 'mata_pelatihan')
         <div class="mb-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Mata Pelatihan</h3>
-                <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700" onclick="return confirm('Hitung Nilai Sikap Perilaku?')">Kalkulasi Nilai Sikap Perilaku Peserta</button>
-                </form>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Daftar Mata Pelatihan</h3>
+                    <p class="text-sm text-gray-500">Daftar mata pelatihan dan alokasi JP untuk pelatihan ini</p>
+                </div>
+                <div>
+                    <a href="{{ route('events.subjects.index', $event) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold shadow transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Manajemen Mata Pelatihan
+                    </a>
+                </div>
             </div>
-            
-            <div class="mb-6 bg-gray-50 p-4 rounded border">
-                <h4 class="font-semibold mb-3">Tambah Mata Pelatihan</h4>
-                <form method="POST" action="{{ route('events.subjects.store', $event) }}" class="flex space-x-2">
-                    @csrf
-                    <input type="text" name="name" placeholder="Nama Mata Pelatihan" class="border p-2 rounded flex-1" required>
-                    <input type="number" name="jp" placeholder="JP" class="border p-2 rounded w-24" required min="1">
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Simpan</button>
-                </form>
-            </div>
-            <div class="overflow-x-auto bg-white rounded-lg shadow">
+
+            @if (session('success'))
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                    <span class="block sm:inline">{!! session('success') !!}</span>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                    <span class="block sm:inline">{!! session('error') !!}</span>
+                </div>
+            @endif
+
+            <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
                 <table class="min-w-full leading-normal">
                     <thead>
                         <tr>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12 text-center">No</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Mata Pelatihan</th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32 text-center">JP</th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Aksi</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">JP</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-48">Monitoring Sikap</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($subjects as $subject)
-                        <tr>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-semibold">
-                                <a href="{{ route('events.subjectMonitoring', ['event' => $event, 'subject' => $subject]) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
-                                    {{ $subject->name }}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                                {{ $loop->iteration }}
+                            </td>
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm font-semibold text-gray-900">
+                                {{ $subject->name }}
+                            </td>
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm text-center font-medium text-gray-700">
+                                {{ $subject->jp }} JP
+                            </td>
+                            <td class="px-5 py-4 border-b border-gray-200 bg-white text-sm text-center">
+                                <a href="{{ route('events.subjectMonitoring', ['event' => $event, 'subject' => $subject]) }}" class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition">
+                                    Monitoring Sikap &rarr;
                                 </a>
-                            </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                {{ $subject->jp }}
-                            </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                <button type="button" onclick="document.getElementById('edit-subject-{{ $subject->id }}').classList.toggle('hidden')" class="text-blue-600 hover:underline">Edit</button>
-                                <form method="POST" action="{{ route('events.subjects.destroy', [$event, $subject]) }}" class="inline-block ml-2" onsubmit="return confirm('Hapus mata pelatihan ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:underline">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <tr id="edit-subject-{{ $subject->id }}" class="hidden bg-gray-50">
-                            <td colspan="3" class="px-5 py-3 border-b border-gray-200">
-                                <form method="POST" action="{{ route('events.subjects.update', [$event, $subject]) }}" class="flex space-x-2">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="text" name="name" value="{{ $subject->name }}" class="border p-2 rounded flex-1" required>
-                                    <input type="number" name="jp" value="{{ $subject->jp }}" class="border p-2 rounded w-24" required min="1">
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update</button>
-                                    <button type="button" onclick="document.getElementById('edit-subject-{{ $subject->id }}').classList.add('hidden')" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Batal</button>
-                                </form>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
-                                Belum ada mata pelatihan untuk event ini.
+                            <td colspan="4" class="px-5 py-8 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
+                                <p class="mb-2">Belum ada mata pelatihan untuk pelatihan ini.</p>
+                                <a href="{{ route('events.subjects.index', $event) }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold hover:underline">
+                                    Ke Manajemen Mata Pelatihan &rarr;
+                                </a>
                             </td>
                         </tr>
                         @endforelse

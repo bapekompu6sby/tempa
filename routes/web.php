@@ -108,13 +108,15 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     Route::resource('events', App\Http\Controllers\EventController::class);
     Route::post('events/{event}/finish', [App\Http\Controllers\EventController::class, 'finish'])->name('events.finish');
     Route::get('events/{event}/participants', [App\Http\Controllers\EventController::class, 'participants'])->name('events.participants');
+    Route::delete('events/{event}/participants/{asn}', [App\Http\Controllers\EventController::class, 'destroyParticipant'])->name('events.participants.destroy');
     Route::post('events/{event}/import-asn', [App\Http\Controllers\AsnImportController::class, 'importForEvent'])->name('events.importAsn');
     Route::post('events/{event}/generate-asn-event-subjects', [App\Http\Controllers\EventController::class, 'generateAsnEventSubjects'])->name('events.generateAsnEventSubjects');
     Route::post('events/{event}/generate-monitoring-items', [App\Http\Controllers\EventController::class, 'generateMonitoringItems'])->name('events.generateMonitoringItems');
     Route::post('events/{event}/calculate-behavioral-scores', [App\Http\Controllers\EventController::class, 'calculateBehavioralScores'])->name('events.calculateBehavioralScores');
+    Route::get('events/{event}/subjects', [App\Http\Controllers\EventSubjectController::class, 'index'])->name('events.subjects');
     Route::get('events/{event}/subjects/{subject}/monitoring', [App\Http\Controllers\EventController::class, 'subjectMonitoring'])->name('events.subjectMonitoring');
     Route::post('events/{event}/subjects/{subject}/monitoring', [App\Http\Controllers\EventController::class, 'saveSubjectMonitoring'])->name('events.saveSubjectMonitoring');
-    Route::resource('events.subjects', App\Http\Controllers\EventSubjectController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('events.subjects', App\Http\Controllers\EventSubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('events/{event}/download-report', [App\Http\Controllers\EventController::class, 'downloadReport'])->name('events.downloadReport');
     // view event documents
     Route::get('events/{event}/documents', [App\Http\Controllers\EventController::class, 'documents'])->name('events.documents');

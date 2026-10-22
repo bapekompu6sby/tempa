@@ -152,12 +152,60 @@ class EventController extends Controller
     }
 
     /**
-     * Display participants for the specified event.
+     * Display participants for the specified event (Manajemen Peserta).
      */
-    public function participants(Event $event)
+    public function participants(Request $request, Event $event)
     {
-        $participants = $event->asns()->paginate(20);
-        return view('events.participants', compact('event', 'participants'));
+        $q = $request->input('q');
+        $query = $event->asns();
+        if (!empty($q)) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('nip', 'like', "%{$q}%");
+            });
+        }
+        $participants = $query->paginate(50)->appends($request->except('page'));
+        return view('events.participants', compact('event', 'participants', 'q'));
+    }
+
+    /**
+     * Remove participant from event.
+     */
+    public function destroyParticipant(Event $event, \App\Models\Asn $asn)
+    {
+        $asnEvent = \Illuminate\Support\Facades\DB::table('asn_event')
+            ->where('event_id', $event->id)
+            ->where('asn_id', $asn->id)
+            ->first();
+
+        if ($asnEvent) {
+            $aesIds = \Illuminate\Support\Facades\DB::table('asn_event_subject')
+                ->where('asn_event_id', $asnEvent->id)
+                ->pluck('id');
+
+            if ($aesIds->isNotEmpty()) {
+                \App\Models\MonitoringItem::where('monitorable_type', 'asn_event_subject')
+                    ->whereIn('monitorable_id', $aesIds)
+                    ->delete();
+            }
+
+            \App\Models\MonitoringItem::where('monitorable_type', 'asn_event')
+                ->where('monitorable_id', $asnEvent->id)
+                ->delete();
+
+            $event->asns()->detach($asn->id);
+        }
+
+        return back()->with('success', 'Peserta berhasil dihapus dari pelatihan.');
+    }
+
+    /**
+     * Display subjects for the specified event (Manajemen Mata Pelatihan).
+     */
+    public function subjects(Event $event)
+    {
+        $subjects = $event->eventSubjects()->get();
+        return view('events.subjects', compact('event', 'subjects'));
     }
 
     /**
