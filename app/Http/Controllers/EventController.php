@@ -70,7 +70,7 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        // Get main tab: instruksi, peserta, mata_pelatihan
+        // Get main tab: instruksi, peserta, mata_pelatihan, monitoring
         $main_tab = request('main_tab', 'peserta');
 
         // Prepare tabbed instruction lists scoped to this event, with optional search
@@ -85,6 +85,7 @@ class EventController extends Controller
         $pengamat = collect();
         $participants = null;
         $subjects = null;
+        $monitoringSetup = null;
 
         if ($main_tab === 'instruksi') {
             // load related instructions
@@ -134,9 +135,11 @@ class EventController extends Controller
             $participants = $event->asns()->paginate(20)->appends(request()->except('page'));
         } elseif ($main_tab === 'mata_pelatihan') {
             $subjects = $event->eventSubjects()->get();
+        } elseif ($main_tab === 'monitoring') {
+            $monitoringSetup = $event->getMonitoringSetupStatus();
         }
 
-        return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q', 'phase', 'main_tab', 'participants', 'subjects'));
+        return view('events.show', compact('event', 'all', 'pic', 'host', 'pengamat', 'tab', 'q', 'phase', 'main_tab', 'participants', 'subjects', 'monitoringSetup'));
     }
 
     /**
@@ -274,16 +277,19 @@ class EventController extends Controller
     public function generateAsnEventSubjects(Event $event)
     {
         $event->generateAsnEventSubjects();
-        return back()->with('success', 'ASN Event Subjects berhasil digenerate.');
+        return back()->with('success', 'Participant Event Subjects berhasil digenerate.');
     }
 
     /**
      * Generate monitoring items for the event.
      */
-    public function generateMonitoringItems(Event $event)
+    public function generateMonitoringItems(Request $request, Event $event)
     {
-        $event->generateMonitoringItems();
-        return back()->with('success', 'Monitoring Items berhasil digenerate.');
+        $category = $request->input('category');
+        $event->generateMonitoringItems($category);
+
+        $catLabel = $category ? ' kategori ' . ucwords(str_replace('_', ' ', $category)) : '';
+        return back()->with('success', "Monitoring Items{$catLabel} berhasil digenerate.");
     }
 
     /**

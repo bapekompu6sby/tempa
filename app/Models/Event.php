@@ -403,9 +403,13 @@ class Event extends Model
     /**
      * Generate monitoring items for this event.
      */
-    public function generateMonitoringItems(): void
+    public function generateMonitoringItems(?string $category = null): void
     {
-        $templates = \App\Models\MonitoringTemplate::all();
+        $templatesQuery = \App\Models\MonitoringTemplate::query();
+        if ($category) {
+            $templatesQuery->where('category', $category);
+        }
+        $templates = $templatesQuery->get();
         $isElearning = in_array($this->learning_model, ['full_elearning', 'distance_learning']);
         
         $asnEvents = DB::table('asn_event')->where('event_id', $this->id)->get();
@@ -424,7 +428,7 @@ class Event extends Model
                 continue;
             }
 
-            if ($template->category === 'sikap') {
+            if ($template->category === 'sikap' || $template->ownership === 'asn_event_subject') {
                 // Attached to asn_event_subject
                 foreach ($asnEventSubjects as $aes) {
                     \App\Models\MonitoringItem::firstOrCreate([
@@ -438,7 +442,7 @@ class Event extends Model
                         'order' => $template->order ?? 0,
                     ]);
                 }
-            } elseif ($template->category === 'administrasi_peserta') {
+            } elseif ($template->category === 'administrasi_peserta' || $template->ownership === 'asn_event') {
                 // Attached to asn_event
                 foreach ($asnEvents as $ae) {
                     \App\Models\MonitoringItem::firstOrCreate([
@@ -452,7 +456,7 @@ class Event extends Model
                         'order' => $template->order ?? 0,
                     ]);
                 }
-            } elseif (in_array($template->category, ['administrasi', 'sarpras'])) {
+            } elseif (in_array($template->category, ['administrasi', 'sarpras']) || $template->ownership === 'event') {
                 // Attached to the event itself
                 \App\Models\MonitoringItem::firstOrCreate([
                     'monitoring_template_id' => $template->id,
@@ -466,6 +470,139 @@ class Event extends Model
                 ]);
             }
         }
+    }
+
+    /**
+     * Get summary status for monitoring setup checklist.
+     */
+    public function getMonitoringSetupStatus(): array
+    {
+        $participantCount = $this->asns()->count();
+        $subjectCount = $this->eventSubjects()->count();
+
+        $asnEventIds = DB::table('asn_event')->where('event_id', $this->id)->pluck('id');
+        $asnEventSubjectCount = $asnEventIds->isNotEmpty()
+            ? DB::table('asn_event_subject')->whereIn('asn_event_id', $asnEventIds)->count()
+            : 0;
+
+        $isElearning = in_array($this->learning_model, ['full_elearning', 'distance_learning']);
+
+        $categoryDefinitions = [
+            'administrasi' => [
+                'label' => 'Administrasi',
+                'description' => 'Monitoring kelengkapan administrasi pelatihan',
+                'target' => 'Pelatihan',
+            ],
+            'sarpras' => [
+                'label' => 'Sarana & Prasarana',
+                'description' => 'Monitoring kesiapan sarana, prasarana, dan ruangan',
+                'target' => 'Pelatihan',
+            ],
+            'administrasi_peserta' => [
+                'label' => 'Administrasi Peserta',
+                'description' => 'Monitoring berkas & administrasi setiap peserta',
+                'target' => 'Peserta',
+            ],
+            'sikap' => [
+                'label' => 'Sikap Perilaku',
+                'description' => 'Monitoring penilaian sikap dan perilaku peserta per mata pelatihan',
+                'target' => 'Peserta x Mata Pelatihan',
+            ],
+        ];
+
+        // Also check any distinct categories from MonitoringTemplate
+        $dbCategories = \App\Models\MonitoringTemplate::select('category')->distinct()->pluck('category')->toArray();
+        foreach ($dbCategories as $cat) {
+            if (!isset($categoryDefinitions[$cat])) {
+                $categoryDefinitions[$cat] = [
+                    'label' => ucwords(str_replace('_', ' ', $cat)),
+                    'description' => 'Monitoring kategori ' . str_replace('_', ' ', $cat),
+                    'target' => 'Pelatihan / Peserta',
+                ];
+            }
+        }
+
+        $aesIds = $asnEventIds->isNotEmpty()
+            ? DB::table('asn_event_subject')->whereIn('asn_event_id', $asnEventIds)->pluck('id')
+            : collect();
+
+        $categoryStats = [];
+        foreach ($categoryDefinitions as $catKey => $catInfo) {
+            $templateCount = \App\Models\MonitoringTemplate::where('category', $catKey)->count();
+
+            // Count existing items for this event
+            $itemCount = \App\Models\MonitoringItem::where('category', $catKey)
+                ->where(function ($q) use ($asnEventIds, $aesIds) {
+                    $q->where(function ($sub) {
+                        $sub->where('monitorable_type', self::class)
+                            ->where('monitorable_id', $this->id);
+                    });
+                    if ($asnEventIds->isNotEmpty()) {
+                        $q->orWhere(function ($sub) use ($asnEventIds) {
+                            $sub->where('monitorable_type', 'asn_event')
+                                ->whereIn('monitorable_id', $asnEventIds);
+                        });
+                    }
+                    if ($aesIds->isNotEmpty()) {
+                        $q->orWhere(function ($sub) use ($aesIds) {
+                            $sub->where('monitorable_type', 'asn_event_subject')
+                                ->whereIn('monitorable_id', $aesIds);
+                        });
+                    }
+                })
+                ->count();
+
+            $canGenerate = true;
+            $note = null;
+
+            if ($templateCount === 0) {
+                $canGenerate = false;
+                $note = 'Belum ada template aktif di Master Monitoring Template.';
+            } elseif ($catKey === 'sikap') {
+                if ($isElearning) {
+                    $canGenerate = false;
+                    $note = 'Tidak diterapkan untuk model pembelajaran E-Learning / Distance Learning.';
+                } elseif ($asnEventSubjectCount === 0) {
+                    $canGenerate = false;
+                    $note = 'Harus generate Participant Event Subject terlebih dahulu (Langkah 3).';
+                }
+            } elseif ($catKey === 'administrasi_peserta') {
+                if ($participantCount === 0) {
+                    $canGenerate = false;
+                    $note = 'Memerlukan minimal 1 peserta terdaftar.';
+                }
+            }
+
+            $categoryStats[$catKey] = [
+                'key' => $catKey,
+                'label' => $catInfo['label'],
+                'description' => $catInfo['description'],
+                'target' => $catInfo['target'],
+                'template_count' => $templateCount,
+                'item_count' => $itemCount,
+                'is_checked' => $itemCount > 0,
+                'can_generate' => $canGenerate,
+                'note' => $note,
+            ];
+        }
+
+        return [
+            'participant' => [
+                'count' => $participantCount,
+                'is_checked' => $participantCount > 0,
+            ],
+            'subject' => [
+                'count' => $subjectCount,
+                'is_checked' => $subjectCount > 0,
+            ],
+            'asn_event_subject' => [
+                'count' => $asnEventSubjectCount,
+                'expected' => $participantCount * $subjectCount,
+                'is_checked' => $asnEventSubjectCount > 0,
+                'can_generate' => $participantCount > 0 && $subjectCount > 0,
+            ],
+            'categories' => $categoryStats,
+        ];
     }
 
     /**

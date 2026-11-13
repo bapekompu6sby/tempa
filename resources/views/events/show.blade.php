@@ -4,34 +4,19 @@
 <div class="container mx-auto py-8">
     <h2 class="text-2xl font-bold mb-6">Detail Pelatihan</h2>
     <div class="bg-white p-6 rounded shadow max-w-5xl mx-auto relative border-t-4 border-gray-200">
-        {{-- Top-right action buttons --}}
-        <div class="absolute top-4 right-4 flex space-x-2">
-            @php
-                $hasParticipants = $event->asns()->exists();
-                $hasAsnEventSubject = \Illuminate\Support\Facades\DB::table('asn_event_subject')
-                    ->whereIn('asn_event_id', \Illuminate\Support\Facades\DB::table('asn_event')->where('event_id', $event->id)->pluck('id'))
-                    ->exists();
-                $canGenerateMonitoring = $hasParticipants && $hasAsnEventSubject;
-            @endphp
-            <!-- <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
-                @csrf
-                <button type="submit" class="px-3 py-1.5 rounded text-sm bg-purple-600 text-white hover:bg-purple-700 cursor-pointer" title="Calculate Behavioral Score">Calculate Behavioral Score</button>
-            </form> -->
-            <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
-                @csrf
-                <button type="submit" class="px-3 py-1.5 rounded text-sm {{ $canGenerateMonitoring ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}" {{ $canGenerateMonitoring ? '' : 'disabled' }} title="{{ $canGenerateMonitoring ? 'Generate semua form monitoring untuk peserta' : 'Event harus memiliki peserta dan sudah di-inisiasi nilainya' }}">Generate Monitoring Items</button>
-            </form>
-            <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 text-white rounded text-sm">Edit</a>
-            <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Dokumen</a>
+        {{-- Action menu (left-aligned) --}}
+        <div class="mb-6 flex flex-wrap items-center justify-start gap-2">
+            <a href="{{ route('events.edit', $event) }}" class="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm font-medium transition">Edit</a>
+            <a href="{{ route('events.documents', $event) }}" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition">Dokumen</a>
             <form method="POST" action="{{ route('events.finish', $event) }}" class="inline">
                 @csrf
-                <button type="submit" class="px-3 py-1.5 bg-green-600 text-white rounded text-sm cursor-pointer" onclick="return confirm('Tandai pelatihan sebagai selesai?')">Selesaikan Pelatihan</button>
+                <button type="submit" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition cursor-pointer" onclick="return confirm('Tandai pelatihan sebagai selesai?')">Selesaikan Pelatihan</button>
             </form>
-            <a href="{{ route('events.index') }}" class="px-3 py-1.5 bg-gray-300 rounded text-sm">Kembali</a>
+            <a href="{{ route('events.index') }}" class="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded text-sm font-medium transition">Kembali</a>
         </div>
         {{-- Event Report File (moved below header) --}}
         @if(!empty($event->event_report_url))
-        <div class="mb-6 mt-8 flex items-center justify-between bg-green-50 border border-green-200 rounded p-4 shadow-sm">
+        <div class="mb-6 flex items-center justify-between bg-green-50 border border-green-200 rounded p-4 shadow-sm">
             <div>
                 <div class="text-lg font-semibold text-green-900 mb-1 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
@@ -131,10 +116,11 @@
             $main_tab = request('main_tab', 'peserta');
         @endphp
         <div class="mb-6 border-b">
-            <nav class="flex space-x-4">
+            <nav class="flex space-x-4 justify-start">
                 {{-- <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'instruksi' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Instruksi</a> --}}
                 <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'peserta']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'peserta' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Peserta</a>
                 <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'mata_pelatihan']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'mata_pelatihan' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Mata Pelatihan</a>
+                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'monitoring']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'monitoring' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Monitoring</a>
             </nav>
         </div>
 
@@ -471,6 +457,238 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+        @elseif($main_tab === 'monitoring')
+        @php
+            $monitoringSetup = $monitoringSetup ?? $event->getMonitoringSetupStatus();
+        @endphp
+        <div class="mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Setup &amp; Checklist Monitoring</h3>
+                    <p class="text-sm text-gray-500">Kelola prasyarat dan generate form monitoring untuk pelatihan ini</p>
+                </div>
+            </div>
+
+            @if (session('success'))
+                <div class="mb-4 bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded shadow-sm flex items-center justify-between">
+                    <div>{!! session('success') !!}</div>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-4 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm flex items-center justify-between">
+                    <div>{!! session('error') !!}</div>
+                </div>
+            @endif
+
+            {{-- Checklist Prasyarat (Peserta, Mata Pelatihan, Participant Event Subject) --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                    <h4 class="font-bold text-gray-700 text-sm uppercase tracking-wider">Prasyarat Monitoring Pelatihan</h4>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    {{-- 1. Peserta Pelatihan --}}
+                    <div class="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 {{ $monitoringSetup['participant']['is_checked'] ? 'bg-white' : 'bg-red-50/30' }}">
+                        <div class="flex items-start space-x-4">
+                            @if($monitoringSetup['participant']['is_checked'])
+                                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center border border-green-300 mt-0.5" title="Terpenuhi">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            @else
+                                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center border border-red-300 mt-0.5" title="Belum Ada Peserta">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </span>
+                            @endif
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h5 class="text-base font-semibold text-gray-900">1. Peserta Pelatihan (Participant)</h5>
+                                    @if($monitoringSetup['participant']['is_checked'])
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                            ✓ Checked ({{ $monitoringSetup['participant']['count'] }} Peserta)
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                            ✗ Unchecked (0 Peserta)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Memerlukan minimal 1 peserta terdaftar pada pelatihan ini.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <a href="{{ route('events.participants', $event) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold transition shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                Manajemen Peserta &rarr;
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- 2. Mata Pelatihan --}}
+                    <div class="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 {{ $monitoringSetup['subject']['is_checked'] ? 'bg-white' : 'bg-red-50/30' }}">
+                        <div class="flex items-start space-x-4">
+                            @if($monitoringSetup['subject']['is_checked'])
+                                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center border border-green-300 mt-0.5" title="Terpenuhi">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            @else
+                                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center border border-red-300 mt-0.5" title="Belum Ada Mata Pelatihan">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </span>
+                            @endif
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h5 class="text-base font-semibold text-gray-900">2. Mata Pelatihan (Event Subject)</h5>
+                                    @if($monitoringSetup['subject']['is_checked'])
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                            ✓ Checked ({{ $monitoringSetup['subject']['count'] }} Mata Pelatihan)
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                            ✗ Unchecked (0 Mata Pelatihan)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Memerlukan minimal 1 mata pelatihan terdaftar pada pelatihan ini.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <a href="{{ route('events.subjects.index', $event) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold transition shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                Manajemen Mata Pelatihan &rarr;
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- 3. Participant Event Subject --}}
+                    <div class="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 {{ $monitoringSetup['asn_event_subject']['is_checked'] ? 'bg-white' : 'bg-red-50/30' }}">
+                        <div class="flex items-start space-x-4">
+                            @if($monitoringSetup['asn_event_subject']['is_checked'])
+                                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center border border-green-300 mt-0.5" title="Terpenuhi">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            @else
+                                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center border border-red-300 mt-0.5" title="Belum Terhubung">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </span>
+                            @endif
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h5 class="text-base font-semibold text-gray-900">3. Participant Event Subject</h5>
+                                    @if($monitoringSetup['asn_event_subject']['is_checked'])
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                            ✓ Checked ({{ $monitoringSetup['asn_event_subject']['count'] }} relasi)
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                            ✗ Unchecked (0 relasi)
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Menghubungkan seluruh peserta ke setiap mata pelatihan untuk pencatatan nilai &amp; monitoring sikap.
+                                    @if($monitoringSetup['asn_event_subject']['expected'] > 0)
+                                        <span class="text-gray-600 font-medium">(Target: {{ $monitoringSetup['asn_event_subject']['expected'] }} relasi dari {{ $monitoringSetup['participant']['count'] }} peserta &times; {{ $monitoringSetup['subject']['count'] }} mapel).</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <form method="POST" action="{{ route('events.generateAsnEventSubjects', $event) }}" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-4 py-2 {{ $monitoringSetup['asn_event_subject']['can_generate'] ? 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer' : 'bg-gray-200 text-gray-500 cursor-not-allowed' }} rounded text-sm font-semibold transition shadow-sm" {{ $monitoringSetup['asn_event_subject']['can_generate'] ? '' : 'disabled' }} title="{{ $monitoringSetup['asn_event_subject']['can_generate'] ? 'Sinkronisasi relasi peserta dengan seluruh mata pelatihan' : 'Harus memiliki minimal 1 peserta dan 1 mata pelatihan terlebih dahulu' }}">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Generate Participant Event Subject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 4. Monitoring Item per Kategori --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                        <h4 class="font-bold text-gray-700 text-sm uppercase tracking-wider">4. Monitoring Item (per Kategori)</h4>
+                        <p class="text-xs text-gray-500 mt-0.5">Status dan tombol generate untuk masing-masing kategori monitoring</p>
+                    </div>
+                    <div>
+                        <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition shadow-sm cursor-pointer" title="Generate semua kategori monitoring sekaligus">
+                                Generate Semua Kategori Sekaligus
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-gray-200">
+                    @foreach($monitoringSetup['categories'] as $cat)
+                        <div class="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 {{ $cat['is_checked'] ? 'bg-white' : 'bg-red-50/20' }}">
+                            <div class="flex items-start space-x-4">
+                                @if($cat['is_checked'])
+                                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center border border-green-300 mt-0.5" title="Item Sudah Digenerate">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    </span>
+                                @else
+                                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center border border-red-300 mt-0.5" title="Belum Digenerate">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </span>
+                                @endif
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h5 class="text-base font-semibold text-gray-900">{{ $cat['label'] }}</h5>
+                                        @if($cat['is_checked'])
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                                ✓ Checked ({{ $cat['item_count'] }} item)
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                                ✗ Unchecked (0 item)
+                                            </span>
+                                        @endif
+                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">
+                                            {{ $cat['template_count'] }} template tersedia
+                                        </span>
+                                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">
+                                            Target: {{ $cat['target'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">{{ $cat['description'] }}</p>
+                                    @if(!empty($cat['note']))
+                                        <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1 mt-2 inline-block">
+                                            ⚠ {{ $cat['note'] }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="flex-shrink-0 flex items-center space-x-2">
+                                @if($cat['key'] === 'sikap')
+                                    <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded text-xs font-semibold transition" title="Kalkulasi Nilai Sikap Perilaku Seluruh Peserta">
+                                            Kalkulasi Nilai
+                                        </button>
+                                    </form>
+                                @endif
+                                <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="category" value="{{ $cat['key'] }}">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 {{ $cat['can_generate'] ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer' : 'bg-gray-200 text-gray-500 cursor-not-allowed' }} rounded text-sm font-semibold transition shadow-sm" {{ $cat['can_generate'] ? '' : 'disabled' }} title="{{ $cat['note'] ?? 'Generate form monitoring kategori ' . $cat['label'] }}">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                        {{ $cat['is_checked'] ? 'Regenerate' : 'Generate' }} {{ $cat['label'] }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
         @endif
