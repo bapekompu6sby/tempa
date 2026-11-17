@@ -37,42 +37,25 @@
         </div>
     @endif
 
-    {{-- Import Box --}}
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 pb-3 border-b border-gray-100 gap-2">
-            <div>
-                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    Import Peserta ke Pelatihan
-                </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Unggah berkas Excel atau CSV untuk memasukkan peserta secara massal.</p>
-            </div>
-            <div>
-                <a href="{{ route('asn.import.template') }}" class="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-100 transition">
-                    <svg class="w-4 h-4 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download Template Excel
-                </a>
-            </div>
+    @if ($errors->any())
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm" role="alert">
+            <ul class="list-disc list-inside text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-        <form method="POST" action="{{ route('events.importAsn', $event) }}" enctype="multipart/form-data" class="flex flex-col md:flex-row items-end gap-4">
-            @csrf
-            <div class="flex-grow w-full">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Pilih File Excel/CSV (.xlsx, .xls, .csv)</label>
-                <input type="file" name="file" required accept=".xlsx,.xls,.csv" class="w-full border border-gray-300 p-2 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div class="w-full md:w-auto">
-                <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition flex items-center justify-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    Import Data
-                </button>
-            </div>
-        </form>
+    @endif
+
+    {{-- Import Box (synced with ASN Import, defaulted to this event) --}}
+    <div class="mb-6">
+        @include('asn._import_form', [
+            'formAction' => route('events.importAsn', $event),
+            'events' => $events ?? collect([$event]),
+            'selectedEventId' => $event->id,
+            'showTemplateButton' => true,
+            'lockEvent' => true,
+        ])
     </div>
 
     {{-- Actions & Search Bar --}}

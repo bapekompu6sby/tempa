@@ -22,13 +22,25 @@ class AsnImportController extends Controller
 
     public function import(Request $request)
     {
+        return $this->processImport($request);
+    }
+
+    public function importForEvent(Request $request, Event $event)
+    {
+        return $this->processImport($request, $event->id, true);
+    }
+
+    protected function processImport(Request $request, ?int $defaultEventId = null, bool $forceEventId = false)
+    {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:10240',
             'event_id' => 'nullable|exists:events,id',
         ]);
 
         try {
-            $eventId = $request->input('event_id');
+            $eventId = $forceEventId
+                ? $defaultEventId
+                : ($request->filled('event_id') ? (int) $request->input('event_id') : $defaultEventId);
             $importer = new AsnImport($eventId);
             Excel::import($importer, $request->file('file'));
 
@@ -50,23 +62,6 @@ class AsnImportController extends Controller
                 $errorMessages[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
             }
             return back()->with('error', 'Validasi gagal:<br>' . implode('<br>', $errorMessages));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal import data: ' . $e->getMessage());
-        }
-    }
-
-    public function importForEvent(Request $request, Event $event)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:10240',
-        ]);
-
-        try {
-            $importer = new AsnImport($event->id);
-            Excel::import($importer, $request->file('file'));
-
-            $imported = $importer->getImportedCount();
-            return back()->with('success', "Berhasil mengimport {$imported} data ASN dan menambahkannya ke pelatihan!");
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal import data: ' . $e->getMessage());
         }

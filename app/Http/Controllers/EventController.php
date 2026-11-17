@@ -168,7 +168,8 @@ class EventController extends Controller
             });
         }
         $participants = $query->paginate(50)->appends($request->except('page'));
-        return view('events.participants', compact('event', 'participants', 'q'));
+        $events = Event::orderBy('start_date', 'desc')->orderBy('name')->get();
+        return view('events.participants', compact('event', 'participants', 'q', 'events'));
     }
 
     /**
