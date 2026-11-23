@@ -117,10 +117,10 @@
         @endphp
         <div class="mb-6 border-b">
             <nav class="flex space-x-4 justify-start">
-                {{-- <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'instruksi' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Instruksi</a> --}}
+                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'instruksi' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Progress Pelatihan</a>
                 <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'peserta']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'peserta' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Peserta</a>
                 <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'mata_pelatihan']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'mata_pelatihan' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Mata Pelatihan</a>
-                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'monitoring']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'monitoring' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Monitoring</a>
+                <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'monitoring']) }}" class="px-4 py-2 -mb-px border-b-2 font-medium {{ $main_tab === 'monitoring' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-600 hover:text-gray-800' }}">Setup Monitoring</a>
             </nav>
         </div>
 
@@ -132,6 +132,7 @@
             {{-- Search + Tabs --}}
             <div class="mb-4 flex items-center justify-between">
                 <form method="GET" action="{{ route('events.show', $event) }}" class="flex items-center space-x-2">
+                    <input type="hidden" name="main_tab" value="instruksi">
                     <input type="hidden" name="tab" value="{{ $tab }}">
                     <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama atau detail..." class="border rounded px-3 py-2 w-64">
 
@@ -145,7 +146,7 @@
 
                     <button type="submit" class="px-3 py-2 bg-gray-200 rounded">Cari</button>
                     @if(!empty($q) || (isset($phase) && $phase !== 'all'))
-                        <a href="{{ route('events.show', ['event' => $event, 'tab' => $tab]) }}" class="ml-2 text-sm text-gray-600">Reset</a>
+                        <a href="{{ route('events.show', ['event' => $event, 'main_tab' => 'instruksi', 'tab' => $tab]) }}" class="ml-2 text-sm text-gray-600">Reset</a>
                     @endif
                 </form>
             </div>
@@ -165,7 +166,7 @@
                         @php $active = ($tab === $key); @endphp
                         @php
                             // preserve q and phase when switching tabs inside event
-                            $params = ['event' => $event, 'tab' => $key];
+                            $params = ['event' => $event, 'main_tab' => 'instruksi', 'tab' => $key];
                             if(!empty($q)) $params['q'] = $q;
                             if(isset($phase) && $phase !== 'all') $params['phase'] = $phase;
                         @endphp
@@ -303,7 +304,16 @@
                     <h3 class="text-lg font-semibold text-gray-800">Daftar Peserta Pelatihan</h3>
                     <p class="text-sm text-gray-500">Daftar peserta yang terdaftar pada pelatihan ini</p>
                 </div>
-                <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-semibold shadow transition cursor-pointer" title="Hitung Nilai Sikap Perilaku Seluruh Peserta" onclick="return confirm('Hitung nilai sikap seluruh peserta untuk pelatihan ini?')">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            Hitung Nilai Sikap
+                        </button>
+                    </form>
                     <a href="{{ route('events.participants', $event) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold shadow transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -396,7 +406,13 @@
                     <h3 class="text-lg font-semibold text-gray-800">Daftar Mata Pelatihan</h3>
                     <p class="text-sm text-gray-500">Daftar mata pelatihan dan alokasi JP untuk pelatihan ini</p>
                 </div>
-                <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('events.exportSikapMonitoring', $event) }}" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-semibold shadow transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Export XLSX Sikap
+                    </a>
                     <a href="{{ route('events.subjects.index', $event) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold shadow transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -669,14 +685,6 @@
                             </div>
 
                             <div class="flex-shrink-0 flex items-center space-x-2">
-                                @if($cat['key'] === 'sikap')
-                                    <form method="POST" action="{{ route('events.calculateBehavioralScores', $event) }}" class="inline">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded text-xs font-semibold transition" title="Kalkulasi Nilai Sikap Perilaku Seluruh Peserta">
-                                            Kalkulasi Nilai
-                                        </button>
-                                    </form>
-                                @endif
                                 <form method="POST" action="{{ route('events.generateMonitoringItems', $event) }}" class="inline">
                                     @csrf
                                     <input type="hidden" name="category" value="{{ $cat['key'] }}">

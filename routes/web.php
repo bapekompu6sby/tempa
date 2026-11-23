@@ -116,6 +116,7 @@ Route::middleware([\App\Http\Middleware\RequirePassword::class])->group(function
     Route::get('events/{event}/subjects', [App\Http\Controllers\EventSubjectController::class, 'index'])->name('events.subjects');
     Route::get('events/{event}/subjects/{subject}/monitoring', [App\Http\Controllers\EventController::class, 'subjectMonitoring'])->name('events.subjectMonitoring');
     Route::post('events/{event}/subjects/{subject}/monitoring', [App\Http\Controllers\EventController::class, 'saveSubjectMonitoring'])->name('events.saveSubjectMonitoring');
+    Route::get('events/{event}/export-sikap-monitoring', [App\Http\Controllers\EventController::class, 'exportSikapMonitoring'])->name('events.exportSikapMonitoring');
     Route::resource('events.subjects', App\Http\Controllers\EventSubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('events/{event}/download-report', [App\Http\Controllers\EventController::class, 'downloadReport'])->name('events.downloadReport');
     // view event documents

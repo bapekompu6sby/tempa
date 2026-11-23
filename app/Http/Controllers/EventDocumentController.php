@@ -32,7 +32,34 @@ class EventDocumentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'name' => 'required|string|max:255',
+            'file' => 'nullable|required_without:link|file|max:122880',
+            'link' => 'nullable|required_without:file|string|max:2048',
+        ], [
+            'file.required_without' => 'Harap unggah file atau sertakan link dokumen.',
+            'link.required_without' => 'Harap sertakan link dokumen atau unggah file.',
+        ]);
+
+        $path = $request->hasFile('file')
+            ? $request->file('file')->store('event_documents', 'public')
+            : null;
+
+        $link = !empty($validated['link']) ? trim($validated['link']) : null;
+        if ($link && !preg_match('/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//', $link)) {
+            $link = 'https://' . ltrim($link, '/');
+        }
+
+        EventDocument::create([
+            'event_id' => $validated['event_id'],
+            'name' => $validated['name'],
+            'file_path' => $path,
+            'link' => $link,
+            'checked' => true,
+        ]);
+
+        return back()->with('success', 'Dokumen berhasil ditambahkan.');
     }
 
     /**
@@ -84,9 +111,26 @@ class EventDocumentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(EventDocument $eventDocument)
+    public function destroy(Request $request, EventDocument $eventDocument)
     {
-        //
+        if (!empty($eventDocument->file_path)) {
+            Storage::disk('public')->delete($eventDocument->file_path);
+        }
+
+        foreach ($eventDocument->files as $file) {
+            if (!empty($file->file_path)) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+            $file->delete();
+        }
+
+        $eventDocument->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Dokumen berhasil dihapus.');
     }
 
     /**

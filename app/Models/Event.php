@@ -81,9 +81,8 @@ class Event extends Model
                 $event->refresh();
             }
 
-            // Delegate to the model methods to create EventInstruction and EventDocument records
+            // Delegate to the model method to create EventInstruction records
             $event->createEventInstructions();
-            $event->createEventDocuments();
         });
     }
 

@@ -147,9 +147,11 @@ class EventController extends Controller
      */
     public function documents(Event $event)
     {
-        $event->load('eventDocuments');
-
-        $documents = $event->eventDocuments()->get();
+        $documents = $event->eventDocuments()
+            ->with('files')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
 
         return view('events.documents', compact('event', 'documents'));
     }
@@ -339,6 +341,169 @@ class EventController extends Controller
         }
 
         return back()->with('success', 'Progress monitoring sikap berhasil disimpan.');
+    }
+
+    /**
+     * Export sikap perilaku monitoring to XLSX with one sheet per event subject.
+     */
+    public function exportSikapMonitoring(Event $event)
+    {
+        $subjects = $event->eventSubjects()->orderBy('id')->get();
+        if ($subjects->isEmpty()) {
+            return back()->with('error', 'Belum ada mata pelatihan untuk diexport.');
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $usedTitles = [];
+
+        foreach ($subjects as $sheetIndex => $subject) {
+            $sheet = $sheetIndex === 0
+                ? $spreadsheet->getActiveSheet()
+                : $spreadsheet->createSheet();
+
+            // Build valid, unique Excel sheet title (max 31 chars, no \ / ? * [ ] :)
+            $cleanName = preg_replace('/[\\\\\/\?\*\[\]\:]/', '', (string) $subject->name);
+            $cleanName = trim($cleanName) ?: ('Mapel ' . ($sheetIndex + 1));
+            $baseTitle = mb_substr($cleanName, 0, 31);
+            $title = $baseTitle;
+            $suffix = 2;
+            while (in_array(mb_strtolower($title), $usedTitles, true)) {
+                $suffixStr = ' (' . $suffix . ')';
+                $title = mb_substr($cleanName, 0, 31 - mb_strlen($suffixStr)) . $suffixStr;
+                $suffix++;
+            }
+            $usedTitles[] = mb_strtolower($title);
+            $sheet->setTitle($title);
+
+            $asnEventSubjects = \Illuminate\Support\Facades\DB::table('asn_event_subject')
+                ->join('asn_event', 'asn_event_subject.asn_event_id', '=', 'asn_event.id')
+                ->join('asns', 'asn_event.asn_id', '=', 'asns.id')
+                ->where('asn_event.event_id', $event->id)
+                ->where('asn_event_subject.event_subject_id', $subject->id)
+                ->orderBy('asns.name')
+                ->select('asn_event_subject.id as aes_id', 'asns.name', 'asns.nip', 'asn_event_subject.behavioral_score')
+                ->get();
+
+            $monitoringItems = \App\Models\MonitoringItem::with('template')
+                ->where('monitorable_type', 'asn_event_subject')
+                ->whereIn('monitorable_id', $asnEventSubjects->pluck('aes_id'))
+                ->orderBy('order')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('monitorable_id');
+
+            // Determine item columns from first participant with items
+            $headerItems = collect();
+            foreach ($asnEventSubjects as $aes) {
+                $items = $monitoringItems->get($aes->aes_id, collect());
+                if ($items->isNotEmpty()) {
+                    $headerItems = $items;
+                    break;
+                }
+            }
+
+            // Title metadata
+            $sheet->setCellValue('A1', 'Monitoring Sikap Perilaku: ' . $subject->name);
+            $sheet->setCellValue('A2', 'Pelatihan: ' . $event->name . ' | JP: ' . ($subject->jp ?? '-'));
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
+            $sheet->getStyle('A2')->getFont()->setSize(10);
+
+            // Header row (Row 4)
+            $headerRow = 4;
+            $headers = ['No', 'NIP', 'Nama Peserta'];
+            foreach ($headerItems as $item) {
+                $headers[] = $item->name;
+            }
+            $headers[] = 'Nilai Sikap';
+
+            foreach ($headers as $colIdx => $heading) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+                $sheet->setCellValue($colLetter . $headerRow, $heading);
+            }
+
+            $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
+            $headerRange = 'A' . $headerRow . ':' . $lastColLetter . $headerRow;
+            $sheet->getStyle($headerRange)->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'E5E7EB'],
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+                ],
+            ]);
+
+            // Data rows
+            $rowNum = 5;
+            foreach ($asnEventSubjects as $index => $aes) {
+                $sheet->setCellValue('A' . $rowNum, $index + 1);
+                $sheet->setCellValueExplicit('B' . $rowNum, (string) ($aes->nip ?? '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $sheet->setCellValue('C' . $rowNum, $aes->name);
+
+                $items = $monitoringItems->get($aes->aes_id, collect());
+                $colIdx = 4;
+                if ($items->isNotEmpty()) {
+                    foreach ($items as $item) {
+                        $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
+                        $sheet->setCellValue($colLetter . $rowNum, $item->value ? 1 : 0);
+                        $sheet->getStyle($colLetter . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                        $colIdx++;
+                    }
+                } else {
+                    foreach ($headerItems as $ignored) {
+                        $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
+                        $sheet->setCellValue($colLetter . $rowNum, '-');
+                        $sheet->getStyle($colLetter . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                        $colIdx++;
+                    }
+                }
+
+                $scoreColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
+                $sheet->setCellValue($scoreColLetter . $rowNum, round((float) ($aes->behavioral_score ?? 0), 1));
+                $sheet->getStyle($scoreColLetter . $rowNum)->getNumberFormat()->setFormatCode('0.0');
+                $sheet->getStyle($scoreColLetter . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+                $rowRange = 'A' . $rowNum . ':' . $lastColLetter . $rowNum;
+                $sheet->getStyle($rowRange)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+                    ],
+                ]);
+
+                $rowNum++;
+            }
+
+            // Set column widths
+            $sheet->getColumnDimension('A')->setWidth(6);
+            $sheet->getColumnDimension('B')->setWidth(22);
+            $sheet->getColumnDimension('C')->setWidth(32);
+            for ($c = 4; $c < count($headers); $c++) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($c);
+                $sheet->getColumnDimension($colLetter)->setWidth(22);
+            }
+            $sheet->getColumnDimension($lastColLetter)->setWidth(14);
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'Monitoring_Sikap_' . Str::slug($event->name, '_') . '.xlsx';
+
+        $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="' . $fileName . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
     }
 
     /**
